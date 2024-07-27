@@ -2,6 +2,7 @@ package main
 
 import (
 	"image/color"
+	"math"
 	"time"
 
 	tgl "github.com/zac460/turdgl"
@@ -9,9 +10,10 @@ import (
 )
 
 const (
-	maxNodeDistPx = 80
-	numSegments   = 30
-	segmentSize   = 20
+	maxNodeDistPx   = 80
+	numSegments     = 30
+	headSize        = 30
+	bodyScaleFactor = 0.97
 )
 
 type snake struct {
@@ -20,6 +22,7 @@ type snake struct {
 	velocity *tgl.Vec // velocity in px/s
 }
 
+// Snake constructs a new snake based on the given head position.
 func NewSnake(headPos tgl.Vec) *snake {
 	headStyle := tgl.Style{
 		Colour:    color.RGBA{255, 255, 255, 255},
@@ -31,32 +34,49 @@ func NewSnake(headPos tgl.Vec) *snake {
 		Thickness: 4,
 	}
 
+	// Construct body in with segments stretched out...
 	var b []*tgl.Circle
 	for i := 0; i < numSegments-1; i++ {
-		b = append(b, tgl.NewCircle(
-			segmentSize, segmentSize,
-			tgl.Vec{X: headPos.X, Y: headPos.Y + segmentSize*float64(i+1)}, bodyStyle))
+		segmentDiameter := headSize * math.Pow(bodyScaleFactor, float64(i))
+		segment := tgl.NewCircle(
+			segmentDiameter, segmentDiameter,
+			tgl.Vec{X: headPos.X, Y: headPos.Y + headSize*float64(i)},
+			bodyStyle,
+		)
+		b = append(b, segment)
 	}
-
-	return &snake{
-		head: tgl.NewCircle(segmentSize, segmentSize, headPos, headStyle),
+	s := snake{
+		head: tgl.NewCircle(headSize, headSize, headPos, headStyle),
 		body: b,
 	}
-}
-
-func (s *snake) Draw(buf *tgl.FrameBuffer) {
+	// ...then align the body segments
 	s.updateBodyPos()
 
-	s.head.Draw(buf)
-	for _, c := range s.body {
-		c.Draw(buf)
-	}
+	return &s
 }
 
-// Move moves the head of the snake. A reference to the frame buffer is needed
-// so out of bounds pixels aren't referenced.
-func (s *snake) Move(mov tgl.Vec) {
-	s.head.Move(mov)
+// Draw draws the snake on the provided frame buffer.
+func (s *snake) Draw(buf *tgl.FrameBuffer) {
+	const markerSize = 4
+	markerStyle := tgl.Style{Colour: color.RGBA{255, 0, 0, 0}, Thickness: 0}
+
+	// Draw head
+	s.head.Draw(buf)
+
+	// Draw body
+	for _, c := range s.body {
+		// Draw segment
+		c.Draw(buf)
+
+		// Draw markers
+		lPos := c.Marker(math.Pi / 2 * 3)
+		lMarker := tgl.NewCircle(markerSize, markerSize, lPos, markerStyle)
+		lMarker.Draw(buf)
+
+		rPos := c.Marker(math.Pi / 2)
+		rMarker := tgl.NewCircle(markerSize, markerSize, rPos, markerStyle)
+		rMarker.Draw(buf)
+	}
 }
 
 // Update recalculates the snake's position based on the current velocity and time interval.
@@ -65,10 +85,11 @@ func (s *snake) Update(dt time.Duration, buf *tgl.FrameBuffer) {
 	// Update the head
 	newX := s.head.Pos.X + s.velocity.X*dt.Seconds()
 	newY := s.head.Pos.Y + s.velocity.Y*dt.Seconds()
-	const segmentRad float64 = segmentSize / 2
+	const segmentRad float64 = headSize / 2
 	newX = Constrain(newX, segmentRad, float64(buf.Width())-segmentRad-1)
 	newY = Constrain(newY, segmentRad, float64(buf.Height())-segmentRad-1)
 	s.head.Pos = tgl.Vec{X: newX, Y: newY}
+	s.head.Direction = tgl.Normalise(*s.velocity)
 
 	// Update the body
 	s.updateBodyPos()
@@ -82,12 +103,12 @@ func (s *snake) updateBodyPos() {
 		} else {
 			nodeAhead = s.body[i-1]
 		}
-
 		// If node is too far away from the node ahead of it...
-		if tgl.Dist(node.Pos, nodeAhead.Pos) > segmentSize {
+		if tgl.Dist(node.Pos, nodeAhead.Pos) > nodeAhead.Width() {
 			// Move the node to be adjacent to the node ahead
 			diff := tgl.Sub(nodeAhead.Pos, node.Pos)
-			node.Move(tgl.Sub(diff, diff.SetMag(segmentSize)))
+			node.Move(tgl.Sub(diff, diff.SetMag(nodeAhead.Width())))
+			node.Direction = tgl.Normalise(tgl.Sub(nodeAhead.Pos, node.Pos))
 		}
 	}
 }

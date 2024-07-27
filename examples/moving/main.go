@@ -10,13 +10,6 @@ import (
 	tgl "github.com/zac460/turdgl"
 )
 
-const (
-	dirUp = iota
-	dirDown
-	dirLeft
-	dirRight
-)
-
 var (
 	frames = 0
 	second = time.Tick(time.Second)
@@ -75,7 +68,7 @@ func run() {
 		}
 
 		// Set background colour
-		framebuf.SetColour(color.RGBA{39, 45, 53, 255})
+		framebuf.SetBackground(color.RGBA{39, 45, 53, 255})
 
 		// Modify frame buffer
 		snake.Draw(framebuf)

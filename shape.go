@@ -1,6 +1,7 @@
 package turdgl
 
 import (
+	"fmt"
 	"image/color"
 	"math"
 )
@@ -13,19 +14,31 @@ type Style struct {
 
 // shape contains the generic attributes for a 2D shape.
 type shape struct {
-	Pos   Vec
-	w, h  float64 // dimensions
-	style Style
+	Pos       Vec
+	Direction Vec
+	w, h      float64 // dimensions
+	style     Style
 }
 
 // newShape constructs a new shape according to the supplied parameters.
 func newShape(width, height float64, pos Vec, style Style) shape {
 	return shape{
-		Pos:   pos,
-		w:     width,
-		h:     height,
-		style: style,
+		Pos:       pos,
+		Direction: Normalise(Vec{0, 1}), // upwards starting direction
+		w:         width,
+		h:         height,
+		style:     style,
 	}
+}
+
+// Width returns the width of the shape.
+func (s *shape) Width() float64 {
+	return s.w
+}
+
+// Height returns the height of the shape.
+func (s *shape) Height() float64 {
+	return s.h
 }
 
 // Move modifies the position of the shape by the given vector.
@@ -84,6 +97,7 @@ func NewCircle(width, height float64, pos Vec, style Style) *Circle {
 // Draw draws the circle onto the provided frame buffer.
 func (c *Circle) Draw(buf *FrameBuffer) {
 	if c.w != c.h {
+		fmt.Println("w:", c.w, "h:", c.h)
 		panic("circle width and height must match")
 	}
 
@@ -114,3 +128,11 @@ func (c *Circle) Draw(buf *FrameBuffer) {
 		}
 	}
 }
+
+// Returns the point on the circle's perimeter that is theta radians clockwise from the
+// circle's direction.
+func (c *Circle) Marker(theta float64) Vec {
+	return Add(c.Pos, (c.Direction.SetMag(c.Width() / 2).Rotate(theta)))
+}
+
+// TODO: just ignore incorrect indexes in the lowest level draw function

@@ -39,8 +39,8 @@ func (f *FrameBuffer) Clear() {
 	}
 }
 
-// SetColour sets every pixel in the frame buffer to the provided colour.
-func (f *FrameBuffer) SetColour(c color.Color) {
+// SetBackground sets every pixel in the frame buffer to the provided colour.
+func (f *FrameBuffer) SetBackground(c color.Color) {
 	for i := 0; i < len(*f); i++ {
 		for j := 0; j < len((*f)[0]); j++ {
 			(*f)[i][j] = NewPixel(c)
