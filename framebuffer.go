@@ -72,3 +72,13 @@ func (f *FrameBuffer) Bytes() []byte {
 	}
 	return out
 }
+
+// WithinFrame returns true if the given point lies within the boundary of the frame
+// buffer, taking the padding value into account.
+func (f *FrameBuffer) WithinFrame(point Vec, padding float64) bool {
+	w, h := float64(f.Width()), float64(f.Height())
+	if padding > w || padding > h {
+		panic("WithinFrame - padding cannot be greater than the frame width or height")
+	}
+	return point.X-1 < w-padding && point.Y-1 < h-padding && point.X > padding && point.Y > padding
+}

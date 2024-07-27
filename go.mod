@@ -2,7 +2,10 @@ module github.com/zac460/turdgl
 
 go 1.22
 
-require github.com/gopxl/pixel/v2 v2.0.0-20231007231924-11d9ad9bbb56
+require (
+	github.com/gopxl/pixel/v2 v2.0.0-20231007231924-11d9ad9bbb56
+	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
+)
 
 require (
 	github.com/faiface/glhf v0.0.0-20211013000516-57b20770c369 // indirect
