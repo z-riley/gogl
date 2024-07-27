@@ -39,6 +39,15 @@ func (f *FrameBuffer) Clear() {
 	}
 }
 
+// SetColour sets every pixel in the frame buffer to the provided colour.
+func (f *FrameBuffer) SetColour(c color.Color) {
+	for i := 0; i < len(*f); i++ {
+		for j := 0; j < len((*f)[0]); j++ {
+			(*f)[i][j] = NewPixel(c)
+		}
+	}
+}
+
 // Width returns the width of the frame buffer.
 func (f *FrameBuffer) Width() int {
 	return len((*f)[0])

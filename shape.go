@@ -2,11 +2,7 @@ package turdgl
 
 import (
 	"image/color"
-	"math"
 )
-
-// Vec represents Cartesian coordinates on a pixel grid.
-type Vec struct{ X, Y int }
 
 // Style contains style information for a shape.
 type Style struct {
@@ -100,9 +96,7 @@ func (c *Circle) Draw(buf *FrameBuffer) {
 	for i := bbox.pos.X; i <= bbox.pos.X+bbox.w; i++ {
 		for j := bbox.pos.Y; j <= bbox.pos.Y+bbox.h; j++ {
 			// Draw pixel if it's close enough to centre
-			aSqr := math.Pow(float64(c.pos.X-i), 2)
-			bSqr := math.Pow(float64(c.pos.Y-j), 2)
-			dist := math.Sqrt(aSqr + bSqr)
+			dist := Dist(c.pos, Vec{i, j})
 			if c.style.Thickness == 0 {
 				// Solid fill
 				if dist <= float64(radius) {
