@@ -62,14 +62,11 @@ func NewRect(width, height float64, pos Vec, style Style) *Rect {
 
 // Draw draws the rectangle onto the provided frame buffer.
 func (r *Rect) Draw(buf *FrameBuffer) {
-	b := *buf
-	colourPixel := NewPixel(r.style.Colour)
-
 	if r.style.Thickness == 0 {
 		for i := 0; i <= int(math.Round(r.w)); i++ {
 			for j := 0; j <= int(math.Round(r.h)); j++ {
 				xInt, yInt := int(math.Round(r.Pos.X)), int(math.Round(r.Pos.Y))
-				b[yInt+j][xInt+i] = colourPixel
+				buf.SetPixel(yInt+j, xInt+i, NewPixel(r.style.Colour))
 			}
 		}
 	} else {
@@ -101,10 +98,8 @@ func (c *Circle) Draw(buf *FrameBuffer) {
 		panic("circle width and height must match")
 	}
 
-	fb := *buf
-	radius := c.w / 2
-
 	// Construct bounding box
+	radius := c.w / 2
 	bbBoxPos := Vec{c.Pos.X - (radius), c.Pos.Y - (radius)}
 	bbox := NewRect(c.w, c.h, bbBoxPos, Style{})
 
@@ -117,12 +112,13 @@ func (c *Circle) Draw(buf *FrameBuffer) {
 			if c.style.Thickness == 0 {
 				// Solid fill
 				if dist <= float64(radius) {
-					fb[jInt][iInt] = NewPixel(c.style.Colour)
+					buf.SetPixel(jInt, iInt, NewPixel(c.style.Colour))
 				}
 			} else {
 				// Outline
 				if dist >= float64(radius-c.style.Thickness) && dist <= float64(radius) {
-					fb[jInt][iInt] = NewPixel(c.style.Colour)
+					buf.SetPixel(jInt, iInt, NewPixel(c.style.Colour))
+
 				}
 			}
 		}

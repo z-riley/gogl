@@ -39,6 +39,15 @@ func (f *FrameBuffer) Clear() {
 	}
 }
 
+// SetPixel sets a pixel in the frame buffer. If the requested pixel is out of bounds,
+// nothing happens.
+func (f *FrameBuffer) SetPixel(y, x int, p Pixel) {
+	if y > f.Height()-1 || y < 0 || x > f.Width()-1 || x < 0 {
+		return
+	}
+	(*f)[y][x] = p
+}
+
 // SetBackground sets every pixel in the frame buffer to the provided colour.
 func (f *FrameBuffer) SetBackground(c color.Color) {
 	for i := 0; i < len(*f); i++ {
