@@ -7,14 +7,26 @@ func GenerateCatmullRomSpline(points []Vec, steps int) []Vec {
 	if n < 4 {
 		return nil
 	}
-
 	splinePoints := []Vec{}
+	// First point
+	for j := 0; j <= steps; j++ {
+		t := float64(j) / float64(steps)
+		splinePoints = append(splinePoints,
+			catmullRomSpline(points[0], points[0], points[1], points[2], t))
+	}
+	// Middle points
 	for i := 1; i < n-2; i++ {
 		for j := 0; j <= steps; j++ {
 			t := float64(j) / float64(steps)
 			splinePoints = append(splinePoints,
 				catmullRomSpline(points[i-1], points[i], points[i+1], points[i+2], t))
 		}
+	}
+	// Last point
+	for j := 0; j <= steps; j++ {
+		t := float64(j) / float64(steps)
+		splinePoints = append(splinePoints,
+			catmullRomSpline(points[n-3], points[n-2], points[n-1], points[n-1], t))
 	}
 	return splinePoints
 }

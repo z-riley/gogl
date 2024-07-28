@@ -45,8 +45,11 @@ func NewSnake(headPos tgl.Vec) *snake {
 		)
 		b = append(b, segment)
 	}
+	h := tgl.NewCircle(headSize, headSize, headPos, headStyle)
+	h.Direction = tgl.Vec{X: 0, Y: -1} // faces upwards
+
 	s := snake{
-		head: tgl.NewCircle(headSize, headSize, headPos, headStyle),
+		head: h,
 		body: b,
 	}
 	// ...then align the body segments
@@ -63,11 +66,11 @@ func (s *snake) Draw(buf *tgl.FrameBuffer) {
 	// Draw head segment
 	s.head.Draw(buf)
 	// Draw head marker
-	lPos := s.head.Marker(math.Pi / 2)
-	lMarker := tgl.NewCircle(markerSize, markerSize, lPos, markerStyle)
+	lMarkerHead := s.head.EdgePoint(math.Pi / 2)
+	lMarker := tgl.NewCircle(markerSize, markerSize, lMarkerHead, markerStyle)
 	lMarker.Draw(buf)
-	rPos := s.head.Marker(math.Pi / 2 * 3)
-	rMarker := tgl.NewCircle(markerSize, markerSize, rPos, markerStyle)
+	rMarkerHead := s.head.EdgePoint(math.Pi / 2 * 3)
+	rMarker := tgl.NewCircle(markerSize, markerSize, rMarkerHead, markerStyle)
 	rMarker.Draw(buf)
 
 	// Draw body
@@ -77,11 +80,11 @@ func (s *snake) Draw(buf *tgl.FrameBuffer) {
 		c.Draw(buf)
 
 		// Draw markers
-		lPos := c.Marker(math.Pi / 2)
+		lPos := c.EdgePoint(math.Pi / 2)
 		lMarker := tgl.NewCircle(markerSize, markerSize, lPos, markerStyle)
 		lMarker.Draw(buf)
 
-		rPos := c.Marker(math.Pi / 2 * 3)
+		rPos := c.EdgePoint(math.Pi / 2 * 3)
 		rMarker := tgl.NewCircle(markerSize, markerSize, rPos, markerStyle)
 		rMarker.Draw(buf)
 
@@ -89,8 +92,8 @@ func (s *snake) Draw(buf *tgl.FrameBuffer) {
 		markers[2*(len(s.body))-i] = rPos
 	}
 
-	markers[0] = s.head.Marker(math.Pi / 2 * 3)
-	markers[len(markers)-1] = s.head.Marker(math.Pi / 2)
+	markers[0] = lMarkerHead
+	markers[len(markers)-1] = rMarkerHead
 
 	splinePoints := tgl.GenerateCatmullRomSpline(markers, 5)
 	for _, point := range splinePoints {

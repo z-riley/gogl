@@ -125,10 +125,8 @@ func (c *Circle) Draw(buf *FrameBuffer) {
 	}
 }
 
-// Returns the point on the circle's perimeter that is theta radians clockwise from the
-// circle's direction.
-func (c *Circle) Marker(theta float64) Vec {
+// EdgePoint generates a point the point on the circle's perimeter that is theta radians
+// clockwise from the circle's direction.
+func (c *Circle) EdgePoint(theta float64) Vec {
 	return Add(c.Pos, (c.Direction.SetMag(c.Width() / 2).Rotate(theta)))
 }
-
-// TODO: just ignore incorrect indexes in the lowest level draw function
