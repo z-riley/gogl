@@ -16,18 +16,34 @@ type Style struct {
 type shape struct {
 	Pos       Vec
 	Direction Vec
-	w, h      float64 // dimensions
+	w, h      float64
 	style     Style
 }
 
 // newShape constructs a new shape according to the supplied parameters.
-func newShape(width, height float64, pos Vec, style Style) shape {
-	return shape{
+func newShape(width, height float64, pos Vec, opts ...func(*shape)) *shape {
+	s := defaultShape(width, height, pos)
+	for _, opt := range opts {
+		opt(s)
+	}
+	return s
+}
+
+// WithStyle is used in the newShape constructor for setting a shape's style.
+func WithStyle(style Style) func(*shape) {
+	return func(s *shape) {
+		s.style = style
+	}
+}
+
+// defaultShape constructs a shape with default parameters.
+func defaultShape(width, height float64, pos Vec) *shape {
+	return &shape{
 		Pos:       pos,
-		Direction: Normalise(Vec{0, 1}), // upwards starting direction
+		Direction: Normalise(Vec{0, -1}), // upwards
 		w:         width,
 		h:         height,
-		style:     style,
+		style:     Style{Colour: color.RGBA{0xff, 0xff, 0xff, 0xff}, Thickness: 0},
 	}
 }
 
@@ -53,11 +69,11 @@ func (s *shape) SetPos(v Vec) {
 }
 
 // Rect is a rectangle shape, aligned to the top-left corner.
-type Rect struct{ shape }
+type Rect struct{ *shape }
 
 // NewRect constructs a new rectangle shape.
-func NewRect(width, height float64, pos Vec, style Style) *Rect {
-	return &Rect{newShape(width, height, pos, style)}
+func NewRect(width, height float64, pos Vec, opts ...func(*shape)) *Rect {
+	return &Rect{newShape(width, height, pos)}
 }
 
 // Draw draws the rectangle onto the provided frame buffer.
@@ -71,10 +87,17 @@ func (r *Rect) Draw(buf *FrameBuffer) {
 		}
 	} else {
 		// Draw each edge as its own rectangle
-		top := NewRect(r.w, r.style.Thickness, r.Pos, Style{r.style.Colour, 0})
-		bottom := NewRect(r.w, r.style.Thickness, Vec{r.Pos.X, r.Pos.Y + float64(r.h) - float64(r.style.Thickness)}, Style{r.style.Colour, 0})
-		left := NewRect(r.style.Thickness, r.h, Vec{r.Pos.X, r.Pos.Y}, Style{r.style.Colour, 0})
-		right := NewRect(r.style.Thickness, r.h, Vec{r.Pos.X + float64(r.w) - float64(r.style.Thickness), r.Pos.Y}, Style{r.style.Colour, 0})
+		top := NewRect(r.w, r.style.Thickness, r.Pos,
+			WithStyle(Style{r.style.Colour, 0}),
+		)
+		bottom := NewRect(
+			r.w, r.style.Thickness, Vec{r.Pos.X, r.Pos.Y + float64(r.h) - float64(r.style.Thickness)},
+			WithStyle(Style{r.style.Colour, 0}),
+		)
+		left := NewRect(r.style.Thickness, r.h, Vec{r.Pos.X, r.Pos.Y}, WithStyle(Style{r.style.Colour, 0}))
+		right := NewRect(r.style.Thickness, r.h, Vec{r.Pos.X + float64(r.w) - float64(r.style.Thickness), r.Pos.Y},
+			WithStyle(Style{r.style.Colour, 0}),
+		)
 
 		top.Draw(buf)
 		bottom.Draw(buf)
@@ -84,11 +107,11 @@ func (r *Rect) Draw(buf *FrameBuffer) {
 }
 
 // Cicle is a circle shape, aligned to the centre of the circle.
-type Circle struct{ shape }
+type Circle struct{ *shape }
 
 // NewCircle constructs a new circle.
-func NewCircle(width, height float64, pos Vec, style Style) *Circle {
-	return &Circle{newShape(width, height, pos, style)}
+func NewCircle(diameter float64, pos Vec, opts ...func(*shape)) *Circle {
+	return &Circle{newShape(diameter, diameter, pos, opts...)}
 }
 
 // Draw draws the circle onto the provided frame buffer.
@@ -101,7 +124,7 @@ func (c *Circle) Draw(buf *FrameBuffer) {
 	// Construct bounding box
 	radius := c.w / 2
 	bbBoxPos := Vec{c.Pos.X - (radius), c.Pos.Y - (radius)}
-	bbox := NewRect(c.w, c.h, bbBoxPos, Style{})
+	bbox := NewRect(c.w, c.h, bbBoxPos)
 
 	// Iterate over every pixel in the bounding box
 	for i := bbox.Pos.X; i <= bbox.Pos.X+bbox.w; i++ {

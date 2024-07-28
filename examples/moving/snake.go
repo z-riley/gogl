@@ -24,30 +24,25 @@ type snake struct {
 
 // Snake constructs a new snake based on the given head position.
 func NewSnake(headPos tgl.Vec) *snake {
-	headStyle := tgl.Style{
-		Colour:    color.RGBA{255, 255, 255, 255},
-		Thickness: 0,
-	}
+	// Construct head
+	h := tgl.NewCircle(
+		headSize,
+		headPos,
+		tgl.WithStyle(tgl.Style{Colour: color.RGBA{255, 255, 255, 255}, Thickness: 0}),
+	)
+	h.Direction = tgl.Vec{X: 0, Y: -1} // faces upwards
 
-	bodyStyle := tgl.Style{
-		Colour:    color.RGBA{255, 255, 255, 255},
-		Thickness: 4,
-	}
-
-	// Construct body in with segments stretched out...
+	// Construct body with segments stretched out...
 	var b []*tgl.Circle
 	for i := 1; i < numSegments; i++ {
 		segmentDiameter := headSize * math.Pow(bodyScaleFactor, float64(i))
 		segment := tgl.NewCircle(
-			segmentDiameter, segmentDiameter,
+			segmentDiameter,
 			tgl.Vec{X: headPos.X, Y: headPos.Y + headSize*float64(i) + 1},
-			bodyStyle,
+			tgl.WithStyle(tgl.Style{Colour: color.RGBA{255, 255, 255, 255}, Thickness: 4}),
 		)
 		b = append(b, segment)
 	}
-	h := tgl.NewCircle(headSize, headSize, headPos, headStyle)
-	h.Direction = tgl.Vec{X: 0, Y: -1} // faces upwards
-
 	s := snake{
 		head: h,
 		body: b,
@@ -65,12 +60,19 @@ func (s *snake) Draw(buf *tgl.FrameBuffer) {
 
 	// Draw head segment
 	s.head.Draw(buf)
-	// Draw head marker
+	// Draw head markers
 	lMarkerHead := s.head.EdgePoint(math.Pi / 2)
-	lMarker := tgl.NewCircle(markerSize, markerSize, lMarkerHead, markerStyle)
+	lMarker := tgl.NewCircle(
+		markerSize,
+		lMarkerHead,
+		tgl.WithStyle(markerStyle),
+	)
 	lMarker.Draw(buf)
 	rMarkerHead := s.head.EdgePoint(math.Pi / 2 * 3)
-	rMarker := tgl.NewCircle(markerSize, markerSize, rMarkerHead, markerStyle)
+	rMarker := tgl.NewCircle(
+		markerSize,
+		rMarkerHead,
+		tgl.WithStyle(markerStyle))
 	rMarker.Draw(buf)
 
 	// Draw body
@@ -79,13 +81,21 @@ func (s *snake) Draw(buf *tgl.FrameBuffer) {
 		// Draw segment
 		c.Draw(buf)
 
-		// Draw markers
+		// Draw body markers
 		lPos := c.EdgePoint(math.Pi / 2)
-		lMarker := tgl.NewCircle(markerSize, markerSize, lPos, markerStyle)
+		lMarker := tgl.NewCircle(
+			markerSize,
+			lPos,
+			tgl.WithStyle(markerStyle),
+		)
 		lMarker.Draw(buf)
 
 		rPos := c.EdgePoint(math.Pi / 2 * 3)
-		rMarker := tgl.NewCircle(markerSize, markerSize, rPos, markerStyle)
+		rMarker := tgl.NewCircle(
+			markerSize,
+			rPos,
+			tgl.WithStyle(markerStyle),
+		)
 		rMarker.Draw(buf)
 
 		markers[i+1] = lPos
@@ -95,11 +105,15 @@ func (s *snake) Draw(buf *tgl.FrameBuffer) {
 	markers[0] = lMarkerHead
 	markers[len(markers)-1] = rMarkerHead
 
-	splinePoints := tgl.GenerateCatmullRomSpline(markers, 5)
+	splinePoints := tgl.GenerateCatmullRomSpline(markers, 20)
 	for _, point := range splinePoints {
 		pointStyle := tgl.Style{Colour: color.RGBA{0, 255, 0, 255}, Thickness: 0}
 		const pointSize = 3
-		point := tgl.NewCircle(pointSize, pointSize, point, pointStyle)
+		point := tgl.NewCircle(
+			pointSize,
+			point,
+			tgl.WithStyle(pointStyle),
+		)
 		point.Draw(buf)
 	}
 }
