@@ -11,7 +11,7 @@ import (
 
 const (
 	maxNodeDistPx   = 80
-	numSegments     = 30
+	numSegments     = 10
 	headSize        = 30
 	bodyScaleFactor = 0.97
 )
@@ -36,11 +36,11 @@ func NewSnake(headPos tgl.Vec) *snake {
 
 	// Construct body in with segments stretched out...
 	var b []*tgl.Circle
-	for i := 0; i < numSegments-1; i++ {
+	for i := 1; i < numSegments; i++ {
 		segmentDiameter := headSize * math.Pow(bodyScaleFactor, float64(i))
 		segment := tgl.NewCircle(
 			segmentDiameter, segmentDiameter,
-			tgl.Vec{X: headPos.X, Y: headPos.Y + headSize*float64(i)},
+			tgl.Vec{X: headPos.X, Y: headPos.Y + headSize*float64(i) + 1},
 			bodyStyle,
 		)
 		b = append(b, segment)
@@ -60,22 +60,44 @@ func (s *snake) Draw(buf *tgl.FrameBuffer) {
 	const markerSize = 4
 	markerStyle := tgl.Style{Colour: color.RGBA{255, 0, 0, 0}, Thickness: 0}
 
-	// Draw head
+	// Draw head segment
 	s.head.Draw(buf)
+	// Draw head marker
+	lPos := s.head.Marker(math.Pi / 2)
+	lMarker := tgl.NewCircle(markerSize, markerSize, lPos, markerStyle)
+	lMarker.Draw(buf)
+	rPos := s.head.Marker(math.Pi / 2 * 3)
+	rMarker := tgl.NewCircle(markerSize, markerSize, rPos, markerStyle)
+	rMarker.Draw(buf)
 
 	// Draw body
-	for _, c := range s.body {
+	markers := make([]tgl.Vec, 2+2*len(s.body))
+	for i, c := range s.body {
 		// Draw segment
 		c.Draw(buf)
 
 		// Draw markers
-		lPos := c.Marker(math.Pi / 2 * 3)
+		lPos := c.Marker(math.Pi / 2)
 		lMarker := tgl.NewCircle(markerSize, markerSize, lPos, markerStyle)
 		lMarker.Draw(buf)
 
-		rPos := c.Marker(math.Pi / 2)
+		rPos := c.Marker(math.Pi / 2 * 3)
 		rMarker := tgl.NewCircle(markerSize, markerSize, rPos, markerStyle)
 		rMarker.Draw(buf)
+
+		markers[i+1] = lPos
+		markers[2*(len(s.body))-i] = rPos
+	}
+
+	markers[0] = s.head.Marker(math.Pi / 2 * 3)
+	markers[len(markers)-1] = s.head.Marker(math.Pi / 2)
+
+	splinePoints := tgl.GenerateCatmullRomSpline(markers, 5)
+	for _, point := range splinePoints {
+		pointStyle := tgl.Style{Colour: color.RGBA{0, 255, 0, 255}, Thickness: 0}
+		const pointSize = 3
+		point := tgl.NewCircle(pointSize, pointSize, point, pointStyle)
+		point.Draw(buf)
 	}
 }
 

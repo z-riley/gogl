@@ -39,8 +39,8 @@ func (f *FrameBuffer) Clear() {
 	}
 }
 
-// SetPixel sets a pixel in the frame buffer. If the requested pixel is out of bounds,
-// nothing happens.
+// SetPixel sets a pixel in the frame buffer. If the requested pixel is out of
+// bounds, nothing happens.
 func (f *FrameBuffer) SetPixel(y, x int, p Pixel) {
 	if y > f.Height()-1 || y < 0 || x > f.Width()-1 || x < 0 {
 		return
