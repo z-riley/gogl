@@ -4,12 +4,22 @@ import (
 	"fmt"
 	"image/color"
 	"math"
+	"reflect"
 )
 
 // Style contains style information for a shape.
 type Style struct {
 	Colour    color.Color
 	Thickness float64 // leave 0 for solid
+}
+
+var DefaultStyle = Style{Colour: color.RGBA{0xff, 0xff, 0xff, 0xff}, Thickness: 0}
+
+// Shape is an interface for shapes
+type Shape interface {
+	GetPos() Vec
+	Width() float64
+	Height() float64
 }
 
 // shape contains the generic attributes for a 2D shape.
@@ -43,7 +53,7 @@ func defaultShape(width, height float64, pos Vec) *shape {
 		Direction: Normalise(Vec{0, -1}), // upwards
 		w:         width,
 		h:         height,
-		style:     Style{Colour: color.RGBA{0xff, 0xff, 0xff, 0xff}, Thickness: 0},
+		style:     DefaultStyle,
 	}
 }
 
@@ -63,9 +73,24 @@ func (s *shape) Move(mov Vec) {
 	s.Pos.Y += mov.Y
 }
 
+// Pos returns the Cartesian position of the shape.
+func (s *shape) GetPos() Vec {
+	return s.Pos
+}
+
 // SetPos sets the Cartesian position of the shape.
 func (s *shape) SetPos(v Vec) {
 	s.Pos = v
+}
+
+// GetStyle returns the style of the shape.
+func (s *shape) GetStyle() Style {
+	return s.style
+}
+
+// SetStyle sets style of the shape.
+func (s *shape) SetStyle(style Style) {
+	s.style = style
 }
 
 // Rect is a rectangle shape, aligned to the top-left corner.
@@ -73,7 +98,7 @@ type Rect struct{ *shape }
 
 // NewRect constructs a new rectangle shape.
 func NewRect(width, height float64, pos Vec, opts ...func(*shape)) *Rect {
-	return &Rect{newShape(width, height, pos)}
+	return &Rect{newShape(width, height, pos, opts...)}
 }
 
 // Draw draws the rectangle onto the provided frame buffer.
@@ -152,4 +177,65 @@ func (c *Circle) Draw(buf *FrameBuffer) {
 // clockwise from the circle's direction.
 func (c *Circle) EdgePoint(theta float64) Vec {
 	return Add(c.Pos, (c.Direction.SetMag(c.Width() / 2).Rotate(theta)))
+}
+
+// IsColliding returns true if two shapes are colliding.
+func IsColliding(s1, s2 Shape) bool {
+	switch s1.(type) {
+	case *Rect:
+		switch s2.(type) {
+		case *Rect:
+			// Rect-Rect
+			onLeft := s1.GetPos().X > s2.GetPos().X+s2.Width()
+			onRight := s2.GetPos().X > s1.GetPos().X+s1.Width()
+			above := s1.GetPos().Y > s2.GetPos().Y+s2.Height()
+			below := s2.GetPos().Y > s1.GetPos().Y+s1.Height()
+			if !onRight && !onLeft && !above && !below {
+				return true
+			} else {
+				return false
+			}
+		case *Circle:
+			// Rect-Circle:
+			onLeft := s1.GetPos().X > s2.GetPos().X+s2.Width()/2
+			onRight := s2.GetPos().X-s2.Width()/2 > s1.GetPos().X+s1.Width()
+			above := s1.GetPos().Y > s2.GetPos().Y+s2.Height()/2
+			below := s2.GetPos().Y-s2.Height()/2 > s1.GetPos().Y+s1.Height()
+			if !onRight && !onLeft && !above && !below {
+				return true
+			} else {
+				return false
+			}
+		default:
+			t := reflect.TypeOf(s2).String()
+			panic("collision detection is unsupported for type: %s" + t)
+		}
+	case *Circle:
+		switch s2.(type) {
+		case *Rect:
+			// Circle-Rect
+			onLeft := s2.GetPos().X > s1.GetPos().X+s1.Width()/2
+			onRight := s1.GetPos().X-s1.Width()/2 > s2.GetPos().X+s2.Width()
+			above := s2.GetPos().Y > s1.GetPos().Y+s1.Height()/2
+			below := s1.GetPos().Y-s1.Height()/2 > s2.GetPos().Y+s2.Height()
+			if !onRight && !onLeft && !above && !below {
+				return true
+			} else {
+				return false
+			}
+		case *Circle:
+			// Circle-Circle
+			if Dist(s1.GetPos(), s2.GetPos()) <= s1.Width()/2+s2.Width()/2 {
+				return true
+			} else {
+				return false
+			}
+		default:
+			t := reflect.TypeOf(s2).String()
+			panic("collision detection is unsupported for type: %s" + t)
+		}
+	default:
+		t := reflect.TypeOf(s1).String()
+		panic("collision detection is unsupported for type: %s" + t)
+	}
 }

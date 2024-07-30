@@ -122,12 +122,12 @@ func (s *snake) Draw(buf *tgl.FrameBuffer) {
 // A reference to the frame buffer must be provided to check snake isn't out of bounds.
 func (s *snake) Update(dt time.Duration, buf *tgl.FrameBuffer) {
 	// Update the head
-	newX := s.head.Pos.X + s.velocity.X*dt.Seconds()
-	newY := s.head.Pos.Y + s.velocity.Y*dt.Seconds()
+	newX := s.head.GetPos().X + s.velocity.X*dt.Seconds()
+	newY := s.head.GetPos().Y + s.velocity.Y*dt.Seconds()
 	const segmentRad float64 = headSize / 2
 	newX = Constrain(newX, segmentRad, float64(buf.Width())-segmentRad-1)
 	newY = Constrain(newY, segmentRad, float64(buf.Height())-segmentRad-1)
-	s.head.Pos = tgl.Vec{X: newX, Y: newY}
+	s.head.SetPos(tgl.Vec{X: newX, Y: newY})
 	s.head.Direction = tgl.Normalise(*s.velocity)
 
 	// Update the body
@@ -143,11 +143,11 @@ func (s *snake) updateBodyPos() {
 			nodeAhead = s.body[i-1]
 		}
 		// If node is too far away from the node ahead of it...
-		if tgl.Dist(node.Pos, nodeAhead.Pos) > nodeAhead.Width() {
+		if tgl.Dist(node.GetPos(), nodeAhead.GetPos()) > nodeAhead.Width() {
 			// Move the node to be adjacent to the node ahead
-			diff := tgl.Sub(nodeAhead.Pos, node.Pos)
+			diff := tgl.Sub(nodeAhead.GetPos(), node.GetPos())
 			node.Move(tgl.Sub(diff, diff.SetMag(nodeAhead.Width())))
-			node.Direction = tgl.Normalise(tgl.Sub(nodeAhead.Pos, node.Pos))
+			node.Direction = tgl.Normalise(tgl.Sub(nodeAhead.GetPos(), node.GetPos()))
 		}
 	}
 }
