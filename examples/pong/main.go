@@ -8,6 +8,7 @@ import (
 	"github.com/gopxl/pixel/v2"
 	"github.com/gopxl/pixel/v2/pixelgl"
 	tgl "github.com/zac460/turdgl"
+	"golang.org/x/exp/constraints"
 )
 
 var (
@@ -95,4 +96,16 @@ func run() {
 
 func main() {
 	pixelgl.Run(run)
+}
+
+// Constrain keeps a number between lower and upper bounds.
+func Constrain[T constraints.Ordered](x, lower, upper T) T {
+	switch {
+	case x < lower:
+		return lower
+	case x > upper:
+		return upper
+	default:
+		return x
+	}
 }
