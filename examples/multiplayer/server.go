@@ -41,7 +41,7 @@ func pongServer() {
 }
 
 func runServer() {
-	go NewServer("localhost", 3333).Run()
+	go NewServer("0.0.0.0", 3333).Run()
 
 	cfg := pixelgl.WindowConfig{
 		Title:     "Pong",
