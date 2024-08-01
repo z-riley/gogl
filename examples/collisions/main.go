@@ -5,33 +5,22 @@ import (
 	"image/color"
 	"time"
 
-	"github.com/gopxl/pixel/v2"
-	"github.com/gopxl/pixel/v2/pixelgl"
 	tgl "github.com/zac460/turdgl"
 )
 
-var (
-	frames = 0
-	second = time.Tick(time.Second)
-)
-
-func run() {
-	cfg := pixelgl.WindowConfig{
-		Title:     "Pong",
-		Bounds:    pixel.R(0, 0, 1024, 768),
-		VSync:     true,
-		Resizable: true,
-	}
-	win, err := pixelgl.NewWindow(cfg)
+func main() {
+	win, err := tgl.NewWindow(tgl.WindowCfg{
+		Title:  "Shape Collision Example",
+		Width:  1024,
+		Height: 768,
+	})
 	if err != nil {
 		panic(err)
 	}
 
-	// Screen state
-	screenWidth := win.Canvas().Texture().Width()
-	screenHeight := win.Canvas().Texture().Height()
-	framebuf := tgl.NewFrameBuffer(screenWidth, screenHeight)
-	prevSize := win.Bounds().Size()
+	// For measuring FPS
+	frames := 0
+	second := time.Tick(time.Second)
 
 	// Shapes
 	rect1 := tgl.NewRect(100, 60, tgl.Vec{X: 500, Y: 200})
@@ -43,35 +32,28 @@ func run() {
 		tgl.WithStyle(tgl.Style{Colour: color.RGBA{0, 0, 255, 255}}),
 	)
 
-	for {
-		// Handle user input
-		if win.Closed() || win.JustPressed(pixelgl.KeyLeftControl) || win.JustPressed(pixelgl.KeyEscape) {
-			return
-		}
-		if win.Pressed(pixelgl.KeyW) {
-			rect2.Pos.Y--
-			circle2.Pos.Y--
-		}
-		if win.Pressed(pixelgl.KeyS) {
-			rect2.Pos.Y++
-			circle2.Pos.Y++
-		}
-		if win.Pressed(pixelgl.KeyA) {
-			rect2.Pos.X--
-			circle2.Pos.X--
-		}
-		if win.Pressed(pixelgl.KeyD) {
-			rect2.Pos.X++
-			circle2.Pos.X++
-		}
+	// Keybinds
+	win.RegisterKeybind(tgl.KeyEscape, func() { win.Quit() })
+	win.RegisterKeybind(tgl.KeyLCtrl, func() { win.Quit() })
+	win.RegisterKeybind(tgl.KeyW, func() {
+		rect2.Move(tgl.Vec{Y: -1})
+		circle2.Move(tgl.Vec{Y: -1})
+	})
+	win.RegisterKeybind(tgl.KeyS, func() {
+		rect2.Move(tgl.Vec{Y: 1})
+		circle2.Move(tgl.Vec{Y: 1})
+	})
+	win.RegisterKeybind(tgl.KeyA, func() {
+		rect2.Move(tgl.Vec{X: -1})
+		circle2.Move(tgl.Vec{X: -1})
+	})
+	win.RegisterKeybind(tgl.KeyD, func() {
+		rect2.Move(tgl.Vec{X: 1})
+		circle2.Move(tgl.Vec{X: 1})
+	})
 
-		// Adjust frame buffer size if window size changes
-		if !prevSize.Eq(win.Bounds().Size()) {
-			framebuf = tgl.NewFrameBuffer(win.Canvas().Texture().Width(), win.Canvas().Texture().Height())
-		}
-
-		// Set background colour
-		framebuf.SetBackground(color.Black)
+	for win.IsRunning() {
+		win.Framebuffer.SetBackground(color.Black)
 
 		// Adjust shape colours to react to collisions
 		rect1.SetStyle(tgl.DefaultStyle)
@@ -89,27 +71,21 @@ func run() {
 			circle1.SetStyle(tgl.Style{Colour: color.RGBA{255, 0, 0, 255}})
 		}
 
-		// Modify frame buffer
-		rect1.Draw(framebuf)
-		rect2.Draw(framebuf)
-		circle1.Draw(framebuf)
-		circle2.Draw(framebuf)
+		// Draw shapes
+		win.Draw(rect1)
+		win.Draw(rect2)
+		win.Draw(circle1)
+		win.Draw(circle2)
 
-		// Render screen
-		win.Canvas().SetPixels(framebuf.Bytes())
 		win.Update()
 
 		// Count FPS
 		frames++
 		select {
 		case <-second:
-			win.SetTitle(fmt.Sprintf("%s | FPS: %d", cfg.Title, frames))
+			win.SetTitle(fmt.Sprintf("%s | FPS: %d", win.GetConfig().Title, frames))
 			frames = 0
 		default:
 		}
 	}
-}
-
-func main() {
-	pixelgl.Run(run)
 }

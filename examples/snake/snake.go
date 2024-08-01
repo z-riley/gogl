@@ -53,6 +53,11 @@ func NewSnake(headPos tgl.Vec) *snake {
 	return &s
 }
 
+// GetPos returns the position of the snake from the centre of the head.
+func (s *snake) GetPos() tgl.Vec {
+	return s.head.Pos
+}
+
 // Draw draws the snake on the provided frame buffer.
 func (s *snake) Draw(buf *tgl.FrameBuffer) {
 	const markerSize = 4

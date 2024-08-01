@@ -20,7 +20,7 @@ func TestBytes(t *testing.T) {
 		2, 2, 2, 2,
 		3, 3, 3, 3,
 	}
-	actual := f.Bytes()
+	actual := f.BytesReverse()
 
 	if !reflect.DeepEqual(expected, actual) {
 		t.Errorf("\nExpected: %v\nGot: %v", expected, actual)

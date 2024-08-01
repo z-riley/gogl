@@ -67,8 +67,8 @@ func (f *FrameBuffer) Height() int {
 	return len(*f)
 }
 
-// Bytes returns the frame buffer as a one-dimensional slice of bytes.
-func (f *FrameBuffer) Bytes() []byte {
+// BytesReverse returns the frame buffer as a one-dimensional slice of bytes.
+func (f *FrameBuffer) BytesReverse() []byte {
 	buf := *f
 	out := make([]byte, len(buf)*len(buf[0])*pxLen)
 	offset := 0
@@ -77,6 +77,23 @@ func (f *FrameBuffer) Bytes() []byte {
 		for _, pixel := range slice {
 			copy(out[offset:], pixel[:]) // copy the bytes of each Pixel
 			offset += len(pixel)
+		}
+	}
+	return out
+}
+
+func (f *FrameBuffer) Bytes() []byte {
+	buf := *f
+	out := make([]byte, len(buf)*len(buf[0])*pxLen)
+	offset := 0
+	for i := 0; i < len(buf); i++ {
+		slice := buf[i]
+		for _, pixel := range slice {
+			// Copy the bytes of each pixel in reverse order
+			for k := pxLen - 1; k >= 0; k-- {
+				out[offset] = pixel[k]
+				offset++
+			}
 		}
 	}
 	return out

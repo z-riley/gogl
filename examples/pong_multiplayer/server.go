@@ -9,8 +9,6 @@ import (
 	"time"
 
 	"github.com/charmbracelet/log"
-	"github.com/gopxl/pixel/v2"
-	"github.com/gopxl/pixel/v2/pixelgl"
 	tgl "github.com/zac460/turdgl"
 )
 
@@ -30,90 +28,65 @@ type GameState struct {
 	BallPos        tgl.Vec `json:"ballPos"`
 }
 
-var (
-	frames = 0
-	second = time.Tick(time.Second)
-)
-
 // pongServer is the entrypoint for a pong server instance.
 func pongServer() {
-	pixelgl.Run(runServer)
-}
-
-func runServer() {
 	go NewServer("0.0.0.0", 3333).Run()
 
-	cfg := pixelgl.WindowConfig{
-		Title:     "Pong",
-		Bounds:    pixel.R(0, 0, 1024, 768),
-		VSync:     true,
-		Resizable: true,
-	}
-	win, err := pixelgl.NewWindow(cfg)
+	win, err := tgl.NewWindow(tgl.WindowCfg{
+		Title:  "Pong Server",
+		Width:  1024,
+		Height: 768,
+	})
 	if err != nil {
 		panic(err)
 	}
 
-	// Screen state
-	screenWidth := win.Canvas().Texture().Width()
-	screenHeight := win.Canvas().Texture().Height()
-	framebuf := tgl.NewFrameBuffer(screenWidth, screenHeight)
-	prevSize := win.Bounds().Size()
+	// For measuring FPS
+	frames := 0
+	second := time.Tick(time.Second)
 
 	// Shapes
 	gameServer.paddleLeft = NewPaddle(tgl.Vec{X: 50, Y: 200})
-	gameServer.paddleRight = NewPaddle(tgl.Vec{X: float64(screenWidth) - 50, Y: 200})
-	gameServer.ball = NewBall(tgl.Vec{X: win.Bounds().Center().X, Y: win.Bounds().Center().Y})
+	gameServer.paddleRight = NewPaddle(tgl.Vec{X: float64(win.GetConfig().Width) - 50, Y: 200})
+	gameServer.ball = NewBall(tgl.Vec{
+		X: float64(win.GetConfig().Width / 2),
+		Y: float64(win.GetConfig().Height / 2),
+	})
 
 	prevTime := time.Now()
-	for {
+	for win.IsRunning() {
 		dt := time.Since(prevTime)
 		prevTime = time.Now()
 
-		// Handle user input
-		if win.Closed() || win.JustPressed(pixelgl.KeyLeftControl) || win.JustPressed(pixelgl.KeyEscape) {
-			return
+		// React to pressed keys
+		if win.KeyIsPressed(tgl.KeyW) {
+			gameServer.paddleLeft.MovePos(dirUp, dt, win.Framebuffer)
 		}
-		if win.Pressed(pixelgl.KeyW) {
-			gameServer.paddleLeft.MovePos(dirUp, dt, framebuf)
+		if win.KeyIsPressed(tgl.KeyS) {
+			gameServer.paddleLeft.MovePos(dirDown, dt, win.Framebuffer)
 		}
-		if win.Pressed(pixelgl.KeyS) {
-			gameServer.paddleLeft.MovePos(dirDown, dt, framebuf)
-		}
-		if win.Pressed(pixelgl.KeyUp) {
-			gameServer.paddleRight.MovePos(dirUp, dt, framebuf)
-		}
-		if win.Pressed(pixelgl.KeyDown) {
-			gameServer.paddleRight.MovePos(dirDown, dt, framebuf)
-		}
-		gameServer.ball.Update(dt, framebuf)
+
+		gameServer.ball.Update(dt, win.Framebuffer)
 		if tgl.IsColliding(gameServer.ball.body, gameServer.paddleLeft.body) ||
 			tgl.IsColliding(gameServer.ball.body, gameServer.paddleRight.body) {
 			gameServer.ball.velocity.X *= -1
 		}
 
-		// Adjust frame buffer size if window size changes
-		if !prevSize.Eq(win.Bounds().Size()) {
-			framebuf = tgl.NewFrameBuffer(win.Canvas().Texture().Width(), win.Canvas().Texture().Height())
-		}
-
 		// Set background colour
-		framebuf.SetBackground(color.RGBA{39, 45, 53, 255})
+		win.Framebuffer.SetBackground(color.RGBA{39, 45, 53, 255})
 
-		// Modify frame buffer
-		gameServer.paddleLeft.Draw(framebuf)
-		gameServer.paddleRight.Draw(framebuf)
-		gameServer.ball.Draw(framebuf)
+		// Draw shapes
+		win.Draw(gameServer.paddleLeft)
+		win.Draw(gameServer.paddleRight)
+		win.Draw(gameServer.ball)
 
-		// Render screen
-		win.Canvas().SetPixels(framebuf.Bytes())
 		win.Update()
 
 		// Count FPS
 		frames++
 		select {
 		case <-second:
-			win.SetTitle(fmt.Sprintf("%s | FPS: %d", cfg.Title, frames))
+			win.SetTitle(fmt.Sprintf("%s | FPS: %d", win.GetConfig().Title, frames))
 			frames = 0
 		default:
 		}

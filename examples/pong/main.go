@@ -5,97 +5,82 @@ import (
 	"image/color"
 	"time"
 
-	"github.com/gopxl/pixel/v2"
-	"github.com/gopxl/pixel/v2/pixelgl"
 	tgl "github.com/zac460/turdgl"
 	"golang.org/x/exp/constraints"
 )
 
-var (
-	frames = 0
-	second = time.Tick(time.Second)
-)
-
-func run() {
-	cfg := pixelgl.WindowConfig{
-		Title:     "Pong",
-		Bounds:    pixel.R(0, 0, 1024, 768),
-		VSync:     true,
-		Resizable: true,
-	}
-	win, err := pixelgl.NewWindow(cfg)
+func main() {
+	win, err := tgl.NewWindow(tgl.WindowCfg{
+		Title:  "Pong Example",
+		Width:  1024,
+		Height: 768,
+	})
 	if err != nil {
 		panic(err)
 	}
 
-	// Screen state
-	screenWidth := win.Canvas().Texture().Width()
-	screenHeight := win.Canvas().Texture().Height()
-	framebuf := tgl.NewFrameBuffer(screenWidth, screenHeight)
-	prevSize := win.Bounds().Size()
+	// For measuring FPS
+	frames := 0
+	second := time.Tick(time.Second)
 
 	// Shapes
 	paddleLeft := NewPaddle(tgl.Vec{X: 50, Y: 200})
-	paddleRight := NewPaddle(tgl.Vec{X: float64(screenWidth) - 50, Y: 200})
-	ball := NewBall(tgl.Vec{X: win.Bounds().Center().X, Y: win.Bounds().Center().Y})
+	paddleRight := NewPaddle(tgl.Vec{X: float64(win.GetConfig().Width) - 50, Y: 200})
+	ball := NewBall(tgl.Vec{
+		X: float64(win.GetConfig().Width / 2),
+		Y: float64(win.GetConfig().Height / 2),
+	})
+
+	// Keybinds
+	win.RegisterKeybind(tgl.KeyEscape, func() { win.Quit() })
+	win.RegisterKeybind(tgl.KeyLCtrl, func() { win.Quit() })
 
 	prevTime := time.Now()
-	for {
+	for win.IsRunning() {
 		dt := time.Since(prevTime)
 		prevTime = time.Now()
 
-		// Handle user input
-		if win.Closed() || win.JustPressed(pixelgl.KeyLeftControl) || win.JustPressed(pixelgl.KeyEscape) {
-			return
+		// React to pressed keys
+		if win.KeyIsPressed(tgl.KeyW) {
+			paddleLeft.MovePos(dirUp, dt, win.Framebuffer)
 		}
-		if win.Pressed(pixelgl.KeyW) {
-			paddleLeft.MovePos(dirUp, dt, framebuf)
+		if win.KeyIsPressed(tgl.KeyS) {
+			paddleLeft.MovePos(dirDown, dt, win.Framebuffer)
 		}
-		if win.Pressed(pixelgl.KeyS) {
-			paddleLeft.MovePos(dirDown, dt, framebuf)
+		if win.KeyIsPressed(tgl.KeyUp) {
+			paddleRight.MovePos(dirUp, dt, win.Framebuffer)
 		}
-		if win.Pressed(pixelgl.KeyUp) {
-			paddleRight.MovePos(dirUp, dt, framebuf)
+		if win.KeyIsPressed(tgl.KeyDown) {
+			paddleRight.MovePos(dirDown, dt, win.Framebuffer)
 		}
-		if win.Pressed(pixelgl.KeyDown) {
-			paddleRight.MovePos(dirDown, dt, framebuf)
-		}
-		ball.Update(dt, framebuf)
+
+		// Ball movement
+		ball.Update(dt, win.Framebuffer)
 		if tgl.IsColliding(ball.body, paddleLeft.body) ||
 			tgl.IsColliding(ball.body, paddleRight.body) {
 			ball.velocity.X *= -1
 		}
 
-		// Adjust frame buffer size if window size changes
-		if !prevSize.Eq(win.Bounds().Size()) {
-			framebuf = tgl.NewFrameBuffer(win.Canvas().Texture().Width(), win.Canvas().Texture().Height())
-		}
-
 		// Set background colour
-		framebuf.SetBackground(color.RGBA{39, 45, 53, 255})
+		win.Framebuffer.SetBackground(color.RGBA{39, 45, 53, 255})
 
 		// Modify frame buffer
-		paddleLeft.Draw(framebuf)
-		paddleRight.Draw(framebuf)
-		ball.Draw(framebuf)
+		win.Draw(paddleLeft)
+		win.Draw(paddleRight)
+		win.Draw(ball)
 
 		// Render screen
-		win.Canvas().SetPixels(framebuf.Bytes())
 		win.Update()
 
 		// Count FPS
 		frames++
 		select {
 		case <-second:
-			win.SetTitle(fmt.Sprintf("%s | FPS: %d", cfg.Title, frames))
+			win.SetTitle(fmt.Sprintf("%s | FPS: %d", win.GetConfig().Title, frames))
 			frames = 0
 		default:
 		}
 	}
-}
-
-func main() {
-	pixelgl.Run(run)
 }
 
 // Constrain keeps a number between lower and upper bounds.
