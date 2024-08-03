@@ -16,6 +16,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer win.Destroy()
 
 	snake := NewSnake(tgl.Vec{X: 400, Y: 100})
 

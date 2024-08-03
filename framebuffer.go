@@ -9,7 +9,8 @@ type Drawable interface {
 
 const pxLen = 4
 
-type Pixel [pxLen]byte // red, green, blue, alpha
+// Pixel represents a pixel, with bytes [red, green, blue, alpha]
+type Pixel [pxLen]byte
 
 // NewPixel constructs a new coloured pixel.
 func NewPixel(c color.Color) Pixel {
@@ -67,26 +68,12 @@ func (f *FrameBuffer) Width() int {
 	return len((*f)[0])
 }
 
-// Length returns the length of the frame buffer.
+// Height returns the height of the frame buffer.
 func (f *FrameBuffer) Height() int {
 	return len(*f)
 }
 
-// BytesReverse returns the frame buffer as a one-dimensional slice of bytes.
-func (f *FrameBuffer) BytesReverse() []byte {
-	buf := *f
-	out := make([]byte, len(buf)*len(buf[0])*pxLen)
-	offset := 0
-	for i := len(buf) - 1; i >= 0; i-- {
-		slice := buf[i]
-		for _, pixel := range slice {
-			copy(out[offset:], pixel[:]) // copy the bytes of each Pixel
-			offset += len(pixel)
-		}
-	}
-	return out
-}
-
+// Bytes returns the frame buffer as a one-dimensional slice of bytes.
 func (f *FrameBuffer) Bytes() []byte {
 	buf := *f
 	out := make([]byte, len(buf)*len(buf[0])*pxLen)

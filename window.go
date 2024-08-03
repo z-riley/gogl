@@ -7,16 +7,19 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
+// WindowCfg contains adjustable configuration for a window.
 type WindowCfg struct {
 	Title         string
 	Width, Height int
 }
 
+// engine contains constructs used to execute background logic.
 type engine struct {
 	running bool
 	keys    *keyTracker
 }
 
+// Window represents OS Window.
 type Window struct {
 	KeyBindings map[sdl.Keycode]func()
 	Framebuffer *FrameBuffer
@@ -27,6 +30,7 @@ type Window struct {
 	config      WindowCfg
 }
 
+// NewWindow constructs a new window according to the provided configuration.
 func NewWindow(cfg WindowCfg) (*Window, error) {
 	if err := sdl.Init(sdl.INIT_VIDEO); err != nil {
 		return nil, err
@@ -75,6 +79,7 @@ func NewWindow(cfg WindowCfg) (*Window, error) {
 	}, nil
 }
 
+// Destroy deallocates the window's resources. Call it at the end of your application.
 func (w *Window) Destroy() {
 	sdl.Quit()
 	w.win.Destroy()
@@ -82,14 +87,18 @@ func (w *Window) Destroy() {
 	w.texture.Destroy()
 }
 
+// RegisterKeybind sets a callback function which is triggered every time
+// the Update method is called if the relevant key is pressed.
 func (w *Window) RegisterKeybind(key sdl.Keycode, cb func()) {
 	w.KeyBindings[key] = cb
 }
 
+// KeyIsPressed returns whether a given key is currently pressed.
 func (w *Window) KeyIsPressed(key sdl.Keycode) bool {
-	return w.engine.keys.IsPressed(key)
+	return w.engine.keys.isPressed(key)
 }
 
+// Draw draws a drawable shape to the window's frame buffer.
 func (w *Window) Draw(s Drawable) {
 	s.Draw(w.Framebuffer)
 }
@@ -107,7 +116,7 @@ func (w *Window) Update() {
 
 	// React to key presses
 	for key, fn := range w.KeyBindings {
-		if w.engine.keys.IsPressed(key) {
+		if w.engine.keys.isPressed(key) {
 			fn()
 		}
 	}
@@ -119,10 +128,12 @@ func (w *Window) Update() {
 	w.renderer.Present()
 }
 
+// IsRunning returns true while the window is running.
 func (w *Window) IsRunning() bool {
 	return w.engine.running
 }
 
+// Quit signals the window to exit.
 func (w *Window) Quit() {
 	w.engine.running = false
 }
@@ -132,16 +143,19 @@ func (w *Window) GetConfig() WindowCfg {
 	return w.config
 }
 
+// Width returns the width of the window in pixels.
 func (w *Window) Width() int {
 	width, _ := w.win.GetSize()
 	return int(width)
 }
 
+// Height returns the height of the window in pixels.
 func (w *Window) Height() int {
 	_, height := w.win.GetSize()
 	return int(height)
 }
 
+// SetTitle sets the title of the window to the provided string.
 func (w *Window) SetTitle(title string) {
 	w.win.SetTitle(title)
 }

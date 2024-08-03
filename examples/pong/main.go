@@ -18,6 +18,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer win.Destroy()
 
 	// For measuring FPS
 	frames := 0

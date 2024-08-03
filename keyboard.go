@@ -4,25 +4,30 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
+// keyTracker is used to track which keys are pressed by the user and
+// react accordingly.
 type keyTracker struct {
 	pressedKeys map[sdl.Keycode]struct{}
 }
 
+// newKeyTracker constructs a key tracker object.
 func newKeyTracker() *keyTracker {
 	return &keyTracker{pressedKeys: make(map[sdl.Keycode]struct{})}
 }
 
+// Is pressed returns true if a key is currently pressed.
+func (k *keyTracker) isPressed(key sdl.Keycode) bool {
+	_, ok := k.pressedKeys[key]
+	return ok
+}
+
+// eventHandler is called every time a window updates, to process the current key presses.
 func (k *keyTracker) eventHandler(event *sdl.KeyboardEvent) {
 	if event.State == sdl.PRESSED {
 		k.pressedKeys[event.Keysym.Sym] = struct{}{}
 	} else if event.State == sdl.RELEASED {
 		delete(k.pressedKeys, event.Keysym.Sym)
 	}
-}
-
-func (k *keyTracker) IsPressed(key sdl.Keycode) bool {
-	_, ok := k.pressedKeys[key]
-	return ok
 }
 
 const (
@@ -54,9 +59,9 @@ const (
 	KeyEscape     = sdl.K_ESCAPE     // "Escape" (the Esc key)
 	KeyBackspace  = sdl.K_BACKSPACE  // "Backspace"
 	KeyTab        = sdl.K_TAB        // "Tab" (the Tab key)
-	KeyTpace      = sdl.K_SPACE      // "Space" (the Space Bar key(s))
+	KeySpace      = sdl.K_SPACE      // "Space" (the Space Bar key(s))
 	KeyExclaim    = sdl.K_EXCLAIM    // "!"
-	KeyQuotedbl   = sdl.K_QUOTEDBL   // """
+	KeyQuotedBL   = sdl.K_QUOTEDBL   // """
 	KeyHash       = sdl.K_HASH       // "#"
 	KeyPercent    = sdl.K_PERCENT    // "%"
 	KeyDollar     = sdl.K_DOLLAR     // "$"
@@ -195,13 +200,13 @@ const (
 	KeyPaste         = sdl.K_PASTE          // "Paste"
 	KeyFind          = sdl.K_FIND           // "Find"
 	KeyMute          = sdl.K_MUTE           // "Mute"
-	KeyVolumeup      = sdl.K_VOLUMEUP       // "VolumeUp"
-	KeyVolumedown    = sdl.K_VOLUMEDOWN     // "VolumeDown"
+	KeyVolumeUp      = sdl.K_VOLUMEUP       // "VolumeUp"
+	KeyVolumeDown    = sdl.K_VOLUMEDOWN     // "VolumeDown"
 	KeyKPComma       = sdl.K_KP_COMMA       // "Keypad ," (the Comma key (numeric keypad))
-	KeyKPEqualsas400 = sdl.K_KP_EQUALSAS400 // "Keypad = (AS400)" (the Equals AS400 key (numeric keypad))
+	KeyKPEqualsAS400 = sdl.K_KP_EQUALSAS400 // "Keypad = (AS400)" (the Equals AS400 key (numeric keypad))
 
-	KeyAlterase   = sdl.K_ALTERASE   // "AltErase" (Erase-Eaze)
-	KeySysreq     = sdl.K_SYSREQ     // "SysReq" (the SysReq key)
+	KeyAltErase   = sdl.K_ALTERASE   // "AltErase" (Erase-Eaze)
+	KeySysReq     = sdl.K_SYSREQ     // "SysReq" (the SysReq key)
 	KeyCancel     = sdl.K_CANCEL     // "Cancel"
 	KeyClear      = sdl.K_CLEAR      // "Clear"
 	KeyPrior      = sdl.K_PRIOR      // "Prior"
@@ -209,20 +214,20 @@ const (
 	KeySeparator  = sdl.K_SEPARATOR  // "Separator"
 	KeyOut        = sdl.K_OUT        // "Out"
 	KeyOper       = sdl.K_OPER       // "Oper"
-	KeyClearagain = sdl.K_CLEARAGAIN // "Clear / Again"
-	KeyCrsel      = sdl.K_CRSEL      // "CrSel"
-	KeyExsel      = sdl.K_EXSEL      // "ExSel"
+	KeyClearAgain = sdl.K_CLEARAGAIN // "Clear / Again"
+	KeyCrSel      = sdl.K_CRSEL      // "CrSel"
+	KeyExSel      = sdl.K_EXSEL      // "ExSel"
 
 	KeyKP00               = sdl.K_KP_00              // "Keypad 00" (the 00 key (numeric keypad))
 	KeyKP000              = sdl.K_KP_000             // "Keypad 000" (the 000 key (numeric keypad))
-	KeyThousandsseparator = sdl.K_THOUSANDSSEPARATOR // "ThousandsSeparator" (the Thousands Separator key)
-	KeyDecimalseparator   = sdl.K_DECIMALSEPARATOR   // "DecimalSeparator" (the Decimal Separator key)
-	KeyCurrencyunit       = sdl.K_CURRENCYUNIT       // "CurrencyUnit" (the Currency Unit key)
-	KeyCurrencysubunit    = sdl.K_CURRENCYSUBUNIT    // "CurrencySubUnit" (the Currency Subunit key)
-	KeyKPLeftparen        = sdl.K_KP_LEFTPAREN       // "Keypad (" (the Left Parenthesis key (numeric keypad))
-	KeyKPRightparen       = sdl.K_KP_RIGHTPAREN      // "Keypad )" (the Right Parenthesis key (numeric keypad))
-	KeyKPLeftbrace        = sdl.K_KP_LEFTBRACE       // "Keypad {" (the Left Brace key (numeric keypad))
-	KeyKPRightbrace       = sdl.K_KP_RIGHTBRACE      // "Keypad }" (the Right Brace key (numeric keypad))
+	KeyThousandsSeparator = sdl.K_THOUSANDSSEPARATOR // "ThousandsSeparator" (the Thousands Separator key)
+	KeyDecimalSeparator   = sdl.K_DECIMALSEPARATOR   // "DecimalSeparator" (the Decimal Separator key)
+	KeyCurrencyUnit       = sdl.K_CURRENCYUNIT       // "CurrencyUnit" (the Currency Unit key)
+	KeyCurrencySubUnit    = sdl.K_CURRENCYSUBUNIT    // "CurrencySubUnit" (the Currency Subunit key)
+	KeyKPLeftParen        = sdl.K_KP_LEFTPAREN       // "Keypad (" (the Left Parenthesis key (numeric keypad))
+	KeyKPRightParen       = sdl.K_KP_RIGHTPAREN      // "Keypad )" (the Right Parenthesis key (numeric keypad))
+	KeyKPLeftBrace        = sdl.K_KP_LEFTBRACE       // "Keypad {" (the Left Brace key (numeric keypad))
+	KeyKPRightBrace       = sdl.K_KP_RIGHTBRACE      // "Keypad }" (the Right Brace key (numeric keypad))
 	KeyKPTab              = sdl.K_KP_TAB             // "Keypad Tab" (the Tab key (numeric keypad))
 	KeyKPBackspace        = sdl.K_KP_BACKSPACE       // "Keypad Backspace" (the Backspace key (numeric keypad))
 	KeyKPA                = sdl.K_KP_A               // "Keypad A" (the A key (numeric keypad))
@@ -237,24 +242,24 @@ const (
 	KeyKPLess             = sdl.K_KP_LESS            // "Keypad <" (the Less key (numeric keypad))
 	KeyKPGreater          = sdl.K_KP_GREATER         // "Keypad >" (the Greater key (numeric keypad))
 	KeyKPAmpersand        = sdl.K_KP_AMPERSAND       // "Keypad &" (the & key (numeric keypad))
-	KeyKPDblampersand     = sdl.K_KP_DBLAMPERSAND    // "Keypad &&" (the && key (numeric keypad))
-	KeyKPVerticalbar      = sdl.K_KP_VERTICALBAR     // "Keypad |" (the | key (numeric keypad))
-	KeyKPDblverticalbar   = sdl.K_KP_DBLVERTICALBAR  // "Keypad ||" (the || key (numeric keypad))
+	KeyKPDblAmpersand     = sdl.K_KP_DBLAMPERSAND    // "Keypad &&" (the && key (numeric keypad))
+	KeyKPVerticalBar      = sdl.K_KP_VERTICALBAR     // "Keypad |" (the | key (numeric keypad))
+	KeyKPDblVerticalBar   = sdl.K_KP_DBLVERTICALBAR  // "Keypad ||" (the || key (numeric keypad))
 	KeyKPColon            = sdl.K_KP_COLON           // "Keypad :" (the : key (numeric keypad))
 	KeyKPHash             = sdl.K_KP_HASH            // "Keypad #" (the # key (numeric keypad))
 	KeyKPSpace            = sdl.K_KP_SPACE           // "Keypad Space" (the Space key (numeric keypad))
 	KeyKPAt               = sdl.K_KP_AT              // "Keypad @" (the @ key (numeric keypad))
 	KeyKPExclam           = sdl.K_KP_EXCLAM          // "Keypad !" (the ! key (numeric keypad))
-	KeyKPMemstore         = sdl.K_KP_MEMSTORE        // "Keypad MemStore" (the Mem Store key (numeric keypad))
-	KeyKPMemrecall        = sdl.K_KP_MEMRECALL       // "Keypad MemRecall" (the Mem Recall key (numeric keypad))
-	KeyKPMemclear         = sdl.K_KP_MEMCLEAR        // "Keypad MemClear" (the Mem Clear key (numeric keypad))
-	KeyKPMemadd           = sdl.K_KP_MEMADD          // "Keypad MemAdd" (the Mem Add key (numeric keypad))
-	KeyKPMemsubtract      = sdl.K_KP_MEMSUBTRACT     // "Keypad MemSubtract" (the Mem Subtract key (numeric keypad))
-	KeyKPMemmultiply      = sdl.K_KP_MEMMULTIPLY     // "Keypad MemMultiply" (the Mem Multiply key (numeric keypad))
-	KeyKPMemdivide        = sdl.K_KP_MEMDIVIDE       // "Keypad MemDivide" (the Mem Divide key (numeric keypad))
-	KeyKPPlusminus        = sdl.K_KP_PLUSMINUS       // "Keypad +/-" (the +/- key (numeric keypad))
+	KeyKPMemStore         = sdl.K_KP_MEMSTORE        // "Keypad MemStore" (the Mem Store key (numeric keypad))
+	KeyKPMemRecall        = sdl.K_KP_MEMRECALL       // "Keypad MemRecall" (the Mem Recall key (numeric keypad))
+	KeyKPMemClear         = sdl.K_KP_MEMCLEAR        // "Keypad MemClear" (the Mem Clear key (numeric keypad))
+	KeyKPMemAdd           = sdl.K_KP_MEMADD          // "Keypad MemAdd" (the Mem Add key (numeric keypad))
+	KeyKPMemSubtract      = sdl.K_KP_MEMSUBTRACT     // "Keypad MemSubtract" (the Mem Subtract key (numeric keypad))
+	KeyKPMemMultiply      = sdl.K_KP_MEMMULTIPLY     // "Keypad MemMultiply" (the Mem Multiply key (numeric keypad))
+	KeyKPMemDivide        = sdl.K_KP_MEMDIVIDE       // "Keypad MemDivide" (the Mem Divide key (numeric keypad))
+	KeyKPPlusMinus        = sdl.K_KP_PLUSMINUS       // "Keypad +/-" (the +/- key (numeric keypad))
 	KeyKPClear            = sdl.K_KP_CLEAR           // "Keypad Clear" (the Clear key (numeric keypad))
-	KeyKPClearentry       = sdl.K_KP_CLEARENTRY      // "Keypad ClearEntry" (the Clear Entry key (numeric keypad))
+	KeyKPClearEntry       = sdl.K_KP_CLEARENTRY      // "Keypad ClearEntry" (the Clear Entry key (numeric keypad))
 	KeyKPBinary           = sdl.K_KP_BINARY          // "Keypad Binary" (the Binary key (numeric keypad))
 	KeyKPOctal            = sdl.K_KP_OCTAL           // "Keypad Octal" (the Octal key (numeric keypad))
 	KeyKPDecimal          = sdl.K_KP_DECIMAL         // "Keypad Decimal" (the Decimal key (numeric keypad))
@@ -271,12 +276,12 @@ const (
 
 	KeyMode = sdl.K_MODE // "ModeSwitch"
 
-	KeyAudionext   = sdl.K_AUDIONEXT    // "AudioNext" (the Next Track media key)
-	KeyAudioprev   = sdl.K_AUDIOPREV    // "AudioPrev" (the Previous Track media key)
-	KeyAudiostop   = sdl.K_AUDIOSTOP    // "AudioStop" (the Stop media key)
-	KeyAudioplay   = sdl.K_AUDIOPLAY    // "AudioPlay" (the Play media key)
-	KeyAudiomute   = sdl.K_AUDIOMUTE    // "AudioMute" (the Mute volume key)
-	KeyMediaselect = sdl.K_MEDIASELECT  // "MediaSelect" (the Media Select key)
+	KeyAudioNext   = sdl.K_AUDIONEXT    // "AudioNext" (the Next Track media key)
+	KeyAudioPrev   = sdl.K_AUDIOPREV    // "AudioPrev" (the Previous Track media key)
+	KeyAudioStop   = sdl.K_AUDIOSTOP    // "AudioStop" (the Stop media key)
+	KeyAudioPlay   = sdl.K_AUDIOPLAY    // "AudioPlay" (the Play media key)
+	KeyAudioMute   = sdl.K_AUDIOMUTE    // "AudioMute" (the Mute volume key)
+	KeyMediaSelect = sdl.K_MEDIASELECT  // "MediaSelect" (the Media Select key)
 	KeyWWW         = sdl.K_WWW          // "WWW" (the WWW/World Wide Web key)
 	KeyMail        = sdl.K_MAIL         // "Mail" (the Mail/eMail key)
 	KeyCalculator  = sdl.K_CALCULATOR   // "Calculator" (the Calculator key)
@@ -289,9 +294,9 @@ const (
 	KeyACRefresh   = sdl.K_AC_REFRESH   // "AC Refresh" (the Refresh key (application control keypad))
 	KeyACBookmarks = sdl.K_AC_BOOKMARKS // "AC Bookmarks" (the Bookmarks key (application control keypad))
 
-	KeyBrightnessdown = sdl.K_BRIGHTNESSDOWN // "BrightnessDown" (the Brightness Down key)
-	KeyBrightnessup   = sdl.K_BRIGHTNESSUP   // "BrightnessUp" (the Brightness Up key)
-	KeyDisplayswitch  = sdl.K_DISPLAYSWITCH  // "DisplaySwitch" (display mirroring/dual display switch, video mode switch)
+	KeyBrightnessDown = sdl.K_BRIGHTNESSDOWN // "BrightnessDown" (the Brightness Down key)
+	KeyBrightnessUp   = sdl.K_BRIGHTNESSUP   // "BrightnessUp" (the Brightness Up key)
+	KeyDisplaySwitch  = sdl.K_DISPLAYSWITCH  // "DisplaySwitch" (display mirroring/dual display switch, video mode switch)
 	KeyKbdIllumtoggle = sdl.K_KBDILLUMTOGGLE // "KBDIllumToggle" (the Keyboard Illumination Toggle key)
 	KeyKbdIllumdown   = sdl.K_KBDILLUMDOWN   // "KBDIllumDown" (the Keyboard Illumination Down key)
 	KeyKbdIllumup     = sdl.K_KBDILLUMUP     // "KBDIllumUp" (the Keyboard Illumination Up key)
