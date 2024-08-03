@@ -8,7 +8,7 @@ import (
 
 const (
 	ballDiameter = 10
-	ballSpeed    = 300
+	ballSpeed    = 500
 )
 
 type ball struct {
@@ -29,9 +29,19 @@ func (b *ball) Draw(buf *tgl.FrameBuffer) {
 	b.body.Draw(buf)
 }
 
+type pongEvent int
+
+const (
+	noWin pongEvent = iota
+	leftWin
+	rightWin
+)
+
 // Update recalculates the balls's position based on the current velocity and time interval.
 // A reference to the frame buffer must be provided to check the ball isn't out of bounds.
-func (b *ball) Update(dt time.Duration, buf *tgl.FrameBuffer) {
+func (b *ball) Update(dt time.Duration, buf *tgl.FrameBuffer) pongEvent {
+	var event pongEvent
+
 	// Update the position
 	pos := b.body.GetPos()
 	newX := b.body.GetPos().X + b.velocity.X*dt.Seconds()
@@ -41,6 +51,13 @@ func (b *ball) Update(dt time.Duration, buf *tgl.FrameBuffer) {
 	if pos.X < ballDiameter || pos.X > float64(buf.Width())-ballDiameter {
 		newX = Constrain(newX, ballDiameter, float64(buf.Width())-ballDiameter)
 		b.velocity.X *= -1
+
+		// Generate win/lose events
+		if b.body.GetPos().X < float64(buf.Width())/2 {
+			event = rightWin
+		} else {
+			event = leftWin
+		}
 	}
 	if b.body.GetPos().Y < ballDiameter || pos.Y > float64(buf.Height())-ballDiameter {
 		newY = Constrain(newY, ballDiameter, float64(buf.Height())-ballDiameter)
@@ -48,4 +65,6 @@ func (b *ball) Update(dt time.Duration, buf *tgl.FrameBuffer) {
 	}
 
 	b.body.SetPos(tgl.Vec{X: newX, Y: newY})
+
+	return event
 }

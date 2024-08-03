@@ -30,10 +30,19 @@ func main() {
 		X: float64(win.GetConfig().Width / 2),
 		Y: float64(win.GetConfig().Height / 2),
 	})
+	scores := tgl.NewText("0 | 0", tgl.Vec{X: 470, Y: 20}).
+		SetSize(34).SetColour(color.White)
+	setScore := func(left, right int) {
+		scores.SetText(fmt.Sprintf("%d | %d", left, right))
+	}
 
 	// Keybinds
 	win.RegisterKeybind(tgl.KeyEscape, func() { win.Quit() })
 	win.RegisterKeybind(tgl.KeyLCtrl, func() { win.Quit() })
+
+	// Game state
+	leftScore := 0
+	rightScore := 0
 
 	prevTime := time.Now()
 	for win.IsRunning() {
@@ -55,7 +64,16 @@ func main() {
 		}
 
 		// Ball movement
-		ball.Update(dt, win.Framebuffer)
+		event := ball.Update(dt, win.Framebuffer)
+		switch event {
+		case noWin:
+		case leftWin:
+			leftScore++
+			setScore(leftScore, rightScore)
+		case rightWin:
+			rightScore++
+			setScore(leftScore, rightScore)
+		}
 		if tgl.IsColliding(ball.body, paddleLeft.body) ||
 			tgl.IsColliding(ball.body, paddleRight.body) {
 			ball.velocity.X *= -1
@@ -65,6 +83,7 @@ func main() {
 		win.Framebuffer.SetBackground(color.RGBA{39, 45, 53, 255})
 
 		// Modify frame buffer
+		win.Draw(scores)
 		win.Draw(paddleLeft)
 		win.Draw(paddleRight)
 		win.Draw(ball)
