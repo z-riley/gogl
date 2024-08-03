@@ -2,6 +2,11 @@ package turdgl
 
 import "image/color"
 
+// Drawable is an interface for things that can be drawn onto a frame buffer.
+type Drawable interface {
+	Draw(*FrameBuffer)
+}
+
 const pxLen = 4
 
 type Pixel [pxLen]byte // red, green, blue, alpha
