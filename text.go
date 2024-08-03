@@ -9,7 +9,7 @@ import (
 	"github.com/golang/freetype"
 )
 
-// Text is a block of text.
+// Text is a customisable block of text.
 type Text struct {
 	body               string
 	pos                Vec
@@ -20,7 +20,7 @@ type Text struct {
 	mask               *image.RGBA // pixel image to be drawn
 }
 
-// NewText constructs a new text object using default parameters.
+// NewText constructs a new text object with default parameters.
 func NewText(body string, pos Vec) *Text {
 	t := Text{
 		body:     body,
@@ -41,10 +41,8 @@ func NewText(body string, pos Vec) *Text {
 
 // Draw draws the text onto the provided frame buffer.
 func (t *Text) Draw(buf *FrameBuffer) {
-	// Draw text onto image
-	width, height := t.mask.Bounds().Max.X, t.mask.Bounds().Max.Y
-	for i := 0; i < height; i++ {
-		for j := 0; j < width; j++ {
+	for i := 0; i < t.mask.Bounds().Max.Y; i++ {
+		for j := 0; j < t.mask.Bounds().Max.X; j++ {
 			rgba := t.mask.RGBAAt(j, i)
 			if rgba.A > 0 {
 				buf.SetPixel(i, j, NewPixel(rgba))
