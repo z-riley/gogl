@@ -143,6 +143,13 @@ func (w *Window) GetConfig() WindowCfg {
 	return w.config
 }
 
+// MouseLocation returns the location of the mouse cursor, relative to
+// the origin of the window.
+func (w *Window) MouseLocation() Vec {
+	x, y, _ := sdl.GetMouseState()
+	return Vec{X: float64(x), Y: float64(y)}
+}
+
 // Width returns the width of the window in pixels.
 func (w *Window) Width() int {
 	width, _ := w.win.GetSize()

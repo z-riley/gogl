@@ -41,6 +41,11 @@ func main() {
 	)
 	txt := tgl.NewText("Hello there", tgl.Vec{X: 100, Y: 600}).
 		SetColour(color.RGBA{255, 255, 255, 255})
+	triangle := tgl.NewTriangle(
+		tgl.Vec{X: 400, Y: 80},
+		tgl.Vec{X: 800, Y: 600},
+		tgl.Vec{X: 100, Y: 400},
+	).SetStyle(tgl.Style{Colour: color.RGBA{100, 10, 100, 255}})
 
 	// Keybinds
 	win.RegisterKeybind(tgl.KeyEscape, func() { win.Quit() })
@@ -51,10 +56,13 @@ func main() {
 		win.Framebuffer.SetBackground(color.RGBA{39, 45, 53, 255})
 
 		// Draw shapes
+		win.Draw(triangle)
 		win.Draw(rect)
 		win.Draw(rect2)
 		win.Draw(circle)
 		win.Draw(txt)
+
+		win.SetTitle(fmt.Sprint(win.MouseLocation()))
 
 		win.Update()
 

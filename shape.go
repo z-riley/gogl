@@ -15,7 +15,7 @@ type Style struct {
 
 var DefaultStyle = Style{Colour: color.RGBA{0xff, 0xff, 0xff, 0xff}, Thickness: 0}
 
-// Shape is an interface for shapes
+// Shape is an interface for shapes.
 type Shape interface {
 	GetPos() Vec
 	Width() float64
