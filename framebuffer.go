@@ -1,6 +1,9 @@
 package turdgl
 
-import "image/color"
+import (
+	"image/color"
+	"math"
+)
 
 // Drawable is an interface for things that can be drawn onto a frame buffer.
 type Drawable interface {
@@ -99,4 +102,36 @@ func (f *FrameBuffer) WithinFrame(point Vec, padding float64) bool {
 		panic("WithinFrame - padding cannot be greater than the frame width or height")
 	}
 	return point.X-1 < w-padding && point.Y-1 < h-padding && point.X > padding && point.Y > padding
+}
+
+// DrawLine draws a single pixel line using Bresenham's line drawing algorithm.
+func DrawLine(v1, v2 Vec, buf *FrameBuffer) {
+	dx := math.Abs(v2.X - v1.X)
+	sx := 1
+	if v1.X > v2.X {
+		sx = -1
+	}
+	dy := -math.Abs(v2.Y - v1.Y)
+	sy := 1
+	if v1.Y > v2.Y {
+		sy = -1
+	}
+	err := dx + dy
+	x1, y1 := int(math.Round(v1.X)), int(math.Round(v1.Y))
+	for {
+		buf.SetPixel(y1, x1, NewPixel(color.White))
+		x2, y2 := int(math.Round(v2.X)), int(math.Round(v2.Y))
+		if x1 == x2 && y1 == y2 {
+			break
+		}
+		e2 := 2 * err
+		if e2 >= dy {
+			err += dy
+			x1 += sx
+		}
+		if e2 <= dx {
+			err += dx
+			y1 += sy
+		}
+	}
 }

@@ -60,7 +60,12 @@ func Add(v1, v2 Vec) Vec {
 
 // Dot calculates the dot product between two vectors.
 func Dot(v1, v2 Vec) float64 {
-	return v1.X*v2.X + v1.Y*v2.X
+	return v1.X*v2.Y - v1.Y*v2.X
+}
+
+// Cross calculates the cross product of two vectors.
+func Cross(v1, v2 Vec) float64 {
+	return v1.X*v2.Y - v1.Y*v2.X
 }
 
 // Theta calculates the angle between two vectors, in radians.

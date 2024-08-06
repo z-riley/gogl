@@ -5,6 +5,8 @@ import (
 	"image/color"
 	"math"
 	"reflect"
+
+	"golang.org/x/exp/rand"
 )
 
 // Style contains style information for a shape.
@@ -14,6 +16,19 @@ type Style struct {
 }
 
 var DefaultStyle = Style{Colour: color.RGBA{0xff, 0xff, 0xff, 0xff}, Thickness: 0}
+
+// RandomStyle generates a style of random colour and thickness 0.
+func RandomStyle() Style {
+	return Style{
+		Colour: color.RGBA{
+			R: byte(rand.Intn(256)),
+			G: byte(rand.Intn(256)),
+			B: byte(rand.Intn(256)),
+			A: byte(rand.Intn(256)),
+		},
+		Thickness: 0,
+	}
+}
 
 // Shape is an interface for shapes.
 type Shape interface {
