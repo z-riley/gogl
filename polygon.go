@@ -145,6 +145,9 @@ func triangulateEarClipping(vecs []Vec) []*Triangle {
 	return segments
 }
 
+// isError keeps track of whether there's a polgyon error.
+var isError bool
+
 // triangulatePoly2Tri triangulates a polygon defined by a slice of vectors
 // into a slice of drawable triangles using Delauney triangulation.
 // https://github.com/ByteArena/poly2tri-go
@@ -155,8 +158,21 @@ func triangulatePoly2Tri(vecs []Vec) []*Triangle {
 		contour[i] = poly2tri.NewPoint(v.X, v.Y)
 	}
 
-	swctx := poly2tri.NewSweepContext(contour, false)
 	// Note: polygon holes can be added if needed using swctx.AddHole()
+	swctx := poly2tri.NewSweepContext(contour, false)
+
+	// Keep going if Triangulate() fails due to intersecting edges
+	defer func() {
+		msg := recover()
+		// This logic exists to not spam the logs. The error will only be
+		// printed once each time the polygon enters an error state
+		if msg == nil {
+			isError = false
+		} else if !isError {
+			isError = true
+			fmt.Println("Warning: Polygon error:", msg)
+		}
+	}()
 	swctx.Triangulate()
 	trianglesRaw := swctx.GetTriangles()
 
