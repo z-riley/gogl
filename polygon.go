@@ -89,22 +89,11 @@ func triangulateEarClipping(vecs []Vec) []*Triangle {
 		r = r.Next()
 	}
 
-	earCounter := 0
-	r.Do(func(a any) {
-		if a.(vertex).isEar {
-			earCounter++
-		}
-	})
-	if earCounter != len(vecs)-2 {
-		// panic("WRONG NUMBER OF EARS DETECTED")
-	}
-
 	// Remove remove ears one by one, saving the triangle segment each time.
 	// Stop when there is only one triangle remaining. There are always 2 less
 	// triangles than polygon vertices
 	var segments []*Triangle
 
-	// i := 0
 	safetyCounter := 0
 	for r.Len() >= 3 {
 		safetyCounter++
@@ -114,7 +103,20 @@ func triangulateEarClipping(vecs []Vec) []*Triangle {
 		}
 		// FIXME: this branch is sometimes not always triggered enough times, meaning the loop
 		// would run forever without the emergency exit. This is because the algorithm fails to
-		// triangulate complex geometry properly.
+		// triangulate complex geometry properly. Run examples/snake/main.go to trigger the bug.
+		//
+		// Options to remediate include:
+		// - Use an existing C tesselation library. For example, make a Go bindings for:
+		//   a) https://github.com/memononen/libtess2/blob/master/Include/tesselator.h
+		//   b) https://github.com/mbebenita/GLUTesselator/tree/master/src
+		//   c) https://github.com/libigl/triangle
+		// - Use an existing Go library:
+		//   a) https://github.com/rclancey/go-earcut, made from JS
+		//
+		// Impracticable options:
+		// - Improve the turdgl triangulation algorithm --> probably too difficult
+		// - Use OpenGL bindings --> won't give pixel grid values back
+		//
 		if getVertex(r).isEar {
 			// Save triangle
 			segments = append(segments, NewTriangle(
