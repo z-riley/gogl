@@ -23,7 +23,6 @@ func main() {
 	frames := 0
 	second := time.Tick(time.Second)
 
-	// Shapes
 	polygon := tgl.NewPolygon([]tgl.Vec{
 		{X: 560, Y: 120},
 		{X: 450, Y: 340},
@@ -34,18 +33,19 @@ func main() {
 		{X: 800, Y: 600},
 		{X: 830, Y: 240},
 		{X: 680, Y: 250},
-	})
-	txt := tgl.NewText("Hello there", tgl.Vec{X: 100, Y: 600}).
+	}).SetStyle(tgl.Style{Colour: color.RGBA{20, 70, 20, 255}})
+
+	txt := tgl.NewText("Press E to move", tgl.Vec{X: 100, Y: 600}).
 		SetColour(color.RGBA{255, 255, 255, 255})
 
 	// Keybinds
 	win.RegisterKeybind(tgl.KeyEscape, func() { win.Quit() })
 	win.RegisterKeybind(tgl.KeyLCtrl, func() { win.Quit() })
+	win.RegisterKeybind(tgl.KeyE, func() { polygon.Move(tgl.Vec{X: 1, Y: 1}) })
 
 	for win.IsRunning() {
-		win.Framebuffer.SetBackground(color.RGBA{39, 45, 53, 255})
+		win.Framebuffer.SetBackground(color.Black)
 
-		// Draw shapes
 		win.Draw(polygon)
 		win.Draw(txt)
 

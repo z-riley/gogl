@@ -2,55 +2,9 @@ package turdgl
 
 import (
 	"container/ring"
-	"fmt"
 	"math"
 	"slices"
 )
-
-type vertex struct {
-	pos   Vec
-	isEar bool
-}
-
-// calculateIsEar populates the isEar field of a ring element.
-func calculateIsEar(ring *ring.Ring) {
-	v := ring.Value.(vertex)
-	prev := ring.Prev().Value.(vertex)
-	next := ring.Next().Value.(vertex)
-
-	// Return early if vertex isn't convex because it can't be an ear
-	if !isConvex(v.pos, next.pos, prev.pos) {
-		return
-	}
-
-	triangle := NewTriangle(
-		ring.Value.(vertex).pos,
-		ring.Next().Value.(vertex).pos,
-		ring.Prev().Value.(vertex).pos,
-	)
-
-	// Check if any other vertices lie within the triangle formed by the
-	// vertex and its two neighbours.
-	r := ring.Next()
-	for i := 0; i < r.Len()-1; i++ {
-
-		current := r.Value.(vertex)
-		switch {
-		case slices.Contains([]Vec{triangle.v1, triangle.v2, triangle.v3}, current.pos):
-			// Ignore the triangle's own vertices
-		case triangle.pointInTriangle(current.pos):
-			// v is not an ear if other vertices exist in the triangle
-		default:
-			// vertex is an ear. Set the isEar flag for the vertex
-			v := ring.Value.(vertex)
-			v.isEar = true
-			ring.Value = v
-			return
-		}
-
-		r = r.Next()
-	}
-}
 
 // Polygon is a 2D shape with 3 or more sides.
 type Polygon struct {
@@ -59,75 +13,25 @@ type Polygon struct {
 	segments []*Triangle
 }
 
-// NewPolygon constructs a polygon according to the supplied vertices.
-// The order of the vertices dictates the edges of the polygon. The final
-// vertex is always linked to the first.
+// NewPolygon constructs a polygon from the specified vertices.
+// The order of the vertices dictates the edges of the polygon.
+// The final vertex is always linked to the first.
 func NewPolygon(vecs []Vec) *Polygon {
-
-	// Construct ring list of vertices for easier manipulation
-	r := ring.New(len(vecs))
-	for i := 0; i < r.Len(); i++ {
-		// TODO use Do(func()) for this instead
-		r.Value = vertex{pos: vecs[i]}
-		r = r.Next()
-	}
-
-	// Mark which vertices are ears
-	// TODO use Do(func()) for this instead
-	for i := 0; i < r.Len(); i++ {
-		calculateIsEar(r)
-		r = r.Next()
-	}
-
-	var segments = []*Triangle{} // TODO THIS COULD BE make(.., len(vecs)-2)?
-	for r.Len() > 1 {
-		if r.Value.(vertex).isEar {
-			// Add triangle to polygon segments
-			segments = append(segments, NewTriangle(
-				r.Value.(vertex).pos,
-				r.Prev().Value.(vertex).pos,
-				r.Next().Value.(vertex).pos,
-			).SetStyle(RandomStyle()))
-
-			// Remove current vertex
-			r = r.Unlink(r.Len() - 1)
-
-			// Update states of adjacent vertices
-			calculateIsEar(r.Prev())
-			calculateIsEar(r.Next())
-
-			// TODO add optimisations:
-			// If Vi is an ear that is removed, then the edge configuration at the adjacent vertices
-			// Vi−1 and Vi+1 can change. If an adjacent vertex is convex, a quick sketch will convince
-			// you that it remains convex.
-			// If an adjacent vertex is an ear, it does not necessarily remain an ear after Vi is removed.
-			// If the adjacent vertex is reflex, it is possible that it becomes convex and possibly an ear.
-
-		}
-
-		r = r.Next()
-	}
 	return &Polygon{
 		vertices: vecs,
 		style:    DefaultStyle,
-		segments: segments,
+		segments: triangulateEarClipping(vecs),
 	}
 }
 
-func PrintRing(ring *ring.Ring) {
-	s := "ring "
-	for i := 0; i < ring.Len(); i++ {
-		s += fmt.Sprint(ring.Value.(vertex).pos) + " "
-		ring = ring.Next()
+// Move modifies the position of the polygon by the given vector.
+func (p *Polygon) Move(mov Vec) {
+	// Translate every vertex by the move vector
+	for i := range p.vertices {
+		p.vertices[i] = Add(p.vertices[i], mov)
 	}
-	fmt.Println(s)
-}
-
-// isConvex returns true if the angle of vertices `before`->`p`->`after` is convex.
-func isConvex(p, before, after Vec) bool {
-	dBefore := Sub(p, before)
-	dAfter := Sub(after, p)
-	return Cross(dBefore, dAfter) > 0
+	// Refresh the triangle segments
+	p.segments = triangulateEarClipping(p.vertices)
 }
 
 // Style returns a copy of the polygon's style.
@@ -144,16 +48,114 @@ func (p *Polygon) SetStyle(s Style) *Polygon {
 // Draw draws the polygon onto the provided frame buffer.
 func (p *Polygon) Draw(buf *FrameBuffer) {
 	for _, segment := range p.segments {
-		segment.Draw(buf)
-	}
-
-	// Overlay debug geometry
-	for i, r := range p.vertices {
-		NewCircle(10, r).Draw(buf)
-		NewText(fmt.Sprintf("%d %v", i, r), r).Draw(buf)
+		segment.SetStyle(p.style).Draw(buf)
 	}
 }
 
+// vertex contains information about a vertex of a polygon.
+type vertex struct {
+	pos   Vec
+	isEar bool
+}
+
+// getVertex returns the value of the vertex in the given ring buffer node.
+func getVertex(node *ring.Ring) vertex {
+	val, ok := node.Value.(vertex)
+	if !ok {
+		panic("failed to take ring.Value as type vertex")
+	}
+	return val
+}
+
+// triangulateEarClipping triangulates a polygon defined by a slice of vectors
+// into a slice of drawable triangles using the ear clipping method.
+func triangulateEarClipping(vecs []Vec) []*Triangle {
+	// Construct ring list of vertices for easier manipulation
+	r := ring.New(len(vecs))
+	for i := 0; i < r.Len(); i++ {
+		r.Value = vertex{pos: vecs[i]}
+		r = r.Next()
+	}
+
+	// Mark which vertices are ears
+	for i := 0; i < r.Len(); i++ {
+		calculateIsEar(r)
+		r = r.Next()
+	}
+
+	// Remove remove ears one by one, saving the triangle segment each time.
+	// Stop when there is only one triangle remaining. There are always 2 less
+	// triangles than polygon vertices
+	segments := make([]*Triangle, len(vecs)-2)
+	for i := 0; r.Len() >= 3; i++ {
+		if getVertex(r).isEar {
+			// Save triangle
+			segments[i] = NewTriangle(
+				getVertex(r).pos,
+				getVertex(r.Prev()).pos,
+				getVertex(r.Next()).pos,
+			)
+
+			// Remove the ear vertex
+			r = r.Unlink(r.Len() - 1)
+
+			// Update states of adjacent vertices now the ear vertex has been removed.
+			calculateIsEar(r.Prev())
+			calculateIsEar(r.Next())
+		}
+		r = r.Next()
+	}
+
+	return segments
+}
+
+// calculateIsEar populates the isEar field of a single ring list element.
+func calculateIsEar(vert *ring.Ring) {
+	current := getVertex(vert)
+	prev := getVertex(vert.Prev())
+	next := getVertex(vert.Next())
+
+	if !isConvex(current.pos, next.pos, prev.pos) {
+		return // ear vertices must be convex
+	}
+
+	// Check if any other vertices lie within the triangle formed by the
+	// vertex and its two neighbours.
+	triangle := NewTriangle(
+		getVertex(vert).pos,
+		getVertex(vert.Next()).pos,
+		getVertex(vert.Prev()).pos,
+	)
+	v := vert.Next()
+	for i := 0; i < v.Len()-1; i++ {
+		current := getVertex(v)
+		switch {
+		case slices.Contains([]Vec{triangle.v1, triangle.v2, triangle.v3}, current.pos):
+			// Ignore the triangle's own vertices
+		case triangle.pointInTriangle(current.pos):
+			// The vertex is not an ear if any other vertices exist in the triangle
+			v := getVertex(vert)
+			v.isEar = true
+			vert.Value = v
+		default:
+			// The vertex is an ear; set the isEar flag
+			v := getVertex(vert)
+			v.isEar = true
+			vert.Value = v
+			return
+		}
+		v = v.Next()
+	}
+}
+
+// isConvex returns true if the angle made by vectors ab and bc is convex,
+// assuming that vectors ab and bc are oriented such that when you rotate the
+// ab towards bc, the rotation is counterclockwise.
+func isConvex(a, b, c Vec) bool {
+	return Cross(Sub(a, b), Sub(c, a)) > 0
+}
+
+// Triangle is triangle shape, defined by the position of its vertices.
 type Triangle struct {
 	v1, v2, v3 Vec
 	style      Style
