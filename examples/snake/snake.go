@@ -13,7 +13,7 @@ const (
 	maxNodeDistPx   = 80
 	numSegments     = 10
 	headSize        = 30
-	bodyScaleFactor = 0.97
+	bodyScaleFactor = 0.95
 )
 
 type snake struct {
@@ -121,6 +121,10 @@ func (s *snake) Draw(buf *tgl.FrameBuffer) {
 		)
 		point.Draw(buf)
 	}
+
+	tgl.NewPolygon(markers).
+		SetStyle(tgl.Style{Colour: color.RGBA{20, 70, 20, 255}}).
+		Draw(buf)
 }
 
 // Update recalculates the snake's position based on the current velocity and time interval.

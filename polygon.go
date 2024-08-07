@@ -2,8 +2,10 @@ package turdgl
 
 import (
 	"container/ring"
+	"fmt"
 	"math"
 	"slices"
+	"time"
 )
 
 // Polygon is a 2D shape with 3 or more sides.
@@ -48,7 +50,11 @@ func (p *Polygon) SetStyle(s Style) *Polygon {
 // Draw draws the polygon onto the provided frame buffer.
 func (p *Polygon) Draw(buf *FrameBuffer) {
 	for _, segment := range p.segments {
-		segment.SetStyle(p.style).Draw(buf)
+		if segment == nil {
+			fmt.Println("Segment nil error", time.Now())
+		} else {
+			segment.SetStyle(p.style).Draw(buf)
+		}
 	}
 }
 
@@ -83,19 +89,39 @@ func triangulateEarClipping(vecs []Vec) []*Triangle {
 		r = r.Next()
 	}
 
+	earCounter := 0
+	r.Do(func(a any) {
+		if a.(vertex).isEar {
+			earCounter++
+		}
+	})
+	if earCounter != len(vecs)-2 {
+		// panic("WRONG NUMBER OF EARS DETECTED")
+	}
+
 	// Remove remove ears one by one, saving the triangle segment each time.
 	// Stop when there is only one triangle remaining. There are always 2 less
 	// triangles than polygon vertices
-	segments := make([]*Triangle, len(vecs)-2)
-	for i := 0; r.Len() >= 3; {
+	var segments []*Triangle
+
+	// i := 0
+	safetyCounter := 0
+	for r.Len() >= 3 {
+		safetyCounter++
+		if safetyCounter > 100 {
+			fmt.Println("Ear clipping emergency exit triggered due to not enough ears found")
+			break
+		}
+		// FIXME: this branch is sometimes not always triggered enough times, meaning the loop
+		// would run forever without the emergency exit. This is because the algorithm fails to
+		// triangulate complex geometry properly.
 		if getVertex(r).isEar {
 			// Save triangle
-			segments[i] = NewTriangle(
+			segments = append(segments, NewTriangle(
 				getVertex(r).pos,
 				getVertex(r.Prev()).pos,
 				getVertex(r.Next()).pos,
-			)
-			i++
+			).SetStyle(RandomStyle()))
 
 			// Remove the ear vertex
 			r = r.Unlink(r.Len() - 1)
