@@ -6,6 +6,7 @@ require (
 	github.com/alexflint/go-arg v1.5.1
 	github.com/charmbracelet/log v0.4.0
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
+	github.com/netgusto/poly2tri-go v0.0.0-20170716161910-d102ad91854f
 	github.com/veandco/go-sdl2 v0.4.40
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
 )

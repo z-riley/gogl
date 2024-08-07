@@ -6,6 +6,8 @@ import (
 	"math"
 	"slices"
 	"time"
+
+	"github.com/netgusto/poly2tri-go"
 )
 
 // Polygon is a 2D shape with 3 or more sides.
@@ -22,7 +24,8 @@ func NewPolygon(vecs []Vec) *Polygon {
 	return &Polygon{
 		vertices: vecs,
 		style:    DefaultStyle,
-		segments: triangulateEarClipping(vecs),
+		segments: triangulatePoly2Tri(vecs),
+		// segments: triangulateEarClipping(vecs), // homemade triangulation function
 	}
 }
 
@@ -53,7 +56,8 @@ func (p *Polygon) Draw(buf *FrameBuffer) {
 		if segment == nil {
 			fmt.Println("Segment nil error", time.Now())
 		} else {
-			segment.SetStyle(p.style).Draw(buf)
+			segment.SetStyle(p.style)
+			segment.Draw(buf)
 		}
 	}
 }
@@ -105,15 +109,18 @@ func triangulateEarClipping(vecs []Vec) []*Triangle {
 		// would run forever without the emergency exit. This is because the algorithm fails to
 		// triangulate complex geometry properly. Run examples/snake/main.go to trigger the bug.
 		//
-		// Options to remediate include:
+		// Options to remediate (best to worst):
+		// - Use an existing Go library:
+		//   a) https://github.com/ByteArena/poly2tri-go
 		// - Use an existing C tesselation library. For example, make a Go bindings for:
 		//   a) https://github.com/memononen/libtess2/blob/master/Include/tesselator.h
 		//   b) https://github.com/mbebenita/GLUTesselator/tree/master/src
 		//   c) https://github.com/libigl/triangle
-		// - Use an existing Go library:
-		//   a) https://github.com/rclancey/go-earcut, made from JS
+		// - Port an entire library to Go:
+		//   a) https://github.com/brendankenny/libtess.js
 		//
 		// Impracticable options:
+		// - Go library https://github.com/rclancey/go-earcut gives incorrect output
 		// - Improve the turdgl triangulation algorithm --> probably too difficult
 		// - Use OpenGL bindings --> won't give pixel grid values back
 		//
@@ -136,6 +143,32 @@ func triangulateEarClipping(vecs []Vec) []*Triangle {
 	}
 
 	return segments
+}
+
+// triangulatePoly2Tri triangulates a polygon defined by a slice of vectors
+// into a slice of drawable triangles using Delauney triangulation.
+// https://github.com/ByteArena/poly2tri-go
+func triangulatePoly2Tri(vecs []Vec) []*Triangle {
+	// Convert vertices to poly2tri format
+	contour := make([]*poly2tri.Point, len(vecs))
+	for i, v := range vecs {
+		contour[i] = poly2tri.NewPoint(v.X, v.Y)
+	}
+
+	swctx := poly2tri.NewSweepContext(contour, false)
+	// Note: polygon holes can be added if needed using swctx.AddHole()
+	swctx.Triangulate()
+	trianglesRaw := swctx.GetTriangles()
+
+	// Convert library format to turdgl triangles
+	var triangles []*Triangle
+	for _, t := range trianglesRaw {
+		a := Vec{t.Points[0].X, t.Points[0].Y}
+		b := Vec{t.Points[1].X, t.Points[1].Y}
+		c := Vec{t.Points[2].X, t.Points[2].Y}
+		triangles = append(triangles, NewTriangle(a, b, c))
+	}
+	return triangles
 }
 
 // calculateIsEar populates the isEar field of a single ring list element.
