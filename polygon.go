@@ -87,7 +87,7 @@ func triangulateEarClipping(vecs []Vec) []*Triangle {
 	// Stop when there is only one triangle remaining. There are always 2 less
 	// triangles than polygon vertices
 	segments := make([]*Triangle, len(vecs)-2)
-	for i := 0; r.Len() >= 3; i++ {
+	for i := 0; r.Len() >= 3; {
 		if getVertex(r).isEar {
 			// Save triangle
 			segments[i] = NewTriangle(
@@ -95,6 +95,7 @@ func triangulateEarClipping(vecs []Vec) []*Triangle {
 				getVertex(r.Prev()).pos,
 				getVertex(r.Next()).pos,
 			)
+			i++
 
 			// Remove the ear vertex
 			r = r.Unlink(r.Len() - 1)
