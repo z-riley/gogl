@@ -11,9 +11,9 @@ import (
 
 const (
 	maxNodeDistPx   = 80
-	numSegments     = 10
+	numSegments     = 40
 	headSize        = 30
-	bodyScaleFactor = 0.95
+	bodyScaleFactor = 0.97
 )
 
 type snake struct {
@@ -67,64 +67,49 @@ func (s *snake) Draw(buf *tgl.FrameBuffer) {
 	s.head.Draw(buf)
 	// Draw head markers
 	lMarkerHead := s.head.EdgePoint(math.Pi / 2)
-	lMarker := tgl.NewCircle(
-		markerSize,
-		lMarkerHead,
-		tgl.WithStyle(markerStyle),
-	)
+	lMarker := tgl.NewCircle(markerSize, lMarkerHead, tgl.WithStyle(markerStyle))
 	lMarker.Draw(buf)
 	rMarkerHead := s.head.EdgePoint(math.Pi / 2 * 3)
-	rMarker := tgl.NewCircle(
-		markerSize,
-		rMarkerHead,
-		tgl.WithStyle(markerStyle))
+	rMarker := tgl.NewCircle(markerSize, rMarkerHead, tgl.WithStyle(markerStyle))
 	rMarker.Draw(buf)
+	fMarkerHead := s.head.EdgePoint(0)
+	fMarker := tgl.NewCircle(markerSize, fMarkerHead, tgl.WithStyle(markerStyle))
+	fMarker.Draw(buf)
 
 	// Draw body
-	markers := make([]tgl.Vec, 2+2*len(s.body))
+	markers := make([]tgl.Vec, 3+2*len(s.body))
 	for i, c := range s.body {
 		// Draw segment
 		c.Draw(buf)
 
 		// Draw body markers
 		lPos := c.EdgePoint(math.Pi / 2)
-		lMarker := tgl.NewCircle(
-			markerSize,
-			lPos,
-			tgl.WithStyle(markerStyle),
-		)
-		lMarker.Draw(buf)
+		tgl.NewCircle(markerSize, lPos, tgl.WithStyle(markerStyle)).Draw(buf)
 
 		rPos := c.EdgePoint(math.Pi / 2 * 3)
-		rMarker := tgl.NewCircle(
-			markerSize,
-			rPos,
-			tgl.WithStyle(markerStyle),
-		)
-		rMarker.Draw(buf)
+		tgl.NewCircle(markerSize, rPos, tgl.WithStyle(markerStyle)).Draw(buf)
 
 		markers[i+1] = lPos
 		markers[2*(len(s.body))-i] = rPos
 	}
 
 	markers[0] = lMarkerHead
-	markers[len(markers)-1] = rMarkerHead
+	markers[len(markers)-2] = rMarkerHead
+	markers[len(markers)-1] = fMarkerHead
 
+	// Draw body fill
+	tgl.NewPolygon(markers).
+		SetStyle(tgl.Style{Colour: color.RGBA{20, 70, 20, 255}}).
+		Draw(buf)
+
+	// Draw body outline
 	splinePoints := tgl.GenerateCatmullRomSpline(markers, 20)
 	for _, point := range splinePoints {
 		pointStyle := tgl.Style{Colour: color.RGBA{0, 255, 0, 255}, Thickness: 0}
 		const pointSize = 3
-		point := tgl.NewCircle(
-			pointSize,
-			point,
-			tgl.WithStyle(pointStyle),
-		)
-		point.Draw(buf)
+		tgl.NewCircle(pointSize, point, tgl.WithStyle(pointStyle)).Draw(buf)
 	}
 
-	tgl.NewPolygon(markers).
-		SetStyle(tgl.Style{Colour: color.RGBA{20, 70, 20, 255}}).
-		Draw(buf)
 }
 
 // Update recalculates the snake's position based on the current velocity and time interval.

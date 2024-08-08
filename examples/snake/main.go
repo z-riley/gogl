@@ -30,7 +30,7 @@ func main() {
 		prevTime = time.Now()
 
 		// React to pressed keys
-		const speed = 700
+		const speed = 1000
 		if win.KeyIsPressed(tgl.KeyW) {
 			snake.velocity = &tgl.Vec{Y: -speed}
 			snake.Update(dt, win.Framebuffer)
