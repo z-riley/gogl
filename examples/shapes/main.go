@@ -39,6 +39,7 @@ func main() {
 		tgl.Vec{X: 300, Y: 100},
 		tgl.WithStyle(tgl.Style{Colour: color.RGBA{255, 0, 0, 1}, Thickness: 30}),
 	)
+	circleButton := tgl.NewButton(circle, func() { fmt.Println("Circle pressed") })
 	triangle := tgl.NewTriangle(
 		tgl.Vec{X: 400, Y: 50},
 		tgl.Vec{X: 580, Y: 120},
@@ -61,6 +62,8 @@ func main() {
 		win.Draw(circle)
 		win.Draw(triangle)
 		win.Draw(txt)
+
+		circleButton.Update(win)
 
 		win.SetTitle(fmt.Sprint(win.MouseLocation()))
 

@@ -150,6 +150,22 @@ func (w *Window) MouseLocation() Vec {
 	return Vec{X: float64(x), Y: float64(y)}
 }
 
+// MouseState represents the state of the mouse buttons.
+type MouseState int
+
+const (
+	NoClick           MouseState = 0
+	LeftClick         MouseState = 1
+	RightClick        MouseState = 4
+	LeftAndRightClick MouseState = 5
+)
+
+// MouseButtonState returns the current state of the mouse buttons.
+func (w *Window) MouseButtonState() MouseState {
+	_, _, s := sdl.GetMouseState()
+	return MouseState(s)
+}
+
 // Width returns the width of the window in pixels.
 func (w *Window) Width() int {
 	width, _ := w.win.GetSize()

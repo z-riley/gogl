@@ -189,6 +189,11 @@ func (c *Circle) Draw(buf *FrameBuffer) {
 	}
 }
 
+// IsHovering returns whether the cursor lies within the circle's perimeter.
+func (c *Circle) IsHovering(cursorPos Vec) bool {
+	return Dist(c.Pos, cursorPos) <= c.Width()/2
+}
+
 // EdgePoint generates a point the point on the circle's perimeter that is theta radians
 // clockwise from the circle's direction.
 func (c *Circle) EdgePoint(theta float64) Vec {
