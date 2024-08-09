@@ -1,13 +1,14 @@
 package turdgl
 
-type button interface {
+// buttonable is an interface for shapes buttons can be built with.
+type buttonable interface {
 	Draw(*FrameBuffer)
 	IsWithin(Vec) bool
 }
 
 // Button can be build on top of shapes to create pressable buttons.
 type Button struct {
-	Shape          button           // the base shape the button is built on
+	Shape          buttonable       // the base shape the button is built on
 	CB             func(MouseState) // the callback function to execute on press
 	Trigger        MouseState       // which mouse button must be used to press the button
 	Behaviour      ButtonBehaviour  // how the button responds to being pressed
@@ -16,7 +17,7 @@ type Button struct {
 
 // NewButton constructs a new button from any shape that satisfies
 // the hoverable interface.
-func NewButton(shape button, callback func(MouseState)) *Button {
+func NewButton(shape buttonable, callback func(MouseState)) *Button {
 	return &Button{
 		Shape:     shape,
 		CB:        callback,

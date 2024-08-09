@@ -34,6 +34,11 @@ func main() {
 		tgl.Vec{X: 50, Y: 50},
 		tgl.WithStyle(tgl.Style{Colour: color.RGBA{255, 0, 0, 1}, Thickness: 2}),
 	)
+	curvedRect := tgl.NewCurvedRect(
+		120, 90, 12,
+		tgl.Vec{X: 50, Y: 200},
+		tgl.WithStyle(tgl.Style{Colour: color.RGBA{240, 170, 90, 1}, Thickness: 8}),
+	)
 
 	// Buttons can be constructed from shapes
 	styleUnpressed := tgl.Style{Colour: color.RGBA{80, 0, 0, 1}, Thickness: 30}
@@ -66,11 +71,18 @@ func main() {
 		win.Framebuffer.SetBackground(color.RGBA{39, 45, 53, 255})
 
 		// Draw shapes
-		win.Draw(rectSolid)
-		win.Draw(rectOutline)
-		win.Draw(triangle)
-		win.Draw(txt)
-		win.Draw(circleButton)
+		for _, shape := range []tgl.Drawable{
+			rectSolid,
+			rectOutline,
+			curvedRect,
+			triangle,
+			txt,
+			circleButton,
+		} {
+			win.Draw(shape)
+		}
+
+		// c.DrawCircleSegment(tgl.Upwards, win.Framebuffer) // TEMP FOR TESTING
 
 		win.SetTitle(fmt.Sprint(win.MouseLocation()))
 

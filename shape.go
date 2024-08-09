@@ -1,7 +1,6 @@
 package turdgl
 
 import (
-	"fmt"
 	"image/color"
 	"math"
 	"reflect"
@@ -62,11 +61,25 @@ func WithStyle(style Style) func(*shape) {
 	}
 }
 
+var (
+	Upwards    = Vec{0, -1}
+	Downwards  = Vec{0, 1}
+	Leftwards  = Vec{-1, 0}
+	Rightwards = Vec{1, 0}
+)
+
+// WithDirection is used in the newShape constructor for setting a shape's starting direction.
+func WithDirection(direction Vec) func(*shape) {
+	return func(s *shape) {
+		s.Direction = direction
+	}
+}
+
 // defaultShape constructs a shape with default parameters.
 func defaultShape(width, height float64, pos Vec) *shape {
 	return &shape{
 		Pos:       pos,
-		Direction: Normalise(Vec{0, -1}), // upwards
+		Direction: Upwards,
 		w:         width,
 		h:         height,
 		style:     DefaultStyle,
@@ -141,7 +154,9 @@ func (r *Rect) Draw(buf *FrameBuffer) {
 			r.w, r.style.Thickness, Vec{r.Pos.X, r.Pos.Y + float64(r.h) - float64(r.style.Thickness)},
 			WithStyle(Style{r.style.Colour, 0}),
 		)
-		left := NewRect(r.style.Thickness, r.h, Vec{r.Pos.X, r.Pos.Y}, WithStyle(Style{r.style.Colour, 0}))
+		left := NewRect(r.style.Thickness, r.h, Vec{r.Pos.X, r.Pos.Y},
+			WithStyle(Style{r.style.Colour, 0}),
+		)
 		right := NewRect(r.style.Thickness, r.h, Vec{r.Pos.X + float64(r.w) - float64(r.style.Thickness), r.Pos.Y},
 			WithStyle(Style{r.style.Colour, 0}),
 		)
@@ -168,10 +183,6 @@ func (c *Circle) IsWithin(pos Vec) bool {
 
 // Draw draws the circle onto the provided frame buffer.
 func (c *Circle) Draw(buf *FrameBuffer) {
-	if c.w != c.h {
-		fmt.Println("w:", c.w, "h:", c.h)
-		panic("circle width and height must match")
-	}
 
 	// Construct bounding box
 	radius := c.w / 2
@@ -193,7 +204,6 @@ func (c *Circle) Draw(buf *FrameBuffer) {
 				// Outline
 				if dist >= float64(radius-c.style.Thickness) && dist <= float64(radius) {
 					buf.SetPixel(jInt, iInt, NewPixel(c.style.Colour))
-
 				}
 			}
 		}
@@ -204,6 +214,106 @@ func (c *Circle) Draw(buf *FrameBuffer) {
 // clockwise from the circle's direction.
 func (c *Circle) EdgePoint(theta float64) Vec {
 	return Add(c.Pos, (c.Direction.SetMag(c.Width() / 2).Rotate(theta)))
+}
+
+// CurvedRect is a rectangle with curved edges, aligned to the top-left.
+type CurvedRect struct {
+	*shape
+	radius float64
+}
+
+// NewCurvedRect constructs a new curved rectangle.
+func NewCurvedRect(width, height, radius float64, pos Vec, opts ...func(*shape)) *CurvedRect {
+	return &CurvedRect{newShape(width, height, pos, opts...), radius}
+}
+
+// IsWithin returns whether a position lies within the curved rectangle's perimeter.
+func (r *CurvedRect) IsWithin(pos Vec) bool {
+	return false
+}
+
+// Draw draws the curved rectangle onto the provided frame buffer.
+func (r *CurvedRect) Draw(buf *FrameBuffer) {
+	thickness := r.style.Thickness
+	if r.style.Thickness == 0 {
+		thickness = math.Max(r.w, r.h) / 2 // for filled shape
+	}
+
+	// Draw each edge as its own rectangle
+	NewRect(
+		r.w-2*(r.radius), thickness, Vec{r.Pos.X + r.radius, r.Pos.Y},
+		WithStyle(Style{r.style.Colour, 0}),
+	).Draw(buf)
+	NewRect(
+		r.w-2*(r.radius), thickness, Vec{r.Pos.X + r.radius, r.Pos.Y + float64(r.h) - float64(thickness)},
+		WithStyle(Style{r.style.Colour, 0}),
+	).Draw(buf)
+	NewRect(
+		thickness, r.h-2*r.radius, Vec{r.Pos.X, r.Pos.Y + r.radius},
+		WithStyle(Style{r.style.Colour, 0}),
+	).Draw(buf)
+	NewRect(
+		thickness, r.h-2*r.radius, Vec{r.Pos.X + float64(r.w) - float64(thickness), r.Pos.Y + r.radius},
+		WithStyle(Style{r.style.Colour, 0}),
+	).Draw(buf)
+
+	// Draw rounded corners
+	drawCorner := func(pos Vec, isCorrectDirection func(Vec, Vec) bool) {
+		// Iterate over every pixel in the bounding box
+		bbox := NewRect(r.w, r.h, Vec{pos.X - (r.radius), pos.Y - (r.radius)})
+		for i := bbox.Pos.X; i <= bbox.Pos.X+bbox.w; i++ {
+			for j := bbox.Pos.Y; j <= bbox.Pos.Y+bbox.h; j++ {
+				// Draw pixel if it's close enough to centre and in the right direction
+				dist := Dist(pos, Vec{i, j})
+				withinCircle := dist >= float64(r.radius-thickness) && dist <= float64(r.radius)
+				if withinCircle && isCorrectDirection(Vec{i, j}, pos) {
+					buf.SetPixel(int(math.Round(j)), int(math.Round(i)), NewPixel(r.style.Colour))
+				}
+			}
+		}
+	}
+	drawCorner(Vec{r.Pos.X + r.radius, r.Pos.Y + r.radius},
+		func(pixelPos, p Vec) bool {
+			return Theta(Rightwards, Sub(pixelPos, p)) >= math.Pi/2
+		})
+	drawCorner(Vec{r.Pos.X + r.w - r.radius, r.Pos.Y + r.radius}, func(pixelPos, p Vec) bool {
+		return Theta(Leftwards, Sub(p, pixelPos)) <= math.Pi/2
+	})
+	drawCorner(Vec{r.Pos.X + r.radius, r.Pos.Y + r.h - r.radius}, func(pixelPos, p Vec) bool {
+		return Theta(Leftwards, Sub(pixelPos, p)) <= math.Pi/2
+	})
+	drawCorner(Vec{r.Pos.X + r.w - r.radius, r.Pos.Y + r.h - r.radius}, func(pixelPos, p Vec) bool {
+		return Theta(Rightwards, Sub(p, pixelPos)) >= math.Pi/2
+	})
+}
+
+func (c *Circle) DrawCircleSegment(limitDir Vec, buf *FrameBuffer) {
+
+	// Construct bounding box
+	radius := c.w / 2
+	bbBoxPos := Vec{c.Pos.X - (radius), c.Pos.Y - (radius)}
+	bbox := NewRect(c.w, c.h, bbBoxPos)
+
+	// Iterate over every pixel in the bounding box
+	for i := bbox.Pos.X; i <= bbox.Pos.X+bbox.w; i++ {
+		for j := bbox.Pos.Y; j <= bbox.Pos.Y+bbox.h; j++ {
+			// Draw pixel if it's close enough to centre
+			dist := Dist(c.Pos, Vec{i, j})
+			jInt, iInt := int(math.Round(j)), int(math.Round(i))
+			if c.style.Thickness == 0 {
+				// Solid fill
+				if dist <= float64(radius) && Theta(c.Direction, Sub(Vec{i, j}, c.Pos)) >= 0 {
+					buf.SetPixel(jInt, iInt, NewPixel(c.style.Colour))
+				}
+			} else {
+				// Outline
+				if dist >= float64(radius-c.style.Thickness) && dist <= float64(radius) &&
+					Theta(c.Direction, Sub(Vec{i, j}, c.Pos)) >= Theta(Upwards, limitDir) {
+					buf.SetPixel(jInt, iInt, NewPixel(color.White))
+				}
+			}
+		}
+	}
 }
 
 // IsColliding returns true if two shapes are colliding.
@@ -261,6 +371,8 @@ func IsColliding(s1, s2 Shape) bool {
 			t := reflect.TypeOf(s2).String()
 			panic("collision detection is unsupported for type: %s" + t)
 		}
+	case *CurvedRect:
+		panic("todo")
 	default:
 		t := reflect.TypeOf(s1).String()
 		panic("collision detection is unsupported for type: %s" + t)
