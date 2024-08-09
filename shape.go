@@ -183,6 +183,10 @@ func (c *Circle) IsWithin(pos Vec) bool {
 
 // Draw draws the circle onto the provided frame buffer.
 func (c *Circle) Draw(buf *FrameBuffer) {
+	thickness := c.style.Thickness
+	if c.style.Thickness == 0 { // for filled shape
+		thickness = c.w / 2
+	}
 
 	// Construct bounding box
 	radius := c.w / 2
@@ -194,17 +198,8 @@ func (c *Circle) Draw(buf *FrameBuffer) {
 		for j := bbox.Pos.Y; j <= bbox.Pos.Y+bbox.h; j++ {
 			// Draw pixel if it's close enough to centre
 			dist := Dist(c.Pos, Vec{i, j})
-			jInt, iInt := int(math.Round(j)), int(math.Round(i))
-			if c.style.Thickness == 0 {
-				// Solid fill
-				if dist <= float64(radius) {
-					buf.SetPixel(jInt, iInt, NewPixel(c.style.Colour))
-				}
-			} else {
-				// Outline
-				if dist >= float64(radius-c.style.Thickness) && dist <= float64(radius) {
-					buf.SetPixel(jInt, iInt, NewPixel(c.style.Colour))
-				}
+			if dist >= float64(radius-thickness) && dist <= float64(radius) {
+				buf.SetPixel(int(math.Round(j)), int(math.Round(i)), NewPixel(c.style.Colour))
 			}
 		}
 	}
@@ -235,8 +230,8 @@ func (r *CurvedRect) IsWithin(pos Vec) bool {
 // Draw draws the curved rectangle onto the provided frame buffer.
 func (r *CurvedRect) Draw(buf *FrameBuffer) {
 	thickness := r.style.Thickness
-	if r.style.Thickness == 0 {
-		thickness = math.Max(r.w, r.h) / 2 // for filled shape
+	if r.style.Thickness == 0 { // for filled shape
+		thickness = math.Max(r.w, r.h) / 2
 	}
 
 	// Draw each edge as its own rectangle
@@ -260,7 +255,7 @@ func (r *CurvedRect) Draw(buf *FrameBuffer) {
 	// Draw rounded corners
 	drawCorner := func(pos Vec, isCorrectDirection func(Vec, Vec) bool) {
 		// Iterate over every pixel in the bounding box
-		bbox := NewRect(r.w, r.h, Vec{pos.X - (r.radius), pos.Y - (r.radius)})
+		bbox := NewRect(2*r.radius, 2*r.radius, Vec{pos.X - (r.radius), pos.Y - (r.radius)})
 		for i := bbox.Pos.X; i <= bbox.Pos.X+bbox.w; i++ {
 			for j := bbox.Pos.Y; j <= bbox.Pos.Y+bbox.h; j++ {
 				// Draw pixel if it's close enough to centre and in the right direction
@@ -272,16 +267,20 @@ func (r *CurvedRect) Draw(buf *FrameBuffer) {
 			}
 		}
 	}
+	// Top left
 	drawCorner(Vec{r.Pos.X + r.radius, r.Pos.Y + r.radius},
 		func(pixelPos, p Vec) bool {
 			return Theta(Rightwards, Sub(pixelPos, p)) >= math.Pi/2
 		})
+	// Top right
 	drawCorner(Vec{r.Pos.X + r.w - r.radius, r.Pos.Y + r.radius}, func(pixelPos, p Vec) bool {
 		return Theta(Leftwards, Sub(p, pixelPos)) <= math.Pi/2
 	})
+	// Bottom left
 	drawCorner(Vec{r.Pos.X + r.radius, r.Pos.Y + r.h - r.radius}, func(pixelPos, p Vec) bool {
 		return Theta(Leftwards, Sub(pixelPos, p)) <= math.Pi/2
 	})
+	// Bottom right
 	drawCorner(Vec{r.Pos.X + r.w - r.radius, r.Pos.Y + r.h - r.radius}, func(pixelPos, p Vec) bool {
 		return Theta(Rightwards, Sub(p, pixelPos)) >= math.Pi/2
 	})
