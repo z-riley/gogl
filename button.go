@@ -2,7 +2,7 @@ package turdgl
 
 type button interface {
 	Draw(*FrameBuffer)
-	IsHovering(Vec) bool
+	IsWithin(Vec) bool
 }
 
 // Button can be build on top of shapes to create pressable buttons.
@@ -44,7 +44,7 @@ const (
 func (b *Button) Update(win *Window) {
 
 	currentMouseState := win.MouseButtonState()
-	hovering := b.Shape.IsHovering(win.MouseLocation())
+	hovering := b.Shape.IsWithin(win.MouseLocation())
 
 	switch b.Behaviour {
 	case OnPress:

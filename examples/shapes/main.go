@@ -40,7 +40,6 @@ func main() {
 	stylePressed := tgl.Style{Colour: color.RGBA{255, 0, 0, 1}, Thickness: 0}
 	c := tgl.NewCircle(100, tgl.Vec{X: 300, Y: 100}, tgl.WithStyle(styleUnpressed))
 	circleButton := tgl.NewButton(c, func(m tgl.MouseState) {
-		fmt.Println(time.Now())
 		if m == tgl.LeftClick {
 			c.SetStyle(stylePressed)
 		} else {

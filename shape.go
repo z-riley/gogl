@@ -117,6 +117,12 @@ func NewRect(width, height float64, pos Vec, opts ...func(*shape)) *Rect {
 	return &Rect{newShape(width, height, pos, opts...)}
 }
 
+// IsWithin returns whether a position lies within the rectangle's perimeter.
+func (r *Rect) IsWithin(pos Vec) bool {
+	return (pos.X >= r.Pos.X) && (pos.X <= r.Pos.X+r.Width()) &&
+		(pos.Y >= r.Pos.Y) && (pos.Y <= r.Pos.Y+r.Height())
+}
+
 // Draw draws the rectangle onto the provided frame buffer.
 func (r *Rect) Draw(buf *FrameBuffer) {
 	if r.style.Thickness == 0 {
@@ -155,6 +161,11 @@ func NewCircle(diameter float64, pos Vec, opts ...func(*shape)) *Circle {
 	return &Circle{newShape(diameter, diameter, pos, opts...)}
 }
 
+// IsWithin returns whether a position lies within the circle's perimeter.
+func (c *Circle) IsWithin(pos Vec) bool {
+	return Dist(c.Pos, pos) <= c.Width()/2
+}
+
 // Draw draws the circle onto the provided frame buffer.
 func (c *Circle) Draw(buf *FrameBuffer) {
 	if c.w != c.h {
@@ -187,11 +198,6 @@ func (c *Circle) Draw(buf *FrameBuffer) {
 			}
 		}
 	}
-}
-
-// IsHovering returns whether the cursor lies within the circle's perimeter.
-func (c *Circle) IsHovering(cursorPos Vec) bool {
-	return Dist(c.Pos, cursorPos) <= c.Width()/2
 }
 
 // EdgePoint generates a point the point on the circle's perimeter that is theta radians
