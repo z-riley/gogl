@@ -2,7 +2,8 @@ package turdgl
 
 import "math"
 
-// Vec represents Cartesian coordinates on a pixel grid.
+// Vec represents Cartesian coordinates on a pixel grid. This may be a vector
+// or just a position in space.
 type Vec struct{ X, Y float64 }
 
 // Mag calculates the magnitude of a vector.

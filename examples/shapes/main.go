@@ -44,13 +44,19 @@ func main() {
 	styleUnpressed := tgl.Style{Colour: color.RGBA{80, 0, 0, 1}, Thickness: 30}
 	stylePressed := tgl.Style{Colour: color.RGBA{255, 0, 0, 1}, Thickness: 0}
 	c := tgl.NewCircle(100, tgl.Vec{X: 300, Y: 100}, tgl.WithStyle(styleUnpressed))
-	circleButton := tgl.NewButton(c, func(m tgl.MouseState) {
+	circleButton := tgl.NewButton(c).SetText("Press me")
+	circleButton.Label.SetSize(16)
+	circleButton.Label.SetColour(color.White)
+	circleButton.SetCallback(func(m tgl.MouseState) {
 		if m == tgl.LeftClick {
 			c.SetStyle(stylePressed)
+			circleButton.SetText("Pressed!")
 		} else {
 			c.SetStyle(styleUnpressed)
+			circleButton.SetText("Press me")
 		}
 	})
+	circleButton.Label.SetAlignment(tgl.AlignBottomCentre)
 
 	// More complex shapes with limited feature sets can also be created
 	triangle := tgl.NewTriangle(
@@ -81,8 +87,6 @@ func main() {
 		} {
 			win.Draw(shape)
 		}
-
-		// c.DrawCircleSegment(tgl.Upwards, win.Framebuffer) // TEMP FOR TESTING
 
 		win.SetTitle(fmt.Sprint(win.MouseLocation()))
 

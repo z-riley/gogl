@@ -9,10 +9,26 @@ import (
 	"github.com/golang/freetype"
 )
 
+// Alignment is used to specify alignment relative to the position coordinate.
+type Alignment int
+
+const (
+	AlignTopLeft = iota
+	AlignTopCentre
+	AlignTopRight
+	AlignCentreLeft
+	AlignCentre
+	AlignCentreRight
+	AlignBottomLeft
+	AlignBottomCentre
+	AlignBottomRight
+)
+
 // Text is a customisable block of text.
 type Text struct {
 	body               string
 	pos                Vec
+	alignment          Alignment
 	colour             color.Color
 	fontPath           string      // .ttf file for generating mask
 	dpi, size, spacing float64     // settings for generating mask
@@ -23,15 +39,16 @@ type Text struct {
 // NewText constructs a new text object with default parameters.
 func NewText(body string, pos Vec) *Text {
 	t := Text{
-		body:     body,
-		pos:      pos,
-		colour:   color.RGBA{0xff, 0, 0, 0xff},
-		fontPath: "../../fonts/luxisr.ttf",
-		dpi:      72,
-		size:     20,
-		spacing:  1.5,
-		width:    1024,
-		height:   768,
+		body:      body,
+		pos:       pos,
+		alignment: AlignTopLeft,
+		colour:    color.RGBA{0xff, 0, 0, 0xff},
+		fontPath:  "../../fonts/luxisr.ttf",
+		dpi:       80,
+		size:      20,
+		spacing:   1.5,
+		width:     1024, // FIXME: this information should come from the window
+		height:    768,  // FIXME: this information should come from the window
 	}
 	if err := t.generateMask(); err != nil {
 		panic(err)
@@ -41,11 +58,42 @@ func NewText(body string, pos Vec) *Text {
 
 // Draw draws the text onto the provided frame buffer.
 func (t *Text) Draw(buf *FrameBuffer) {
-	for i := 0; i < t.mask.Bounds().Max.Y; i++ {
-		for j := 0; j < t.mask.Bounds().Max.X; j++ {
+	// Calculate position offset depending on alignment config
+	textOffset := func() Vec {
+		bbox := t.textBoundry()
+		switch t.alignment {
+		case AlignTopLeft:
+			return Vec{0, 0}
+		case AlignTopCentre:
+			return Vec{-bbox.w / 2, 0}
+		case AlignTopRight:
+			return Vec{-bbox.w, 0}
+		case AlignCentreLeft:
+			return Vec{0, -bbox.h / 2}
+		case AlignCentre:
+			return Vec{-bbox.w / 2, -bbox.h / 2}
+		case AlignCentreRight:
+			return Vec{-bbox.w, 0 - bbox.h/2}
+		case AlignBottomLeft:
+			return Vec{0, -bbox.h}
+		case AlignBottomCentre:
+			return Vec{-bbox.w / 2, -bbox.h}
+		case AlignBottomRight:
+			return Vec{-bbox.w, -bbox.h}
+		default:
+			panic("Unsupported text alignment")
+		}
+	}()
+
+	// Draw pixels to frame buffer
+	for i := 0; i < t.mask.Rect.Dy(); i++ {
+		for j := 0; j < t.mask.Rect.Dx(); j++ {
 			rgba := t.mask.RGBAAt(j, i)
 			if rgba.A > 0 {
-				buf.SetPixel(i, j, NewPixel(rgba))
+				buf.SetPixel(
+					i+int(math.Round(textOffset.Y)), j+int(math.Round(textOffset.X)),
+					NewPixel(rgba),
+				)
 			}
 		}
 	}
@@ -59,6 +107,20 @@ func (t *Text) Text() string {
 // SetText sets the text content.
 func (t *Text) SetText(txt string) *Text {
 	t.body = txt
+	if err := t.generateMask(); err != nil {
+		panic(err)
+	}
+	return t
+}
+
+// Text returns the current alignment.
+func (t *Text) Alignment() Alignment {
+	return t.alignment
+}
+
+// SetText sets the text alignment.
+func (t *Text) SetAlignment(align Alignment) *Text {
+	t.alignment = align
 	if err := t.generateMask(); err != nil {
 		panic(err)
 	}
@@ -179,10 +241,45 @@ func (t *Text) generateMask() error {
 	pt := freetype.Pt(x, y+int(ctx.PointToFixed(t.size)>>6))
 	_, err = ctx.DrawString(t.body, pt)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	pt.Y += ctx.PointToFixed(t.size * t.spacing)
 
 	t.mask = img
 	return nil
+}
+
+// textBoundry returns a bounding box precisely surrounding the rendered text.
+func (t *Text) textBoundry() *Rect {
+	minX := float64(t.mask.Rect.Dx())
+	maxY := 0.0
+	minY := float64(t.mask.Rect.Dy())
+	maxX := 0.0
+	// Iterate over text mask bytes; save min and max X and Y values
+	for y := 0; y < t.mask.Rect.Dy(); y++ {
+		rowLen := t.mask.Rect.Dx()
+		rowStart := 4 * (y * rowLen)
+		rowEnd := 4 * (((y + 1) * rowLen) - 1)
+		row := t.mask.Pix[rowStart:rowEnd]
+		newText := false
+		for x := 3; x < len(row); x += 4 {
+			textFound := row[x] != 0x00
+			if textFound {
+				if !newText {
+					newText = true
+					minY = math.Min(minY, float64(y))
+					minX = math.Min(minX, float64(x/4))
+				}
+				maxY = float64(y)
+				maxX = math.Max(maxX, float64(x/4))
+			}
+		}
+	}
+
+	return NewRect(
+		maxX-minX,
+		maxY-minY,
+		Vec{minX, minY},
+		WithStyle(Style{Colour: color.White, Thickness: 1}),
+	)
 }
