@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/golang/freetype"
+	"github.com/golang/freetype/truetype"
 )
 
 // Alignment is used to specify alignment relative to the position coordinate.
@@ -30,7 +31,7 @@ type Text struct {
 	pos                Vec
 	alignment          Alignment
 	colour             color.Color
-	fontPath           string      // .ttf file for generating mask
+	font               *truetype.Font
 	dpi, size, spacing float64     // settings for generating mask
 	width, height      int         // dimensions of the generated mask
 	mask               *image.RGBA // pixel image to be drawn
@@ -43,12 +44,16 @@ func NewText(body string, pos Vec) *Text {
 		pos:       pos,
 		alignment: AlignTopLeft,
 		colour:    color.RGBA{0xff, 0, 0, 0xff},
-		fontPath:  "../../fonts/luxisr.ttf",
 		dpi:       80,
 		size:      20,
 		spacing:   1.5,
 		width:     1024, // FIXME: this information should come from the window
 		height:    768,  // FIXME: this information should come from the window
+	}
+	var err error
+	t.font, err = loadFont("../../fonts/luxisr.ttf")
+	if err != nil {
+		panic(err)
 	}
 	if err := t.generateMask(); err != nil {
 		panic(err)
@@ -151,16 +156,19 @@ func (t *Text) SetColour(c color.Color) *Text {
 	return t
 }
 
-// FontPath returns the path of the .tff file that was used to generate the text.
-func (t *Text) FontPath() string { return t.fontPath }
-
-// SetFontPath sets the path fo the .tff file that is used to generate the text.
-func (t *Text) SetFontPath(path string) *Text {
-	t.fontPath = path
-	if err := t.generateMask(); err != nil {
-		panic(err)
+// SetPath sets the path fo the .tff file that is used to generate the text.
+func (t *Text) SetFont(path string) error {
+	// Load font into memory
+	var err error
+	t.font, err = loadFont(path)
+	if err != nil {
+		return err
 	}
-	return t
+	// Regenerate text
+	if err := t.generateMask(); err != nil {
+		return err
+	}
+	return nil
 }
 
 // DPI returns the current DPI of the font.
@@ -214,23 +222,11 @@ func (t *Text) SetMaskSize(w, h int) *Text {
 // generateMask regenerates the mask used to generate the font pixel grid.
 // It should be called any time the text settings change.
 func (t *Text) generateMask() error {
-	// Load font into memory.
-	// Note: reading the file each time could be avoided if the *truetype.Font
-	// is stored in cached instead.
-	fontBytes, err := os.ReadFile(t.fontPath)
-	if err != nil {
-		return err
-	}
-	font, err := freetype.ParseFont(fontBytes)
-	if err != nil {
-		return err
-	}
-
 	// Configure settings
 	img := image.NewRGBA(image.Rect(0, 0, t.width, t.height))
 	ctx := freetype.NewContext()
 	ctx.SetDPI(t.dpi)
-	ctx.SetFont(font)
+	ctx.SetFont(t.font)
 	ctx.SetFontSize(t.size)
 	ctx.SetClip(img.Bounds())
 	ctx.SetDst(img)
@@ -239,7 +235,7 @@ func (t *Text) generateMask() error {
 	// Draw the text
 	x, y := int(math.Round(t.pos.X)), int(math.Round(t.pos.Y))
 	pt := freetype.Pt(x, y+int(ctx.PointToFixed(t.size)>>6))
-	_, err = ctx.DrawString(t.body, pt)
+	_, err := ctx.DrawString(t.body, pt)
 	if err != nil {
 		return err
 	}
@@ -255,6 +251,7 @@ func (t *Text) textBoundry() *Rect {
 	maxY := 0.0
 	minY := float64(t.mask.Rect.Dy())
 	maxX := 0.0
+
 	// Iterate over text mask bytes; save min and max X and Y values
 	for y := 0; y < t.mask.Rect.Dy(); y++ {
 		rowLen := t.mask.Rect.Dx()
@@ -282,4 +279,17 @@ func (t *Text) textBoundry() *Rect {
 		Vec{minX, minY},
 		WithStyle(Style{Colour: color.White, Thickness: 1}),
 	)
+}
+
+// loadFont loads a Truetype font from a .tff file.
+func loadFont(path string) (*truetype.Font, error) {
+	fontBytes, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	font, err := freetype.ParseFont(fontBytes)
+	if err != nil {
+		return nil, err
+	}
+	return font, nil
 }
