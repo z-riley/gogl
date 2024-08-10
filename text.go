@@ -14,7 +14,7 @@ import (
 type Alignment int
 
 const (
-	AlignTopLeft = iota
+	AlignTopLeft Alignment = iota
 	AlignTopCentre
 	AlignTopRight
 	AlignCentreLeft
