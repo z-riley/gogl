@@ -47,11 +47,11 @@ func NewText(body string, pos Vec) *Text {
 		dpi:       80,
 		size:      20,
 		spacing:   1.5,
-		width:     1024, // FIXME: this information should come from the window
+		width:     1200, // FIXME: this information should come from the window
 		height:    768,  // FIXME: this information should come from the window
 	}
 	var err error
-	t.font, err = loadFont("../../fonts/luxisr.ttf")
+	t.font, err = loadFont("../../fonts/arial.ttf")
 	if err != nil {
 		panic(err)
 	}
@@ -91,14 +91,17 @@ func (t *Text) Draw(buf *FrameBuffer) {
 	}()
 
 	// Draw pixels to frame buffer
+	// FIXME: Coloured artifacts and edges appear when drawing text onto a coloured background.
+	// green background -> pink artifacts
+	// blue background -> yellow artifacts
+	// red background -> blue artifacts
 	for i := 0; i < t.mask.Rect.Dy(); i++ {
 		for j := 0; j < t.mask.Rect.Dx(); j++ {
 			rgba := t.mask.RGBAAt(j, i)
 			if rgba.A > 0 {
-				buf.SetPixel(
-					i+int(math.Round(textOffset.Y)), j+int(math.Round(textOffset.X)),
-					NewPixel(rgba),
-				)
+				x := j + int(math.Round(textOffset.X))
+				y := i + int(math.Round(textOffset.Y))
+				buf.SetPixel(y, x, NewPixel(rgba))
 			}
 		}
 	}

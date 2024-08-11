@@ -53,28 +53,13 @@ func (f *FrameBuffer) SetPixel(y, x int, p Pixel) {
 	(*f)[y][x] = alphaBlend(p, (*f)[y][x])
 }
 
-// alphaBlend blends a source pixel over a destination pixel using the Porter-Duff
-// source-over operator. This results in the source pixel having a greater impact
-// on the resulting colour.
-func alphaBlend(src, dst Pixel) Pixel {
-	srcR, dstR := uint32(src.R()), uint32(dst.R())
-	srcG, dstG := uint32(src.G()), uint32(dst.G())
-	srcB, dstB := uint32(src.B()), uint32(dst.B())
-	srcA, dstA := uint32(src.A()), uint32(dst.A())
-
-	invSrcA := math.MaxUint8 - srcA
-	a := srcA + (dstA*(invSrcA))/math.MaxUint8
-
-	// Handle fully transparent case
-	if a == 0 {
-		return Pixel{0, 0, 0, 0}
+// addToPixel adds the values of each channel in a pixel to frame buffer.
+func (f *FrameBuffer) addToPixel(y, x int, p Pixel) {
+	if y > f.Height()-1 || y < 0 || x > f.Width()-1 || x < 0 {
+		return
 	}
-
-	r := (srcR*srcA + dstR*dstA*(invSrcA)) / a
-	g := (srcG*srcA + dstG*dstA*(invSrcA)) / a
-	b := (srcB*srcA + dstB*dstA*(invSrcA)) / a
-
-	return Pixel{uint8(r), uint8(g), uint8(b), uint8(a)}
+	// Set pixel value
+	(*f)[y][x] = additionBlend(p, (*f)[y][x])
 }
 
 // Clear sets every pixel in the frame buffer to zero.
@@ -158,5 +143,40 @@ func DrawLine(v1, v2 Vec, buf *FrameBuffer) {
 			err += dx
 			y1 += sy
 		}
+	}
+}
+
+// alphaBlend blends a source pixel over a destination pixel using the Porter-Duff
+// source-over operator. This results in the source pixel having a greater impact
+// on the resulting colour.
+func alphaBlend(src, dst Pixel) Pixel {
+	srcR, dstR := uint32(src.R()), uint32(dst.R())
+	srcG, dstG := uint32(src.G()), uint32(dst.G())
+	srcB, dstB := uint32(src.B()), uint32(dst.B())
+	srcA, dstA := uint32(src.A()), uint32(dst.A())
+
+	invSrcA := math.MaxUint8 - srcA
+	a := srcA + (dstA*(invSrcA))/math.MaxUint8
+
+	// Handle fully transparent case
+	if a == 0 {
+		return Pixel{0, 0, 0, 0}
+	}
+
+	r := (srcR*srcA + dstR*dstA*(invSrcA)) / a
+	g := (srcG*srcA + dstG*dstA*(invSrcA)) / a
+	b := (srcB*srcA + dstB*dstA*(invSrcA)) / a
+
+	return Pixel{uint8(r), uint8(g), uint8(b), uint8(a)}
+}
+
+// additionBlend blends a source pixel with a destination pixel by adding the values
+// of each channel.
+func additionBlend(src, dst Pixel) Pixel {
+	return Pixel{
+		Clamp(dst[0]+src[0], 0, 255),
+		Clamp(dst[1]+src[1], 0, 255),
+		Clamp(dst[2]+src[2], 0, 255),
+		Clamp(dst[3]+src[3], 0, 255),
 	}
 }

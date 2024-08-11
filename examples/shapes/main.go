@@ -34,36 +34,6 @@ func main() {
 		tgl.Vec{X: 50, Y: 50},
 		tgl.WithStyle(tgl.Style{Colour: color.RGBA{255, 0, 0, 255}, Thickness: 2}),
 	)
-	curvedRect := tgl.NewCurvedRect(
-		120, 90, 12,
-		tgl.Vec{X: 50, Y: 200},
-		tgl.WithStyle(tgl.Style{Colour: color.RGBA{240, 170, 90, 255}, Thickness: 8}),
-	)
-	bgRect := tgl.NewRect(
-		120, 90,
-		tgl.Vec{X: 250, Y: 200},
-		tgl.WithStyle(tgl.Style{Colour: color.RGBA{175, 136, 90, 255}, Thickness: 0}),
-	)
-	fgRect := tgl.NewRect(
-		120, 90,
-		tgl.Vec{X: 280, Y: 230},
-		tgl.WithStyle(tgl.Style{Colour: color.RGBA{90, 65, 48, 255}, Thickness: 0}),
-	)
-	circleRed := tgl.NewCircle(
-		100,
-		tgl.Vec{X: 550, Y: 210},
-		tgl.WithStyle(tgl.Style{Colour: color.RGBA{255, 0, 0, 100}}),
-	)
-	circleGreen := tgl.NewCircle(
-		100,
-		tgl.Vec{X: 580, Y: 260},
-		tgl.WithStyle(tgl.Style{Colour: color.RGBA{0, 255, 0, 100}}),
-	)
-	circleBlue := tgl.NewCircle(
-		100,
-		tgl.Vec{X: 520, Y: 260},
-		tgl.WithStyle(tgl.Style{Colour: color.RGBA{0, 0, 255, 100}}),
-	)
 
 	// Buttons can be constructed from shapes
 	styleUnpressed := tgl.Style{Colour: color.RGBA{80, 0, 0, 255}, Thickness: 30}
@@ -91,7 +61,45 @@ func main() {
 	).SetStyle(tgl.Style{Colour: color.RGBA{100, 10, 100, 255}})
 
 	txt := tgl.NewText("Hello there", tgl.Vec{X: 800, Y: 80}).
-		SetColour(color.RGBA{255, 255, 255, 255})
+		SetColour(color.RGBA{255, 255, 255, 255}).
+		SetSize(40)
+
+	curvedRect := tgl.NewCurvedRect(
+		120, 90, 12,
+		tgl.Vec{X: 50, Y: 200},
+		tgl.WithStyle(tgl.Style{Colour: color.RGBA{240, 170, 90, 255}, Thickness: 8}),
+	)
+
+	// Put shapes on the background layer to avoid interactions with other shapes
+	bgRect := tgl.NewRect(
+		120, 90,
+		tgl.Vec{X: 250, Y: 200},
+		tgl.WithStyle(tgl.Style{Colour: color.RGBA{175, 136, 90, 255}, Thickness: 0}),
+	)
+	fgRect := tgl.NewRect(
+		120, 90,
+		tgl.Vec{X: 280, Y: 230},
+		tgl.WithStyle(tgl.Style{Colour: color.RGBA{90, 65, 48, 255}, Thickness: 0}),
+	)
+
+	// Set variable alpha values to blend shape colours
+	circleRed := tgl.NewCircle(
+		100,
+		tgl.Vec{X: 550, Y: 210},
+		tgl.WithStyle(tgl.Style{Colour: color.RGBA{255, 0, 0, 100}}),
+	)
+	circleGreen := tgl.NewCircle(
+		100,
+		tgl.Vec{X: 580, Y: 260},
+		tgl.WithStyle(tgl.Style{Colour: color.RGBA{0, 255, 0, 100}}),
+	)
+	circleBlue := tgl.NewCircle(
+		100,
+		tgl.Vec{X: 520, Y: 260},
+		tgl.WithStyle(tgl.Style{Colour: color.RGBA{0, 0, 255, 100}}),
+	)
+
+	bloom := tgl.NewBloom(tgl.Vec{X: 820, Y: 250})
 
 	// Register window-level keybinds
 	win.RegisterKeybind(tgl.KeyEscape, func() { win.Quit() })
@@ -99,7 +107,7 @@ func main() {
 	win.RegisterKeybind(tgl.KeyE, func() { rectSolid.Move(tgl.Vec{X: 2, Y: 2}) })
 
 	for win.IsRunning() {
-		win.SetBackground(color.RGBA{39, 45, 53, 0})
+		win.SetBackground(color.RGBA{0, 0, 0, 255})
 
 		// Draw foreground shapes
 		for _, shape := range []tgl.Drawable{
@@ -118,11 +126,16 @@ func main() {
 		}
 
 		// Shapes drawn to the background appear behind foreground shapes
-		win.DrawBackground(bgRect)
-
-		win.SetTitle(fmt.Sprint(win.MouseLocation()))
+		for _, shape := range []tgl.Drawable{
+			bgRect,
+			bloom,
+		} {
+			win.Draw(shape)
+		}
 
 		circleButton.Update(win)
+
+		win.SetTitle(fmt.Sprint(win.MouseLocation()))
 		win.Update()
 
 		// Count FPS
