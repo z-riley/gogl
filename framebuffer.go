@@ -13,18 +13,23 @@ type Drawable interface {
 const pxLen = 4
 
 // Pixel represents a pixel, with bytes [red, green, blue, alpha]
-type Pixel [pxLen]byte
+type Pixel [pxLen]uint8
 
 // NewPixel constructs a new coloured pixel.
 func NewPixel(c color.Color) Pixel {
 	r, g, b, a := c.RGBA()
-	return [pxLen]byte{
-		byte(r >> 8),
-		byte(g >> 8),
-		byte(b >> 8),
-		byte(a >> 8),
+	return [pxLen]uint8{
+		uint8(r >> 8),
+		uint8(g >> 8),
+		uint8(b >> 8),
+		uint8(a >> 8),
 	}
 }
+
+func (p Pixel) R() uint8 { return p[0] }
+func (p Pixel) G() uint8 { return p[1] }
+func (p Pixel) B() uint8 { return p[2] }
+func (p Pixel) A() uint8 { return p[3] }
 
 // FrameBuffer is a 2D slice of pixels which represents a screen.
 type FrameBuffer [][]Pixel
@@ -44,12 +49,37 @@ func (f *FrameBuffer) SetPixel(y, x int, p Pixel) {
 	if y > f.Height()-1 || y < 0 || x > f.Width()-1 || x < 0 {
 		return
 	}
-	(*f)[y][x] = p
+	// Set pixel value
+	(*f)[y][x] = alphaBlend(p, (*f)[y][x])
+}
+
+// alphaBlend blends a source pixel over a destination pixel using the Porter-Duff
+// source-over operator. This results in the source pixel having a greater impact
+// on the resulting colour.
+func alphaBlend(src, dst Pixel) Pixel {
+	srcR, dstR := uint32(src.R()), uint32(dst.R())
+	srcG, dstG := uint32(src.G()), uint32(dst.G())
+	srcB, dstB := uint32(src.B()), uint32(dst.B())
+	srcA, dstA := uint32(src.A()), uint32(dst.A())
+
+	invSrcA := math.MaxUint8 - srcA
+	a := srcA + (dstA*(invSrcA))/math.MaxUint8
+
+	// Handle fully transparent case
+	if a == 0 {
+		return Pixel{0, 0, 0, 0}
+	}
+
+	r := (srcR*srcA + dstR*dstA*(invSrcA)) / a
+	g := (srcG*srcA + dstG*dstA*(invSrcA)) / a
+	b := (srcB*srcA + dstB*dstA*(invSrcA)) / a
+
+	return Pixel{uint8(r), uint8(g), uint8(b), uint8(a)}
 }
 
 // Clear sets every pixel in the frame buffer to zero.
 func (f *FrameBuffer) Clear() {
-	f.Fill(color.Black)
+	f.Fill(color.RGBA{0, 0, 0, 0})
 }
 
 // Fill sets every pixel in the frame buffer to the provided colour.

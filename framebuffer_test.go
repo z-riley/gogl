@@ -26,3 +26,12 @@ func TestWithinFrame(t *testing.T) {
 		}
 	}
 }
+
+func BenchmarkAlphaBlend(b *testing.B) {
+	src := Pixel{100, 80, 70, 60}
+	dst := Pixel{200, 160, 140, 60}
+
+	for n := 0; n < b.N; n++ {
+		_ = alphaBlend(src, dst)
+	}
+}

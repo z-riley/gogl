@@ -140,13 +140,13 @@ func (w *Window) Update() {
 		}
 	}
 
-	// Draw shapes to frame buffer. Iterate backwards to simulate a FIFO queue
-	for i := len(w.engine.backgroundDrawQueue) - 1; i >= 0; i-- {
-		w.engine.backgroundDrawQueue[i].Draw(w.Framebuffer)
+	// Draw shapes to frame buffer
+	for _, shape := range w.engine.backgroundDrawQueue {
+		shape.Draw(w.Framebuffer)
 	}
 	w.engine.backgroundDrawQueue = nil
-	for i := len(w.engine.foregroundDrawQueue) - 1; i >= 0; i-- {
-		w.engine.foregroundDrawQueue[i].Draw(w.Framebuffer)
+	for _, shape := range w.engine.foregroundDrawQueue {
+		shape.Draw(w.Framebuffer)
 	}
 	w.engine.foregroundDrawQueue = nil
 
