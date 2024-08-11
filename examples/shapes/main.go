@@ -11,7 +11,7 @@ import (
 func main() {
 	win, err := tgl.NewWindow(tgl.WindowCfg{
 		Title:  "Basic Shapes Example",
-		Width:  1024,
+		Width:  1200,
 		Height: 768,
 	})
 	if err != nil {
@@ -27,22 +27,32 @@ func main() {
 	rectSolid := tgl.NewRect(
 		120, 90,
 		tgl.Vec{X: 50, Y: 50},
-		tgl.WithStyle(tgl.Style{Colour: color.RGBA{0, 0, 255, 1}, Thickness: 0}),
+		tgl.WithStyle(tgl.Style{Colour: color.RGBA{0, 0, 255, 255}, Thickness: 0}),
 	)
 	rectOutline := tgl.NewRect(
 		120, 90,
 		tgl.Vec{X: 50, Y: 50},
-		tgl.WithStyle(tgl.Style{Colour: color.RGBA{255, 0, 0, 1}, Thickness: 2}),
+		tgl.WithStyle(tgl.Style{Colour: color.RGBA{255, 0, 0, 255}, Thickness: 2}),
 	)
 	curvedRect := tgl.NewCurvedRect(
 		120, 90, 12,
 		tgl.Vec{X: 50, Y: 200},
-		tgl.WithStyle(tgl.Style{Colour: color.RGBA{240, 170, 90, 1}, Thickness: 8}),
+		tgl.WithStyle(tgl.Style{Colour: color.RGBA{240, 170, 90, 255}, Thickness: 8}),
+	)
+	bgRect := tgl.NewRect(
+		120, 90,
+		tgl.Vec{X: 250, Y: 200},
+		tgl.WithStyle(tgl.Style{Colour: color.RGBA{90, 65, 48, 255}, Thickness: 8}),
+	)
+	fgRect := tgl.NewRect(
+		120, 90,
+		tgl.Vec{X: 280, Y: 230},
+		tgl.WithStyle(tgl.Style{Colour: color.RGBA{175, 136, 90, 255}, Thickness: 8}),
 	)
 
 	// Buttons can be constructed from shapes
-	styleUnpressed := tgl.Style{Colour: color.RGBA{80, 0, 0, 1}, Thickness: 30}
-	stylePressed := tgl.Style{Colour: color.RGBA{255, 0, 0, 1}, Thickness: 0}
+	styleUnpressed := tgl.Style{Colour: color.RGBA{80, 0, 0, 255}, Thickness: 30}
+	stylePressed := tgl.Style{Colour: color.RGBA{255, 0, 0, 255}, Thickness: 0}
 	c := tgl.NewCircle(100, tgl.Vec{X: 300, Y: 100}, tgl.WithStyle(styleUnpressed))
 	circleButton := tgl.NewButton(c).SetText("Press me")
 	circleButton.Label.SetSize(16)
@@ -76,7 +86,7 @@ func main() {
 	for win.IsRunning() {
 		win.SetBackground(color.RGBA{39, 45, 53, 255})
 
-		// Draw shapes
+		// Draw foreground shapes
 		for _, shape := range []tgl.Drawable{
 			rectSolid,
 			rectOutline,
@@ -84,9 +94,13 @@ func main() {
 			triangle,
 			txt,
 			circleButton,
+			fgRect,
 		} {
 			win.Draw(shape)
 		}
+
+		// Shapes drawn to the background appear behind foreground shapes
+		win.DrawBackground(bgRect)
 
 		win.SetTitle(fmt.Sprint(win.MouseLocation()))
 
