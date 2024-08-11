@@ -16,8 +16,10 @@ type WindowCfg struct {
 
 // engine contains constructs used to execute background logic.
 type engine struct {
-	running bool
-	keys    *keyTracker
+	foregroundDrawQueue []Drawable
+	backgroundDrawQueue []Drawable
+	running             bool
+	keys                *keyTracker
 }
 
 // Window represents OS Window.
@@ -89,6 +91,21 @@ func (w *Window) Destroy() {
 	w.texture.Destroy()
 }
 
+// Draw is an alias for DrawForeground.
+func (w *Window) Draw(s Drawable) {
+	w.engine.foregroundDrawQueue = append(w.engine.foregroundDrawQueue, s)
+}
+
+// DrawForeground draws a shape to the foreground layer.
+func (w *Window) DrawForeground(s Drawable) {
+	w.engine.foregroundDrawQueue = append(w.engine.foregroundDrawQueue, s)
+}
+
+// DrawBackground draws a shape to the background layer.
+func (w *Window) DrawBackground(s Drawable) {
+	w.engine.backgroundDrawQueue = append(w.engine.backgroundDrawQueue, s)
+}
+
 // RegisterKeybind sets a callback function which is triggered every time
 // the Update method is called if the relevant key is pressed.
 func (w *Window) RegisterKeybind(key sdl.Keycode, cb func()) {
@@ -98,29 +115,6 @@ func (w *Window) RegisterKeybind(key sdl.Keycode, cb func()) {
 // KeyIsPressed returns whether a given key is currently pressed.
 func (w *Window) KeyIsPressed(key sdl.Keycode) bool {
 	return w.engine.keys.isPressed(key)
-}
-
-// DrawForeground draws a shape to the foreground.
-func (w *Window) DrawForeground(s Drawable) {
-	w.Draw(s)
-}
-
-// DrawBackground draws a shape to the background.
-func (w *Window) DrawBackground(s Drawable) {
-
-}
-
-// Draw draws a drawable shape to the window's frame buffer.
-func (w *Window) Draw(s Drawable) {
-	/*TODO:
-	Make layers feature:
-	2 layers: background, foreground
-
-	win.SetBackground() --> win.Background.Draw()?
-	win.Draw() --> win.Foreground.Draw()
-	...then make win.Draw() just call win.Foreground.Draw()
-	*/
-	s.Draw(w.Framebuffer)
 }
 
 // SetBackground sets the background to a uniform colour.
@@ -146,7 +140,17 @@ func (w *Window) Update() {
 		}
 	}
 
-	// Present latest frame buffer
+	// Draw shapes to frame buffer. Iterate backwards to simulate a FIFO queue
+	for i := len(w.engine.backgroundDrawQueue) - 1; i >= 0; i-- {
+		w.engine.backgroundDrawQueue[i].Draw(w.Framebuffer)
+	}
+	w.engine.backgroundDrawQueue = nil
+	for i := len(w.engine.foregroundDrawQueue) - 1; i >= 0; i-- {
+		w.engine.foregroundDrawQueue[i].Draw(w.Framebuffer)
+	}
+	w.engine.foregroundDrawQueue = nil
+
+	// Render latest frame buffer to window
 	pixels := w.Framebuffer.Bytes()
 	w.texture.Update(nil, unsafe.Pointer(&pixels[0]), w.config.Width*pxLen)
 	w.renderer.Copy(w.texture, nil, nil)
