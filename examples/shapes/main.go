@@ -74,7 +74,7 @@ func main() {
 	win.RegisterKeybind(tgl.KeyE, func() { rectSolid.Move(tgl.Vec{X: 2, Y: 2}) })
 
 	for win.IsRunning() {
-		win.Framebuffer.SetBackground(color.RGBA{39, 45, 53, 255})
+		win.SetBackground(color.RGBA{39, 45, 53, 255})
 
 		// Draw shapes
 		for _, shape := range []tgl.Drawable{

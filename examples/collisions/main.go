@@ -54,7 +54,7 @@ func main() {
 	})
 
 	for win.IsRunning() {
-		win.Framebuffer.SetBackground(color.Black)
+		win.SetBackground(color.Black)
 
 		// Adjust shape colours to react to collisions
 		rect1.SetStyle(tgl.DefaultStyle)

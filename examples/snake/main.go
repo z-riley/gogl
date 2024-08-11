@@ -49,7 +49,7 @@ func main() {
 		}
 
 		// Set background colour
-		win.Framebuffer.SetBackground(color.RGBA{39, 45, 53, 255})
+		win.SetBackground(color.RGBA{39, 45, 53, 255})
 
 		// Modify frame buffer
 		win.Draw(snake)

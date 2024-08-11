@@ -32,20 +32,10 @@ type FrameBuffer [][]Pixel
 // NewFrameBuffer constructs a new frame buffer with a particular width and height.
 func NewFrameBuffer(width, height int) *FrameBuffer {
 	f := FrameBuffer(make([][]Pixel, height))
-
 	for i := 0; i < len(f); i++ {
 		f[i] = make([]Pixel, width)
 	}
 	return &f
-}
-
-// Clear sets every pixel in the frame buffer to zero.
-func (f *FrameBuffer) Clear() {
-	for i := 0; i < len(*f); i++ {
-		for j := 0; j < len((*f)[0]); j++ {
-			(*f)[i][j] = Pixel{}
-		}
-	}
 }
 
 // SetPixel sets a pixel in the frame buffer. If the requested pixel is out of
@@ -57,8 +47,13 @@ func (f *FrameBuffer) SetPixel(y, x int, p Pixel) {
 	(*f)[y][x] = p
 }
 
-// SetBackground sets every pixel in the frame buffer to the provided colour.
-func (f *FrameBuffer) SetBackground(c color.Color) {
+// Clear sets every pixel in the frame buffer to zero.
+func (f *FrameBuffer) Clear() {
+	f.Fill(color.Black)
+}
+
+// Fill sets every pixel in the frame buffer to the provided colour.
+func (f *FrameBuffer) Fill(c color.Color) {
 	for i := 0; i < len(*f); i++ {
 		for j := 0; j < len((*f)[0]); j++ {
 			(*f)[i][j] = NewPixel(c)

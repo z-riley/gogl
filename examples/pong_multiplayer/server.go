@@ -74,7 +74,7 @@ func pongServer() {
 		}
 
 		// Set background colour
-		win.Framebuffer.SetBackground(color.RGBA{39, 45, 53, 255})
+		win.SetBackground(color.RGBA{39, 45, 53, 255})
 
 		// Draw shapes
 		win.Draw(gameServer.paddleLeft)

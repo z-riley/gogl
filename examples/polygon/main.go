@@ -44,7 +44,7 @@ func main() {
 	win.RegisterKeybind(tgl.KeyE, func() { polygon.Move(tgl.Vec{X: 1, Y: 1}) })
 
 	for win.IsRunning() {
-		win.Framebuffer.SetBackground(color.Black)
+		win.SetBackground(color.Black)
 
 		win.Draw(polygon)
 		win.Draw(txt)

@@ -1,6 +1,7 @@
 package turdgl
 
 import (
+	"image/color"
 	"log"
 	"unsafe"
 
@@ -31,6 +32,7 @@ type Window struct {
 }
 
 // NewWindow constructs a new window according to the provided configuration.
+// TODO: add a note to guide the user to the background/foreground draw methods
 func NewWindow(cfg WindowCfg) (*Window, error) {
 	if err := sdl.Init(sdl.INIT_VIDEO); err != nil {
 		return nil, err
@@ -98,9 +100,32 @@ func (w *Window) KeyIsPressed(key sdl.Keycode) bool {
 	return w.engine.keys.isPressed(key)
 }
 
+// DrawForeground draws a shape to the foreground.
+func (w *Window) DrawForeground(s Drawable) {
+	w.Draw(s)
+}
+
+// DrawBackground draws a shape to the background.
+func (w *Window) DrawBackground(s Drawable) {
+
+}
+
 // Draw draws a drawable shape to the window's frame buffer.
 func (w *Window) Draw(s Drawable) {
+	/*TODO:
+	Make layers feature:
+	2 layers: background, foreground
+
+	win.SetBackground() --> win.Background.Draw()?
+	win.Draw() --> win.Foreground.Draw()
+	...then make win.Draw() just call win.Foreground.Draw()
+	*/
 	s.Draw(w.Framebuffer)
+}
+
+// SetBackground sets the background to a uniform colour.
+func (w *Window) SetBackground(c color.Color) {
+	w.Framebuffer.Fill(c)
 }
 
 func (w *Window) Update() {
