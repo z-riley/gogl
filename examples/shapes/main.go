@@ -135,8 +135,10 @@ func main() {
 
 		circleButton.Update(win)
 
-		win.SetTitle(fmt.Sprint(win.MouseLocation()))
 		win.Update()
+
+		loc := win.MouseLocation()
+		win.SetTitle(fmt.Sprint(loc, win.Framebuffer.GetPixel(int(loc.X), int(loc.Y))))
 
 		// Count FPS
 		frames++

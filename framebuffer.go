@@ -43,6 +43,14 @@ func NewFrameBuffer(width, height int) *FrameBuffer {
 	return &f
 }
 
+// GetPixel returns a copy of the pixel at the specified coordinates.
+func (f *FrameBuffer) GetPixel(x, y int) Pixel {
+	if y > f.Height()-1 || y < 0 || x > f.Width()-1 || x < 0 {
+		panic("GetPixel out of bounds")
+	}
+	return (*f)[y][x]
+}
+
 // SetPixel sets a pixel in the frame buffer. If the requested pixel is out of
 // bounds, nothing happens.
 func (f *FrameBuffer) SetPixel(y, x int, p Pixel) {
@@ -156,16 +164,17 @@ func alphaBlend(src, dst Pixel) Pixel {
 	srcA, dstA := uint32(src.A()), uint32(dst.A())
 
 	invSrcA := math.MaxUint8 - srcA
-	a := srcA + (dstA*(invSrcA))/math.MaxUint8
+	a := Clamp(srcA+(dstA*(invSrcA))/math.MaxUint8, 0, math.MaxUint8)
 
 	// Handle fully transparent case
 	if a == 0 {
 		return Pixel{0, 0, 0, 0}
 	}
 
-	r := (srcR*srcA + dstR*dstA*(invSrcA)) / a
-	g := (srcG*srcA + dstG*dstA*(invSrcA)) / a
-	b := (srcB*srcA + dstB*dstA*(invSrcA)) / a
+	// Clamp to stop overflow
+	r := Clamp((srcR*srcA+dstR*dstA*(invSrcA))/a, 0, math.MaxUint8)
+	g := Clamp((srcG*srcA+dstG*dstA*(invSrcA))/a, 0, math.MaxUint8)
+	b := Clamp((srcB*srcA+dstB*dstA*(invSrcA))/a, 0, math.MaxUint8)
 
 	return Pixel{uint8(r), uint8(g), uint8(b), uint8(a)}
 }
@@ -173,10 +182,16 @@ func alphaBlend(src, dst Pixel) Pixel {
 // additionBlend blends a source pixel with a destination pixel by adding the values
 // of each channel.
 func additionBlend(src, dst Pixel) Pixel {
+	// Clamp to stop overflow
+	r := Clamp(uint16(dst[0])+uint16(src[0]), 0, math.MaxUint8)
+	g := Clamp(uint16(dst[1])+uint16(src[1]), 0, math.MaxUint8)
+	b := Clamp(uint16(dst[2])+uint16(src[2]), 0, math.MaxUint8)
+	a := Clamp(uint16(dst[3])+uint16(src[3]), 0, math.MaxUint8)
+
 	return Pixel{
-		Clamp(dst[0]+src[0], 0, 255),
-		Clamp(dst[1]+src[1], 0, 255),
-		Clamp(dst[2]+src[2], 0, 255),
-		Clamp(dst[3]+src[3], 0, 255),
+		uint8(r),
+		uint8(g),
+		uint8(b),
+		uint8(a),
 	}
 }
