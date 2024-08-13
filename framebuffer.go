@@ -77,23 +77,22 @@ func (f *FrameBuffer) GetPixel(x, y int) Pixel {
 	return (*f)[y][x]
 }
 
-// SetPixel sets a pixel in the frame buffer. If the requested pixel is out of
-// bounds, nothing happens.
-func (f *FrameBuffer) SetPixel(y, x int, p Pixel) {
+// BlendFunc is a function that blends a source pixel with a destination pixel.
+type BlendFunc func(src, dst Pixel) Pixel
+
+// SetPixelFunc sets a pixe in the frame buffer using the specified blend function.
+func (f *FrameBuffer) SetPixelFunc(y, x int, p Pixel, fn BlendFunc) {
 	if y > f.Height()-1 || y < 0 || x > f.Width()-1 || x < 0 {
 		return
 	}
-	// Set pixel value
-	(*f)[y][x] = alphaBlend(p, (*f)[y][x])
+	(*f)[y][x] = fn(p, (*f)[y][x])
 }
 
-// addToPixel adds the values of each channel in a pixel to frame buffer.
-func (f *FrameBuffer) addToPixel(y, x int, p Pixel) {
-	if y > f.Height()-1 || y < 0 || x > f.Width()-1 || x < 0 {
-		return
-	}
-	// Set pixel value
-	(*f)[y][x] = additionBlend(p, (*f)[y][x])
+// SetPixel sets a pixel in the frame buffer. If the requested pixel is out of
+// bounds, nothing happens. The default alpha blending technique is used. To use
+// other blending methods, see SetPixelFunc.
+func (f *FrameBuffer) SetPixel(y, x int, p Pixel) {
+	f.SetPixelFunc(y, x, p, alphaBlend)
 }
 
 // Clear sets every pixel in the frame buffer to zero.
@@ -205,9 +204,9 @@ func alphaBlend(src, dst Pixel) Pixel {
 	return Pixel{uint8(r), uint8(g), uint8(b), uint8(a)}
 }
 
-// additionBlend blends a source pixel with a destination pixel by adding the values
+// additiveBlend blends a source pixel with a destination pixel by adding the values
 // of each channel.
-func additionBlend(src, dst Pixel) Pixel {
+func additiveBlend(src, dst Pixel) Pixel {
 	// Clamp to stop overflow
 	r := Clamp(uint16(dst[0])+uint16(src[0]), 0, math.MaxUint8)
 	g := Clamp(uint16(dst[1])+uint16(src[1]), 0, math.MaxUint8)
