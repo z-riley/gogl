@@ -38,7 +38,7 @@ type Text struct {
 }
 
 // NewText constructs a new text object with default parameters.
-func NewText(body string, pos Vec) *Text {
+func NewText(body string, pos Vec, fontPath string) *Text {
 	t := Text{
 		body:      body,
 		pos:       pos,
@@ -51,7 +51,7 @@ func NewText(body string, pos Vec) *Text {
 		height:    768,  // FIXME: this information should come from the window
 	}
 	var err error
-	t.font, err = loadFont("../../fonts/arial.ttf")
+	t.font, err = loadFont(fontPath)
 	if err != nil {
 		panic(err)
 	}
@@ -159,7 +159,7 @@ func (t *Text) SetColour(c color.Color) *Text {
 	return t
 }
 
-// SetPath sets the path fo the .tff file that is used to generate the text.
+// SetPath sets the path fo the .ttf file that is used to generate the text.
 func (t *Text) SetFont(path string) error {
 	// Load font into memory
 	var err error
@@ -284,7 +284,7 @@ func (t *Text) textBoundry() *Rect {
 	)
 }
 
-// loadFont loads a Truetype font from a .tff file.
+// loadFont loads a Truetype font from a .ttf file.
 func loadFont(path string) (*truetype.Font, error) {
 	fontBytes, err := os.ReadFile(path)
 	if err != nil {

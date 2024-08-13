@@ -39,7 +39,7 @@ func main() {
 	styleUnpressed := tgl.Style{Colour: color.RGBA{80, 0, 0, 255}, Thickness: 30}
 	stylePressed := tgl.Style{Colour: color.RGBA{255, 0, 0, 255}, Thickness: 0, Bloom: 10}
 	c := tgl.NewCircle(100, tgl.Vec{X: 300, Y: 100}, tgl.WithStyle(styleUnpressed))
-	circleButton := tgl.NewButton(c).SetText("Press me")
+	circleButton := tgl.NewButton(c, "../../fonts/arial.ttf").SetText("Press me")
 	circleButton.Label.SetSize(16)
 	circleButton.Label.SetColour(color.White)
 	circleButton.SetCallback(func(m tgl.MouseState) {
@@ -60,7 +60,7 @@ func main() {
 		tgl.Vec{X: 450, Y: 130},
 	).SetStyle(tgl.Style{Colour: color.RGBA{100, 10, 100, 255}})
 
-	txt := tgl.NewText("Hello there", tgl.Vec{X: 800, Y: 80}).
+	txt := tgl.NewText("Hello there", tgl.Vec{X: 800, Y: 80}, "../../fonts/arial.ttf").
 		SetColour(color.RGBA{255, 255, 255, 255}).
 		SetSize(40)
 

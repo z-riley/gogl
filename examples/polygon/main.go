@@ -35,7 +35,7 @@ func main() {
 		{X: 680, Y: 250},
 	}).SetStyle(tgl.Style{Colour: color.RGBA{20, 70, 20, 255}})
 
-	txt := tgl.NewText("Press E to move", tgl.Vec{X: 100, Y: 600}).
+	txt := tgl.NewText("Press E to move", tgl.Vec{X: 100, Y: 600}, "../../fonts/arial.ttf").
 		SetColour(color.RGBA{255, 255, 255, 255})
 
 	// Keybinds

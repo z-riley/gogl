@@ -31,7 +31,7 @@ func main() {
 		X: float64(win.GetConfig().Width / 2),
 		Y: float64(win.GetConfig().Height / 2),
 	})
-	scores := tgl.NewText("0 | 0", tgl.Vec{X: 470, Y: 20}).
+	scores := tgl.NewText("0 | 0", tgl.Vec{X: 470, Y: 20}, "../../fonts/arial.ttf").
 		SetSize(34).SetColour(color.White)
 	setScore := func(left, right int) {
 		scores.SetText(fmt.Sprintf("%d | %d", left, right))

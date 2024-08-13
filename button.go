@@ -23,10 +23,10 @@ type Button struct {
 
 // NewButton constructs a new button from any shape that satisfies
 // the hoverable interface.
-func NewButton(shape buttonable) *Button {
+func NewButton(shape buttonable, fontPath string) *Button {
 	return &Button{
 		Shape:     shape,
-		Label:     NewText("", shape.GetPos()),
+		Label:     NewText("", shape.GetPos(), fontPath),
 		CB:        func(MouseState) { fmt.Println("Warning: Button callback not configured") },
 		Trigger:   LeftClick,
 		Behaviour: OnPressAndRelease,
