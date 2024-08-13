@@ -38,8 +38,8 @@ func Normalise(v Vec) Vec {
 // Dist returns the distance between two vectors, assuming they both
 // originate from the same point.
 func Dist(v1, v2 Vec) float64 {
-	aSqr := math.Pow(v1.X-v2.X, 2)
-	bSqr := math.Pow(v1.Y-v2.Y, 2)
+	aSqr := (v1.X - v2.X) * (v1.X - v2.X)
+	bSqr := (v1.Y - v2.Y) * (v1.Y - v2.Y)
 	return math.Sqrt(aSqr + bSqr)
 }
 

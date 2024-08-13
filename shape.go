@@ -1,6 +1,7 @@
 package turdgl
 
 import (
+	"fmt"
 	"image/color"
 	"math"
 	"reflect"
@@ -223,7 +224,7 @@ func (c *Circle) Draw(buf *FrameBuffer) {
 
 	// Construct bounding box
 	radius := c.w / 2
-	bbBoxPos := Vec{c.Pos.X - (radius), c.Pos.Y - (radius)}
+	bbBoxPos := Vec{c.Pos.X - radius, c.Pos.Y - radius}
 	bbox := NewRect(c.w, c.h, bbBoxPos)
 
 	// Iterate over every pixel in the bounding box
@@ -232,7 +233,66 @@ func (c *Circle) Draw(buf *FrameBuffer) {
 			// Draw pixel if it's close enough to centre
 			dist := Dist(c.Pos, Vec{i, j})
 			if dist >= float64(radius-thickness) && dist <= float64(radius) {
-				buf.SetPixel(int(math.Round(j)), int(math.Round(i)), NewPixel(c.style.Colour))
+				buf.SetPixel(int(j), int(i), NewPixel(c.style.Colour))
+			}
+		}
+	}
+
+	// Draw bloom if it exists
+	if c.style.Bloom > 0 {
+		c.drawBloom(buf)
+	}
+}
+
+// drawBloom draws a bloom effect around a circle.
+func (c *Circle) drawBloom(buf *FrameBuffer) {
+	bloom := float64(c.style.Bloom)
+
+	// Construct bounding box
+	radius := c.w / 2
+	bbBoxPos := Vec{c.Pos.X - radius - bloom, c.Pos.Y - radius - bloom}
+	bbox := NewRect(c.w+bloom+bloom, c.h+bloom+bloom, bbBoxPos)
+
+	// Iterate over every pixel in the bounding box
+	r, g, b, a := RGBA8(c.style.Colour)
+	for i := bbox.Pos.X; i <= bbox.Pos.X+bbox.w; i++ {
+		for j := bbox.Pos.Y; j <= bbox.Pos.Y+bbox.h; j++ {
+			dist := Dist(c.Pos, Vec{i, j})
+			if dist >= float64(radius) && dist <= float64(radius+bloom) {
+				brightness := 1 - ((dist - radius) / bloom)
+				if brightness < 0 {
+					fmt.Println(brightness)
+				}
+				bloomColour := color.RGBA{r, g, b, uint8(brightness * float64(a))}
+				buf.SetPixel(int(j), int(i), NewPixel(bloomColour))
+			}
+		}
+	}
+}
+
+func (c *Circle) DrawCircleSegment(limitDir Vec, buf *FrameBuffer) {
+	// Construct bounding box
+	radius := c.w / 2
+	bbBoxPos := Vec{c.Pos.X - (radius), c.Pos.Y - (radius)}
+	bbox := NewRect(c.w, c.h, bbBoxPos)
+
+	// Iterate over every pixel in the bounding box
+	for i := bbox.Pos.X; i <= bbox.Pos.X+bbox.w; i++ {
+		for j := bbox.Pos.Y; j <= bbox.Pos.Y+bbox.h; j++ {
+			// Draw pixel if it's close enough to centre
+			dist := Dist(c.Pos, Vec{i, j})
+			jInt, iInt := int(math.Round(j)), int(math.Round(i))
+			if c.style.Thickness == 0 {
+				// Solid fill
+				if dist <= float64(radius) && Theta(c.Direction, Sub(Vec{i, j}, c.Pos)) >= 0 {
+					buf.SetPixel(jInt, iInt, NewPixel(c.style.Colour))
+				}
+			} else {
+				// Outline
+				if dist >= float64(radius-c.style.Thickness) && dist <= float64(radius) &&
+					Theta(c.Direction, Sub(Vec{i, j}, c.Pos)) >= Theta(Upwards, limitDir) {
+					buf.SetPixel(jInt, iInt, NewPixel(color.White))
+				}
 			}
 		}
 	}
@@ -317,35 +377,6 @@ func (r *CurvedRect) Draw(buf *FrameBuffer) {
 	drawCorner(Vec{r.Pos.X + r.w - r.radius, r.Pos.Y + r.h - r.radius}, func(pixelPos, p Vec) bool {
 		return Theta(Rightwards, Sub(p, pixelPos)) >= math.Pi/2
 	})
-}
-
-func (c *Circle) DrawCircleSegment(limitDir Vec, buf *FrameBuffer) {
-
-	// Construct bounding box
-	radius := c.w / 2
-	bbBoxPos := Vec{c.Pos.X - (radius), c.Pos.Y - (radius)}
-	bbox := NewRect(c.w, c.h, bbBoxPos)
-
-	// Iterate over every pixel in the bounding box
-	for i := bbox.Pos.X; i <= bbox.Pos.X+bbox.w; i++ {
-		for j := bbox.Pos.Y; j <= bbox.Pos.Y+bbox.h; j++ {
-			// Draw pixel if it's close enough to centre
-			dist := Dist(c.Pos, Vec{i, j})
-			jInt, iInt := int(math.Round(j)), int(math.Round(i))
-			if c.style.Thickness == 0 {
-				// Solid fill
-				if dist <= float64(radius) && Theta(c.Direction, Sub(Vec{i, j}, c.Pos)) >= 0 {
-					buf.SetPixel(jInt, iInt, NewPixel(c.style.Colour))
-				}
-			} else {
-				// Outline
-				if dist >= float64(radius-c.style.Thickness) && dist <= float64(radius) &&
-					Theta(c.Direction, Sub(Vec{i, j}, c.Pos)) >= Theta(Upwards, limitDir) {
-					buf.SetPixel(jInt, iInt, NewPixel(color.White))
-				}
-			}
-		}
-	}
 }
 
 // IsColliding returns true if two shapes are colliding.

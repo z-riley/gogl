@@ -27,7 +27,7 @@ func main() {
 	rectSolid := tgl.NewRect(
 		120, 90,
 		tgl.Vec{X: 50, Y: 50},
-		tgl.WithStyle(tgl.Style{Colour: color.RGBA{0, 0, 255, 255}, Thickness: 0, Bloom: 50}),
+		tgl.WithStyle(tgl.Style{Colour: color.RGBA{0, 0, 255, 255}, Thickness: 0, Bloom: 30}),
 	)
 	rectOutline := tgl.NewRect(
 		120, 90,
@@ -37,7 +37,7 @@ func main() {
 
 	// Buttons can be constructed from shapes
 	styleUnpressed := tgl.Style{Colour: color.RGBA{80, 0, 0, 255}, Thickness: 30}
-	stylePressed := tgl.Style{Colour: color.RGBA{255, 0, 0, 255}, Thickness: 0, Bloom: 20}
+	stylePressed := tgl.Style{Colour: color.RGBA{255, 0, 0, 255}, Thickness: 0, Bloom: 10}
 	c := tgl.NewCircle(100, tgl.Vec{X: 300, Y: 100}, tgl.WithStyle(styleUnpressed))
 	circleButton := tgl.NewButton(c).SetText("Press me")
 	circleButton.Label.SetSize(16)
