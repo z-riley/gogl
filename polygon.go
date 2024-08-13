@@ -25,7 +25,6 @@ func NewPolygon(vecs []Vec) *Polygon {
 		vertices: vecs,
 		style:    DefaultStyle,
 		segments: triangulatePoly2Tri(vecs),
-		// segments: triangulateEarClipping(vecs), // homemade triangulation function
 	}
 }
 
@@ -36,7 +35,7 @@ func (p *Polygon) Move(mov Vec) {
 		p.vertices[i] = Add(p.vertices[i], mov)
 	}
 	// Refresh the triangle segments
-	p.segments = triangulateEarClipping(p.vertices)
+	p.segments = triangulatePoly2Tri(p.vertices)
 }
 
 // Style returns a copy of the polygon's style.
@@ -108,22 +107,6 @@ func triangulateEarClipping(vecs []Vec) []*Triangle {
 		// FIXME: this branch is sometimes not always triggered enough times, meaning the loop
 		// would run forever without the emergency exit. This is because the algorithm fails to
 		// triangulate complex geometry properly. Run examples/snake/main.go to trigger the bug.
-		//
-		// Options to remediate (best to worst):
-		// - Use an existing Go library:
-		//   a) https://github.com/ByteArena/poly2tri-go
-		// - Use an existing C tesselation library. For example, make a Go bindings for:
-		//   a) https://github.com/memononen/libtess2/blob/master/Include/tesselator.h
-		//   b) https://github.com/mbebenita/GLUTesselator/tree/master/src
-		//   c) https://github.com/libigl/triangle
-		// - Port an entire library to Go:
-		//   a) https://github.com/brendankenny/libtess.js
-		//
-		// Impracticable options:
-		// - Go library https://github.com/rclancey/go-earcut gives incorrect output
-		// - Improve the turdgl triangulation algorithm --> probably too difficult
-		// - Use OpenGL bindings --> won't give pixel grid values back
-		//
 		if getVertex(r).isEar {
 			// Save triangle
 			segments = append(segments, NewTriangle(
