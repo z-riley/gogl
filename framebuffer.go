@@ -92,7 +92,7 @@ func (f *FrameBuffer) SetPixelFunc(y, x int, p Pixel, fn BlendFunc) {
 // bounds, nothing happens. The default alpha blending technique is used. To use
 // other blending methods, see SetPixelFunc.
 func (f *FrameBuffer) SetPixel(y, x int, p Pixel) {
-	f.SetPixelFunc(y, x, p, alphaBlend)
+	f.SetPixelFunc(y, x, p, AlphaBlend)
 }
 
 // Clear sets every pixel in the frame buffer to zero.
@@ -179,44 +179,50 @@ func DrawLine(v1, v2 Vec, buf *FrameBuffer) {
 	}
 }
 
-// alphaBlend blends a source pixel over a destination pixel using the Porter-Duff
+// AlphaBlend blends a source pixel over a destination pixel using the Porter-Duff
 // source-over operator. This results in the source pixel having a greater impact
 // on the resulting colour.
-func alphaBlend(src, dst Pixel) Pixel {
+func AlphaBlend(src, dst Pixel) Pixel {
 	srcR, dstR := uint32(src.R()), uint32(dst.R())
 	srcG, dstG := uint32(src.G()), uint32(dst.G())
 	srcB, dstB := uint32(src.B()), uint32(dst.B())
 	srcA, dstA := uint32(src.A()), uint32(dst.A())
 
 	invSrcA := math.MaxUint8 - srcA
-	a := Clamp(srcA+(dstA*(invSrcA))/math.MaxUint8, 0, math.MaxUint8)
+
+	// Resulting alpha calculation (Porter-Duff source-over)
+	a := Clamp(srcA+(dstA*invSrcA)/math.MaxUint8, 0, math.MaxUint8)
 
 	// Handle fully transparent case
 	if a == 0 {
 		return Pixel{0, 0, 0, 0}
 	}
 
-	// Clamp to stop overflow
-	r := Clamp((srcR*srcA+dstR*dstA*(invSrcA))/a, 0, math.MaxUint8)
-	g := Clamp((srcG*srcA+dstG*dstA*(invSrcA))/a, 0, math.MaxUint8)
-	b := Clamp((srcB*srcA+dstB*dstA*(invSrcA))/a, 0, math.MaxUint8)
+	// Resulting color channels calculation
+	r := (srcR*srcA + dstR*dstA*invSrcA/math.MaxUint8) / a
+	g := (srcG*srcA + dstG*dstA*invSrcA/math.MaxUint8) / a
+	b := (srcB*srcA + dstB*dstA*invSrcA/math.MaxUint8) / a
+
+	// Clamp the resulting colors to avoid overflow
+	r = Clamp(r, 0, math.MaxUint8)
+	g = Clamp(g, 0, math.MaxUint8)
+	b = Clamp(b, 0, math.MaxUint8)
 
 	return Pixel{uint8(r), uint8(g), uint8(b), uint8(a)}
 }
 
-// additiveBlend blends a source pixel with a destination pixel by adding the values
+// AdditiveBlend blends a source pixel with a destination pixel by adding the values
 // of each channel.
-func additiveBlend(src, dst Pixel) Pixel {
+func AdditiveBlend(src, dst Pixel) Pixel {
 	// Clamp to stop overflow
 	r := Clamp(uint16(dst[0])+uint16(src[0]), 0, math.MaxUint8)
 	g := Clamp(uint16(dst[1])+uint16(src[1]), 0, math.MaxUint8)
 	b := Clamp(uint16(dst[2])+uint16(src[2]), 0, math.MaxUint8)
-	a := Clamp(uint16(dst[3])+uint16(src[3]), 0, math.MaxUint8)
 
 	return Pixel{
 		uint8(r),
 		uint8(g),
 		uint8(b),
-		uint8(a),
+		src[3],
 	}
 }

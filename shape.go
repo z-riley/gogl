@@ -157,47 +157,36 @@ func (r *Rect) Draw(buf *FrameBuffer) {
 		}
 	} else {
 		// Draw each edge as its own rectangle
-		top := NewRect(r.w, r.style.Thickness, r.Pos,
+		NewRect(r.w, r.style.Thickness, r.Pos,
 			WithStyle(Style{r.style.Colour, 0, 0}),
-		)
-		bottom := NewRect(
+		).Draw(buf)
+		NewRect(
 			r.w, r.style.Thickness, Vec{r.Pos.X, r.Pos.Y + float64(r.h) - float64(r.style.Thickness)},
 			WithStyle(Style{r.style.Colour, 0, 0}),
-		)
-		left := NewRect(r.style.Thickness, r.h, Vec{r.Pos.X, r.Pos.Y},
+		).Draw(buf)
+		NewRect(r.style.Thickness, r.h, Vec{r.Pos.X, r.Pos.Y},
 			WithStyle(Style{r.style.Colour, 0, 0}),
-		)
-		right := NewRect(r.style.Thickness, r.h, Vec{r.Pos.X + float64(r.w) - float64(r.style.Thickness), r.Pos.Y},
+		).Draw(buf)
+		NewRect(r.style.Thickness, r.h, Vec{r.Pos.X + float64(r.w) - float64(r.style.Thickness), r.Pos.Y},
 			WithStyle(Style{r.style.Colour, 0, 0}),
-		)
-
-		top.Draw(buf)
-		bottom.Draw(buf)
-		left.Draw(buf)
-		right.Draw(buf)
+		).Draw(buf)
 	}
 }
 
 // drawBloom draws a bloom effect around a rectangle.
 func (r *Rect) drawBloom(buf *FrameBuffer) {
-	// Bloom by borders
+	// Draw borders around the rectangle of increasing size and decreasing intensity.
 	for rad := 1; rad <= r.style.Bloom; rad++ {
 		x, y := int(math.Round(r.Pos.X)), int(math.Round(r.Pos.Y))
-		w, h := int(math.Round(r.w)), int(math.Round(r.h))
 		topLeftX := x - rad
 		topLeftY := y - rad
-		topRightX := x + w + rad
-		bottomLeftY := y + h + rad
+		topRightX := x + int(math.Round(r.w)) + rad
+		bottomLeftY := y + int(math.Round(r.h)) + rad
 
 		// Calculate colour from distance away from shape body
 		brightness := 1 - (float64(rad) / float64(r.style.Bloom))
 		r, g, b, a := RGBA8(r.style.Colour)
-		bloomColour := color.RGBA{
-			uint8(brightness * float64(r)),
-			uint8(brightness * float64(g)),
-			uint8(brightness * float64(b)),
-			uint8(brightness * float64(a)),
-		}
+		bloomColour := color.RGBA{r, g, b, uint8(brightness * float64(a))}
 
 		// Draw top and bottom bloom
 		for i := topLeftX + 1; i < topRightX; i++ {

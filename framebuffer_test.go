@@ -32,6 +32,6 @@ func BenchmarkAlphaBlend(b *testing.B) {
 	dst := Pixel{200, 160, 140, 60}
 
 	for n := 0; n < b.N; n++ {
-		_ = alphaBlend(src, dst)
+		_ = AlphaBlend(src, dst)
 	}
 }

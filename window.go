@@ -119,7 +119,9 @@ func (w *Window) KeyIsPressed(key sdl.Keycode) bool {
 
 // SetBackground sets the background to a uniform colour.
 func (w *Window) SetBackground(c color.Color) {
-	w.Framebuffer.Fill(c)
+	// Alpha must be 255 for bloom effects to work
+	r, g, b, _ := RGBA8(c)
+	w.Framebuffer.Fill(color.RGBA{r, g, b, 255})
 }
 
 func (w *Window) Update() {
