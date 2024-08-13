@@ -6,8 +6,10 @@ import (
 	"math"
 	"os"
 
-	"github.com/golang/freetype"
-	"github.com/golang/freetype/truetype"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/opentype"
+	"golang.org/x/image/font/sfnt"
+	"golang.org/x/image/math/fixed"
 )
 
 // Alignment is used to specify alignment relative to the position coordinate.
@@ -31,7 +33,7 @@ type Text struct {
 	pos                Vec
 	alignment          Alignment
 	colour             color.Color
-	font               *truetype.Font
+	font               *sfnt.Font
 	dpi, size, spacing float64     // settings for generating mask
 	width, height      int         // dimensions of the generated mask
 	mask               *image.RGBA // pixel image to be drawn
@@ -225,26 +227,26 @@ func (t *Text) SetMaskSize(w, h int) *Text {
 // generateMask regenerates the mask used to generate the font pixel grid.
 // It should be called any time the text settings change.
 func (t *Text) generateMask() error {
-	// Configure settings
-	img := image.NewRGBA(image.Rect(0, 0, t.width, t.height))
-	ctx := freetype.NewContext()
-	ctx.SetDPI(t.dpi)
-	ctx.SetFont(t.font)
-	ctx.SetFontSize(t.size)
-	ctx.SetClip(img.Bounds())
-	ctx.SetDst(img)
-	ctx.SetSrc(image.NewUniform(t.colour))
-
-	// Draw the text
-	x, y := int(math.Round(t.pos.X)), int(math.Round(t.pos.Y))
-	pt := freetype.Pt(x, y+int(ctx.PointToFixed(t.size)>>6))
-	_, err := ctx.DrawString(t.body, pt)
+	face, err := opentype.NewFace(t.font, &opentype.FaceOptions{
+		Size:    t.size,
+		DPI:     t.dpi,
+		Hinting: font.HintingFull,
+	})
 	if err != nil {
 		return err
 	}
-	pt.Y += ctx.PointToFixed(t.size * t.spacing)
+	defer face.Close()
 
+	img := image.NewRGBA(image.Rect(0, 0, t.width, t.height))
+	d := &font.Drawer{
+		Dst:  img,
+		Src:  image.NewUniform(t.colour),
+		Face: face,
+		Dot:  fixed.P(int(t.pos.X), int(t.pos.Y)), // Set the position (x, y)
+	}
+	d.DrawString(t.body)
 	t.mask = img
+
 	return nil
 }
 
@@ -284,13 +286,14 @@ func (t *Text) textBoundry() *Rect {
 	)
 }
 
-// loadFont loads a Truetype font from a .ttf file.
-func loadFont(path string) (*truetype.Font, error) {
+// loadFont loads an OpenType font from a .ttf file.
+func loadFont(path string) (*sfnt.Font, error) {
 	fontBytes, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
-	font, err := freetype.ParseFont(fontBytes)
+	font, err := opentype.Parse(fontBytes)
+	// font, err := freetype.ParseFont(fontBytes)
 	if err != nil {
 		return nil, err
 	}

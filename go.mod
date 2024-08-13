@@ -5,10 +5,10 @@ go 1.22
 require (
 	github.com/alexflint/go-arg v1.5.1
 	github.com/charmbracelet/log v0.4.0
-	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/netgusto/poly2tri-go v0.0.0-20170716161910-d102ad91854f
 	github.com/veandco/go-sdl2 v0.4.40
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
+	golang.org/x/image v0.18.0
 )
 
 require (
@@ -22,6 +22,6 @@ require (
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
-	golang.org/x/image v0.18.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
+	golang.org/x/text v0.16.0 // indirect
 )

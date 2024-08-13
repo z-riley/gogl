@@ -60,7 +60,7 @@ func main() {
 		tgl.Vec{X: 450, Y: 130},
 	).SetStyle(tgl.Style{Colour: color.RGBA{100, 10, 100, 255}})
 
-	txt := tgl.NewText("Hello there", tgl.Vec{X: 800, Y: 80}, "../../fonts/arial.ttf").
+	txt := tgl.NewText("Hello there", tgl.Vec{X: 800, Y: 80}, "../../fonts/opensans.ttf").
 		SetColour(color.RGBA{255, 255, 255, 255}).
 		SetSize(40)
 
