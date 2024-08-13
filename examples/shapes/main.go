@@ -27,7 +27,7 @@ func main() {
 	rectSolid := tgl.NewRect(
 		120, 90,
 		tgl.Vec{X: 50, Y: 50},
-		tgl.WithStyle(tgl.Style{Colour: color.RGBA{0, 0, 255, 255}, Thickness: 0}),
+		tgl.WithStyle(tgl.Style{Colour: color.RGBA{0, 0, 255, 255}, Thickness: 0, Bloom: 50}),
 	)
 	rectOutline := tgl.NewRect(
 		120, 90,
@@ -99,8 +99,6 @@ func main() {
 		tgl.WithStyle(tgl.Style{Colour: color.RGBA{0, 0, 255, 100}}),
 	)
 
-	bloom := tgl.NewBloom(tgl.Vec{X: 820, Y: 250})
-
 	// Register window-level keybinds
 	win.RegisterKeybind(tgl.KeyEscape, func() { win.Quit() })
 	win.RegisterKeybind(tgl.KeyLCtrl, func() { win.Quit() })
@@ -128,7 +126,6 @@ func main() {
 		// Shapes drawn to the background appear behind foreground shapes
 		for _, shape := range []tgl.Drawable{
 			bgRect,
-			bloom,
 		} {
 			win.Draw(shape)
 		}

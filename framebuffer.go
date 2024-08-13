@@ -17,19 +17,45 @@ type Pixel [pxLen]uint8
 
 // NewPixel constructs a new coloured pixel.
 func NewPixel(c color.Color) Pixel {
-	r, g, b, a := c.RGBA()
-	return [pxLen]uint8{
-		uint8(r >> 8),
-		uint8(g >> 8),
-		uint8(b >> 8),
-		uint8(a >> 8),
-	}
+	r, g, b, a := RGBA8(c)
+	return [pxLen]uint8{r, g, b, a}
 }
 
+// R returns the value of the red channel.
 func (p Pixel) R() uint8 { return p[0] }
+
+// G returns the value of the green channel.
 func (p Pixel) G() uint8 { return p[1] }
+
+// B returns the value of the blue channel.
 func (p Pixel) B() uint8 { return p[2] }
+
+// A returns the value of the alpha channel.
 func (p Pixel) A() uint8 { return p[3] }
+
+// average returns the average value of any number of pixels.
+func average(pixels ...Pixel) Pixel {
+	if len(pixels) == 0 {
+		return Pixel{}
+	} else if len(pixels) == 1 {
+		return pixels[0]
+	}
+
+	var sumR, sumG, sumB, sumA int
+	for _, p := range pixels {
+		sumR += int(p.R())
+		sumG += int(p.G())
+		sumB += int(p.B())
+		sumA += int(p.A())
+	}
+
+	return Pixel{
+		uint8(sumR / len(pixels)),
+		uint8(sumG / len(pixels)),
+		uint8(sumB / len(pixels)),
+		uint8(sumA / len(pixels)),
+	}
+}
 
 // FrameBuffer is a 2D slice of pixels which represents a screen.
 type FrameBuffer [][]Pixel

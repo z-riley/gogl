@@ -12,9 +12,14 @@ import (
 type Style struct {
 	Colour    color.Color
 	Thickness float64 // leave 0 for solid
+	Bloom     int     // bloom reach, in pixels
 }
 
-var DefaultStyle = Style{Colour: color.RGBA{0xff, 0xff, 0xff, 0xff}, Thickness: 0}
+var DefaultStyle = Style{
+	Colour:    color.RGBA{0xff, 0xff, 0xff, 0xff},
+	Thickness: 0,
+	Bloom:     0,
+}
 
 // RandomStyle generates a style of random colour and thickness 0.
 func RandomStyle() Style {
@@ -139,32 +144,71 @@ func (r *Rect) IsWithin(pos Vec) bool {
 // Draw draws the rectangle onto the provided frame buffer.
 func (r *Rect) Draw(buf *FrameBuffer) {
 	if r.style.Thickness == 0 {
-		for i := 0; i <= int(math.Round(r.w)); i++ {
-			for j := 0; j <= int(math.Round(r.h)); j++ {
+		width := int(math.Round(r.w))
+		height := int(math.Round(r.h))
+		for i := 0; i <= width; i++ {
+			for j := 0; j <= height; j++ {
 				xInt, yInt := int(math.Round(r.Pos.X)), int(math.Round(r.Pos.Y))
 				buf.SetPixel(yInt+j, xInt+i, NewPixel(r.style.Colour))
 			}
 		}
+		if r.style.Bloom > 0 {
+			r.drawBloom(buf)
+		}
 	} else {
 		// Draw each edge as its own rectangle
 		top := NewRect(r.w, r.style.Thickness, r.Pos,
-			WithStyle(Style{r.style.Colour, 0}),
+			WithStyle(Style{r.style.Colour, 0, 0}),
 		)
 		bottom := NewRect(
 			r.w, r.style.Thickness, Vec{r.Pos.X, r.Pos.Y + float64(r.h) - float64(r.style.Thickness)},
-			WithStyle(Style{r.style.Colour, 0}),
+			WithStyle(Style{r.style.Colour, 0, 0}),
 		)
 		left := NewRect(r.style.Thickness, r.h, Vec{r.Pos.X, r.Pos.Y},
-			WithStyle(Style{r.style.Colour, 0}),
+			WithStyle(Style{r.style.Colour, 0, 0}),
 		)
 		right := NewRect(r.style.Thickness, r.h, Vec{r.Pos.X + float64(r.w) - float64(r.style.Thickness), r.Pos.Y},
-			WithStyle(Style{r.style.Colour, 0}),
+			WithStyle(Style{r.style.Colour, 0, 0}),
 		)
 
 		top.Draw(buf)
 		bottom.Draw(buf)
 		left.Draw(buf)
 		right.Draw(buf)
+	}
+}
+
+// drawBloom draws a bloom effect around a rectangle.
+func (r *Rect) drawBloom(buf *FrameBuffer) {
+	// Bloom by borders
+	for rad := 1; rad <= r.style.Bloom; rad++ {
+		x, y := int(math.Round(r.Pos.X)), int(math.Round(r.Pos.Y))
+		w, h := int(math.Round(r.w)), int(math.Round(r.h))
+		topLeftX := x - rad
+		topLeftY := y - rad
+		topRightX := x + w + rad
+		bottomLeftY := y + h + rad
+
+		// Calculate colour from distance away from shape body
+		brightness := 1 - (float64(rad) / float64(r.style.Bloom))
+		r, g, b, a := RGBA8(r.style.Colour)
+		bloomColour := color.RGBA{
+			uint8(brightness * float64(r)),
+			uint8(brightness * float64(g)),
+			uint8(brightness * float64(b)),
+			uint8(brightness * float64(a)),
+		}
+
+		// Draw top and bottom bloom
+		for i := topLeftX + 1; i < topRightX; i++ {
+			buf.SetPixel(topLeftY, i, NewPixel(bloomColour))
+			buf.SetPixel(bottomLeftY, i, NewPixel(bloomColour))
+		}
+		// Draw left and right bloom
+		for i := topLeftY; i <= bottomLeftY; i++ {
+			buf.SetPixel(i, topLeftX, NewPixel(bloomColour))
+			buf.SetPixel(i, topRightX, NewPixel(bloomColour))
+		}
 	}
 }
 
@@ -237,19 +281,19 @@ func (r *CurvedRect) Draw(buf *FrameBuffer) {
 	// Draw each edge as its own rectangle
 	NewRect(
 		r.w-2*(r.radius), thickness, Vec{r.Pos.X + r.radius, r.Pos.Y},
-		WithStyle(Style{r.style.Colour, 0}),
+		WithStyle(Style{r.style.Colour, 0, 0}),
 	).Draw(buf)
 	NewRect(
 		r.w-2*(r.radius), thickness, Vec{r.Pos.X + r.radius, r.Pos.Y + float64(r.h) - float64(thickness)},
-		WithStyle(Style{r.style.Colour, 0}),
+		WithStyle(Style{r.style.Colour, 0, 0}),
 	).Draw(buf)
 	NewRect(
 		thickness, r.h-2*r.radius, Vec{r.Pos.X, r.Pos.Y + r.radius},
-		WithStyle(Style{r.style.Colour, 0}),
+		WithStyle(Style{r.style.Colour, 0, 0}),
 	).Draw(buf)
 	NewRect(
 		thickness, r.h-2*r.radius, Vec{r.Pos.X + float64(r.w) - float64(thickness), r.Pos.Y + r.radius},
-		WithStyle(Style{r.style.Colour, 0}),
+		WithStyle(Style{r.style.Colour, 0, 0}),
 	).Draw(buf)
 
 	// Draw rounded corners
