@@ -49,7 +49,7 @@ func main() {
 		case m == tgl.LeftClick:
 			c.SetStyle(stylePressed)
 			circleButton.SetText("Pressed!")
-		case circleButton.IsHovering(win):
+		case circleButton.IsHovering():
 			c.SetStyle(styleHover)
 		default:
 			c.SetStyle(styleUnpressed)
@@ -65,7 +65,7 @@ func main() {
 		tgl.Vec{X: 450, Y: 130},
 	).SetStyle(tgl.Style{Colour: color.RGBA{100, 10, 100, 255}})
 
-	txt := tgl.NewText("Hello there", tgl.Vec{X: 800, Y: 80}, "../../fonts/opensans.ttf").
+	txt := tgl.NewText("Hello there", tgl.Vec{X: 800, Y: 80}, "../../fonts/arial.ttf").
 		SetColour(color.RGBA{255, 255, 255, 255}).
 		SetSize(40)
 

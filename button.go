@@ -18,6 +18,7 @@ type Button struct {
 	Behaviour ButtonBehaviour  // how the button responds to being pressed
 
 	prevMouseState MouseState
+	prevMouseLoc   Vec
 	prevLabel      string
 }
 
@@ -69,7 +70,7 @@ const (
 func (b *Button) Update(win *Window) {
 
 	currentMouseState := win.MouseButtonState()
-	hovering := b.IsHovering(win)
+	hovering := b.Shape.IsWithin(win.MouseLocation())
 
 	switch b.Behaviour {
 	case OnAll:
@@ -99,9 +100,10 @@ func (b *Button) Update(win *Window) {
 	}
 
 	b.prevMouseState = win.MouseButtonState()
+	b.prevMouseLoc = win.MouseLocation()
 }
 
 // IsHovering returns whether the cursor is hovering over the button.
-func (b *Button) IsHovering(win *Window) bool {
-	return b.Shape.IsWithin(win.MouseLocation())
+func (b *Button) IsHovering() bool {
+	return b.Shape.IsWithin(b.prevMouseLoc)
 }
