@@ -47,10 +47,14 @@ func main() {
 		// Callback executes after every update
 		switch {
 		case m == tgl.LeftClick:
-			c.SetStyle(stylePressed)
-			circleButton.SetText("Pressed!")
+			if circleButton.IsHovering() {
+				c.SetStyle(stylePressed)
+				circleButton.SetText("Pressed!")
+			}
 		case circleButton.IsHovering():
 			c.SetStyle(styleHover)
+			circleButton.SetText("Hovering")
+
 		default:
 			c.SetStyle(styleUnpressed)
 			circleButton.SetText("Press me")

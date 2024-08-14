@@ -12,6 +12,11 @@ func RGBA8(c color.Color) (r, g, b, a uint8) {
 	return
 }
 
+// RBG constructs a color.RGBA with maximum alpha.
+func RGB(r, g, b uint8) color.RGBA {
+	return color.RGBA{r, g, b, 255}
+}
+
 // Common colour set.
 var (
 	Black   = color.RGBA{0, 0, 0, 255}
@@ -33,6 +38,7 @@ var (
 )
 
 // Extra colours for if you're feeling artistic.
+// FIXME: most of these are too bright.
 var (
 	DarkRed              = color.RGBA{139, 0, 0, 255}
 	Brown                = color.RGBA{165, 42, 42, 255}
