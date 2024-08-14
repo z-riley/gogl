@@ -36,17 +36,22 @@ func main() {
 	)
 
 	// Buttons can be constructed from shapes
-	styleUnpressed := tgl.Style{Colour: color.RGBA{80, 0, 0, 255}, Thickness: 30}
+	styleHover := tgl.Style{Colour: color.RGBA{180, 180, 0, 255}, Thickness: 0, Bloom: 5}
 	stylePressed := tgl.Style{Colour: color.RGBA{255, 0, 0, 255}, Thickness: 0, Bloom: 10}
+	styleUnpressed := tgl.Style{Colour: color.RGBA{80, 0, 0, 255}, Thickness: 30}
 	c := tgl.NewCircle(100, tgl.Vec{X: 300, Y: 100}, tgl.WithStyle(styleUnpressed))
 	circleButton := tgl.NewButton(c, "../../fonts/arial.ttf").SetText("Press me")
 	circleButton.Label.SetSize(16)
 	circleButton.Label.SetColour(color.White)
 	circleButton.SetCallback(func(m tgl.MouseState) {
-		if m == tgl.LeftClick {
+		// Callback executes after every update
+		switch {
+		case m == tgl.LeftClick:
 			c.SetStyle(stylePressed)
 			circleButton.SetText("Pressed!")
-		} else {
+		case circleButton.IsHovering(win):
+			c.SetStyle(styleHover)
+		default:
 			c.SetStyle(styleUnpressed)
 			circleButton.SetText("Press me")
 		}
@@ -127,7 +132,7 @@ func main() {
 		for _, shape := range []tgl.Drawable{
 			bgRect,
 		} {
-			win.Draw(shape)
+			win.DrawBackground(shape)
 		}
 
 		circleButton.Update(win)

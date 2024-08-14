@@ -29,7 +29,7 @@ func NewButton(shape buttonable, fontPath string) *Button {
 		Label:     NewText("", shape.GetPos(), fontPath),
 		CB:        func(MouseState) { fmt.Println("Warning: Button callback not configured") },
 		Trigger:   LeftClick,
-		Behaviour: OnPressAndRelease,
+		Behaviour: OnAll,
 	}
 }
 
@@ -57,18 +57,27 @@ func (b *Button) Draw(buf *FrameBuffer) {
 type ButtonBehaviour int
 
 const (
-	OnPress           ButtonBehaviour = iota // execute behaviour on press
+	OnAll             ButtonBehaviour = iota // execute behaviour every time Update() is called
+	OnPress                                  // execute behaviour on press
 	OnRelease                                // execute behaviour on release
 	OnPressAndRelease                        // execute behaviour on press and release
 	OnHold                                   // execute behaviour as long as button is held down
+	OnHover                                  // execute behaviour if cursor is over button
 )
 
 // Update examines button state and executes behaviour accordingly.
 func (b *Button) Update(win *Window) {
+
 	currentMouseState := win.MouseButtonState()
-	hovering := b.Shape.IsWithin(win.MouseLocation())
+	hovering := b.IsHovering(win)
 
 	switch b.Behaviour {
+	case OnAll:
+		b.CB(currentMouseState)
+	case OnHover:
+		if hovering {
+			b.CB(currentMouseState)
+		}
 	case OnPress:
 		if hovering && (b.prevMouseState == NoClick && currentMouseState == b.Trigger) {
 			b.CB(currentMouseState)
@@ -90,4 +99,9 @@ func (b *Button) Update(win *Window) {
 	}
 
 	b.prevMouseState = win.MouseButtonState()
+}
+
+// IsHovering returns whether the cursor is hovering over the button.
+func (b *Button) IsHovering(win *Window) bool {
+	return b.Shape.IsWithin(win.MouseLocation())
 }

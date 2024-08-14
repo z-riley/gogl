@@ -32,7 +32,7 @@ var (
 	Navy    = color.RGBA{0, 0, 128, 255}
 )
 
-// For if you're feeling artistic.
+// Extra colours for if you're feeling artistic.
 var (
 	DarkRed              = color.RGBA{139, 0, 0, 255}
 	Brown                = color.RGBA{165, 42, 42, 255}
