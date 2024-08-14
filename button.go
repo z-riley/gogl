@@ -1,6 +1,9 @@
 package turdgl
 
-import "fmt"
+import (
+	"fmt"
+	"image/color"
+)
 
 // buttonable is an interface for shapes buttons can be built with.
 type buttonable interface {
@@ -52,12 +55,6 @@ func NewButton(shape buttonable, fontPath string) *Button {
 // is passed into the function so the callback can take appropriate action.
 func (b *Button) SetCallback(callback func(MouseState)) *Button {
 	b.CB = callback
-	return b
-}
-
-// SetText sets the text label to the given string.
-func (b *Button) SetText(s string) *Button {
-	b.Label.SetText(s)
 	return b
 }
 
@@ -119,4 +116,58 @@ func (b *Button) Update(win *Window) {
 // IsHovering returns whether the cursor is hovering over the button.
 func (b *Button) IsHovering() bool {
 	return b.Shape.IsWithin(b.prevMouseLoc)
+}
+
+// SetLabelText sets the text label to the given string.
+func (b *Button) SetLabelText(s string) *Button {
+	b.Label.SetText(s)
+	return b
+}
+
+// SetLabelAlignment sets the alignment of the text label relative to the centre of the shape.
+func (b *Button) SetLabelAlignment(align Alignment) *Button {
+	b.Label.SetAlignment(align)
+	return b
+}
+
+// SetLabelPos sets the label's position on the screen.
+func (b *Button) SetLabelPos(pos Vec) *Button {
+	b.Label.SetPos(pos)
+	return b
+}
+
+// SetLabelColour sets the label text colour.
+func (b *Button) SetLabelColour(c color.Color) *Button {
+	b.Label.SetColour(c)
+	return b
+}
+
+// SetLabelFont sets the path fo the .ttf file that is used to generate the label.
+func (b *Button) SetLabelFont(path string) *Button {
+	b.Label.SetFont(path)
+	return b
+}
+
+// SetLabelDPI sets the DPI of the label font.
+func (b *Button) SetLabelDPI(dpi float64) *Button {
+	b.Label.SetDPI(dpi)
+	return b
+}
+
+// SetLabelSize sets the size of the label font.
+func (b *Button) SetLabelSize(size float64) *Button {
+	b.Label.SetSize(size)
+	return b
+}
+
+// SetLabelSpacing sets the line spacing of the label.
+func (b *Button) SetLabelSpacing(spacing float64) *Button {
+	b.Label.SetSpacing(spacing)
+	return b
+}
+
+// SetLabelMaskSize sets the size of the mask used to generate the label.
+func (b *Button) SetLabelMaskSize(w, h int) *Button {
+	b.Label.SetMaskSize(w, h)
+	return b
 }

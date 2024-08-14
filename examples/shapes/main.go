@@ -40,7 +40,7 @@ func main() {
 	stylePressed := tgl.Style{Colour: color.RGBA{255, 0, 0, 255}, Thickness: 0, Bloom: 10}
 	styleUnpressed := tgl.Style{Colour: color.RGBA{80, 0, 0, 255}, Thickness: 30}
 	c := tgl.NewCircle(100, tgl.Vec{X: 300, Y: 100}, tgl.WithStyle(styleUnpressed))
-	circleButton := tgl.NewButton(c, "../../fonts/arial.ttf").SetText("Press me")
+	circleButton := tgl.NewButton(c, "../../fonts/arial.ttf").SetLabelText("Press me")
 	circleButton.Label.SetSize(16)
 	circleButton.Label.SetColour(color.White)
 	circleButton.SetCallback(func(m tgl.MouseState) {
@@ -49,14 +49,14 @@ func main() {
 		case m == tgl.LeftClick:
 			if circleButton.IsHovering() {
 				c.SetStyle(stylePressed)
-				circleButton.SetText("Pressed!")
+				circleButton.SetLabelText("Pressed!")
 			}
 		case circleButton.IsHovering():
 			c.SetStyle(styleHover)
-			circleButton.SetText("Hovering")
+			circleButton.SetLabelText("Hovering")
 		default:
 			c.SetStyle(styleUnpressed)
-			circleButton.SetText("Press me")
+			circleButton.SetLabelText("Press me")
 		}
 	})
 	circleButton.Label.SetAlignment(tgl.AlignBottomCentre)
