@@ -25,6 +25,7 @@ const (
 	AlignBottomLeft
 	AlignBottomCentre
 	AlignBottomRight
+	AlignCustom
 )
 
 // Text is a customisable block of text.
@@ -32,6 +33,7 @@ type Text struct {
 	body               string
 	pos                Vec
 	alignment          Alignment
+	labelOffset        Vec // label offset used when in AlignCustom mode
 	colour             color.Color
 	font               *sfnt.Font
 	dpi, size, spacing float64     // settings for generating mask
@@ -87,6 +89,8 @@ func (t *Text) Draw(buf *FrameBuffer) {
 			return Vec{-bbox.w / 2, -bbox.h}
 		case AlignBottomRight:
 			return Vec{-bbox.w, -bbox.h}
+		case AlignCustom:
+			return t.labelOffset
 		default:
 			panic("Unsupported text alignment")
 		}
@@ -130,6 +134,18 @@ func (t *Text) SetAlignment(align Alignment) *Text {
 	if err := t.generateMask(); err != nil {
 		panic(err)
 	}
+	return t
+}
+
+// AlignmentCustom returns the label's offset.
+func (t *Text) LabelOffset() Vec {
+	return t.labelOffset
+}
+
+// SetAlignmentCustom sets the label's offset. Note: this only applies when
+// alignment is set to AlignCustom.
+func (t *Text) SetLabelOffset(offset Vec) *Text {
+	t.labelOffset = offset
 	return t
 }
 

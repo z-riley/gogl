@@ -40,9 +40,10 @@ func main() {
 	stylePressed := tgl.Style{Colour: color.RGBA{255, 0, 0, 255}, Thickness: 0, Bloom: 10}
 	styleUnpressed := tgl.Style{Colour: color.RGBA{80, 0, 0, 255}, Thickness: 30}
 	c := tgl.NewCircle(100, tgl.Vec{X: 300, Y: 100}, tgl.WithStyle(styleUnpressed))
-	circleButton := tgl.NewButton(c, "../../fonts/arial.ttf").SetLabelText("Press me")
-	circleButton.Label.SetSize(16)
-	circleButton.Label.SetColour(color.White)
+	circleButton := tgl.NewButton(c, "../../fonts/arial.ttf").
+		SetLabelText("Press me").
+		SetLabelSize(16).
+		SetLabelColour(color.White)
 	circleButton.SetCallback(func(m tgl.MouseState) {
 		// Callback executes after every update
 		switch {
