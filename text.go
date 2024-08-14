@@ -90,7 +90,7 @@ func (t *Text) Draw(buf *FrameBuffer) {
 		case AlignBottomRight:
 			return Vec{-bbox.w, -bbox.h}
 		case AlignCustom:
-			return t.labelOffset
+			return Vec{(-bbox.w / 2) + t.labelOffset.X, (-bbox.h / 2) + t.labelOffset.Y}
 		default:
 			panic("Unsupported text alignment")
 		}
