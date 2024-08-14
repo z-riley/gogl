@@ -93,10 +93,6 @@ func (t *Text) Draw(buf *FrameBuffer) {
 	}()
 
 	// Draw pixels to frame buffer
-	// FIXME: Coloured artifacts and edges appear when drawing text onto a coloured background.
-	// green background -> pink artifacts
-	// blue background -> yellow artifacts
-	// red background -> blue artifacts
 	for i := 0; i < t.mask.Rect.Dy(); i++ {
 		for j := 0; j < t.mask.Rect.Dx(); j++ {
 			rgba := t.mask.RGBAAt(j, i)

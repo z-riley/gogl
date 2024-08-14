@@ -7,6 +7,8 @@ type buttonable interface {
 	Draw(*FrameBuffer)
 	IsWithin(Vec) bool
 	GetPos() Vec
+	Width() float64
+	Height() float64
 }
 
 // Button can be build on top of shapes to create pressable buttons.
@@ -25,9 +27,20 @@ type Button struct {
 // NewButton constructs a new button from any shape that satisfies
 // the hoverable interface.
 func NewButton(shape buttonable, fontPath string) *Button {
+	// Get label pos depending on underlying shape, so text always appears centrally
+	pos := func() Vec {
+		switch shape.(type) {
+		case *Rect:
+			p := shape.GetPos()
+			return Vec{p.X + shape.Width()/2, p.Y + shape.Height()/2}
+		default:
+			return shape.GetPos()
+		}
+	}()
+
 	return &Button{
 		Shape:     shape,
-		Label:     NewText("", shape.GetPos(), fontPath),
+		Label:     NewText("", pos, fontPath),
 		CB:        func(MouseState) { fmt.Println("Warning: Button callback not configured") },
 		Trigger:   LeftClick,
 		Behaviour: OnAll,

@@ -54,7 +54,6 @@ func main() {
 		case circleButton.IsHovering():
 			c.SetStyle(styleHover)
 			circleButton.SetText("Hovering")
-
 		default:
 			c.SetStyle(styleUnpressed)
 			circleButton.SetText("Press me")
