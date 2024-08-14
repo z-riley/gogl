@@ -130,6 +130,12 @@ func (b *Button) SetLabelAlignment(align Alignment) *Button {
 	return b
 }
 
+// SetLabelOffset sets the label's offset, providing the text is in AlignCustom mode.
+func (b *Button) SetLabelOffset(offset Vec) *Button {
+	b.Label.SetOffset(offset)
+	return b
+}
+
 // SetLabelPos sets the label's position on the screen.
 func (b *Button) SetLabelPos(pos Vec) *Button {
 	b.Label.SetPos(pos)

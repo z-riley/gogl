@@ -137,14 +137,14 @@ func (t *Text) SetAlignment(align Alignment) *Text {
 	return t
 }
 
-// AlignmentCustom returns the label's offset.
-func (t *Text) LabelOffset() Vec {
+// Offset returns the text's offset.
+func (t *Text) Offset() Vec {
 	return t.labelOffset
 }
 
-// SetAlignmentCustom sets the label's offset. Note: this only applies when
-// alignment is set to AlignCustom.
-func (t *Text) SetLabelOffset(offset Vec) *Text {
+// SetOffset sets the text's offset. Note: this only applies when alignment
+// is set to AlignCustom.
+func (t *Text) SetOffset(offset Vec) *Text {
 	t.labelOffset = offset
 	return t
 }
