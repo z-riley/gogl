@@ -43,6 +43,7 @@ type Shape interface {
 	GetPos() Vec
 	GetStyle() Style
 	SetStyle(style Style)
+	Move(Vec)
 }
 
 // shape contains the generic attributes for a 2D shape.
