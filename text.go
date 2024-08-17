@@ -97,6 +97,7 @@ func (t *Text) Draw(buf *FrameBuffer) {
 	}()
 
 	// Draw pixels to frame buffer
+	// FIXME: mask may should get larger if needed to account for the textOffset
 	for i := 0; i < t.mask.Rect.Dy(); i++ {
 		for j := 0; j < t.mask.Rect.Dx(); j++ {
 			rgba := t.mask.RGBAAt(j, i)
@@ -129,6 +130,7 @@ func (t *Text) Alignment() Alignment {
 }
 
 // SetText sets the text alignment.
+// Warning: use with caution becuase the alignment is consistent, but often innaccurate.
 func (t *Text) SetAlignment(align Alignment) *Text {
 	t.alignment = align
 	if err := t.generateMask(); err != nil {

@@ -7,11 +7,8 @@ import (
 
 // buttonable is an interface for shapes buttons can be built with.
 type buttonable interface {
-	Draw(*FrameBuffer)
+	Shape
 	IsWithin(Vec) bool
-	GetPos() Vec
-	Width() float64
-	Height() float64
 }
 
 // Button can be build on top of shapes to create pressable buttons.
@@ -27,8 +24,7 @@ type Button struct {
 	prevLabel      string
 }
 
-// NewButton constructs a new button from any shape that satisfies
-// the hoverable interface.
+// NewButton constructs a new button from any shape that satisfies the buttonable interface.
 func NewButton(shape buttonable, fontPath string) *Button {
 	// Get label pos depending on underlying shape, so text always appears centrally
 	pos := func() Vec {

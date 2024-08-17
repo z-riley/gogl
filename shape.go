@@ -37,10 +37,12 @@ func RandomStyle() Style {
 
 // Shape is an interface for shapes.
 type Shape interface {
-	GetPos() Vec
 	Width() float64
 	Height() float64
 	Draw(*FrameBuffer)
+	GetPos() Vec
+	GetStyle() Style
+	SetStyle(style Style)
 }
 
 // shape contains the generic attributes for a 2D shape.
