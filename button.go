@@ -109,6 +109,12 @@ func (b *Button) Update(win *Window) {
 	b.prevMouseLoc = win.MouseLocation()
 }
 
+// Move moves the button by a given vector.
+func (b *Button) Move(mov Vec) {
+	b.Shape.Move(mov)
+	b.Label.pos = Add(b.Label.pos, mov)
+}
+
 // IsHovering returns whether the cursor is hovering over the button.
 func (b *Button) IsHovering() bool {
 	return b.Shape.IsWithin(b.prevMouseLoc)
