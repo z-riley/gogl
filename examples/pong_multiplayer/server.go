@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/log"
-	tgl "github.com/zac460/turdgl"
+	tgl "github.com/z-riley/turdgl"
 )
 
 // Game contains the game's assets.

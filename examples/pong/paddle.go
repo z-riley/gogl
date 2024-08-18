@@ -3,7 +3,7 @@ package main
 import (
 	"time"
 
-	tgl "github.com/zac460/turdgl"
+	tgl "github.com/z-riley/turdgl"
 )
 
 const (

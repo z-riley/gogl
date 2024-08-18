@@ -5,7 +5,7 @@ import (
 	"image/color"
 	"time"
 
-	tgl "github.com/zac460/turdgl"
+	tgl "github.com/z-riley/turdgl"
 	"golang.org/x/exp/constraints"
 )
 
