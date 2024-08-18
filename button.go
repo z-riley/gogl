@@ -26,20 +26,9 @@ type Button struct {
 
 // NewButton constructs a new button from any shape that satisfies the buttonable interface.
 func NewButton(shape buttonable, fontPath string) *Button {
-	// Get label pos depending on underlying shape, so text always appears centrally
-	pos := func() Vec {
-		switch shape.(type) {
-		case *Rect:
-			p := shape.GetPos()
-			return Vec{p.X + shape.Width()/2, p.Y + shape.Height()/2}
-		default:
-			return shape.GetPos()
-		}
-	}()
-
 	return &Button{
 		Shape:     shape,
-		Label:     NewText("", pos, fontPath),
+		Label:     NewText("", shape.GetPos(), fontPath),
 		CB:        func(MouseState) { fmt.Println("Warning: Button callback not configured") },
 		Trigger:   LeftClick,
 		Behaviour: OnAll,
@@ -57,6 +46,18 @@ func (b *Button) SetCallback(callback func(MouseState)) *Button {
 // Draw draws the button onto the frame buffer.
 func (b *Button) Draw(buf *FrameBuffer) {
 	b.Shape.Draw(buf)
+
+	// Get label pos depending on underlying shape, so text always appears centrally
+	b.Label.SetPos(func() Vec {
+		switch b.Shape.(type) {
+		case *Rect:
+			p := b.Shape.GetPos()
+			return Vec{p.X + b.Shape.Width()/2, p.Y + b.Shape.Height()/2}
+		default:
+			return b.Shape.GetPos()
+		}
+	}())
+
 	b.Label.Draw(buf)
 }
 
@@ -112,7 +113,7 @@ func (b *Button) Update(win *Window) {
 // Move moves the button by a given vector.
 func (b *Button) Move(mov Vec) {
 	b.Shape.Move(mov)
-	b.Label.pos = Add(b.Label.pos, mov)
+	b.Label.Move(mov)
 }
 
 // IsHovering returns whether the cursor is hovering over the button.
@@ -132,7 +133,7 @@ func (b *Button) SetLabelAlignment(align Alignment) *Button {
 	return b
 }
 
-// SetLabelOffset sets the label's offset, providing the text is in AlignCustom mode.
+// SetLabelOffset manually sets the label's offset, providing the text is in AlignCustom mode.
 func (b *Button) SetLabelOffset(offset Vec) *Button {
 	b.Label.SetOffset(offset)
 	return b

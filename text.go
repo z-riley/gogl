@@ -110,6 +110,11 @@ func (t *Text) Draw(buf *FrameBuffer) {
 	}
 }
 
+// Move moves the text by a given vector.
+func (t *Text) Move(mov Vec) {
+	t.pos = Add(t.pos, mov)
+}
+
 // Text returns the current text content.
 func (t *Text) Text() string {
 	return t.body
