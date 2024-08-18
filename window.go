@@ -20,9 +20,19 @@ type engine struct {
 	backgroundDrawQueue []Drawable
 	running             bool
 	keys                *keyTracker
+	textMutator         *textMutator
 }
 
-// Window represents OS Window.
+// newEngine constructs a new turdgl engine.
+func newEngine() *engine {
+	return &engine{
+		running:     true,
+		keys:        newKeyTracker(),
+		textMutator: newTextTracker(),
+	}
+}
+
+// Window represents an OS Window.
 type Window struct {
 	KeyBindings map[sdl.Keycode]func()
 	Framebuffer *FrameBuffer
@@ -34,7 +44,6 @@ type Window struct {
 }
 
 // NewWindow constructs a new window according to the provided configuration.
-// TODO: add a note to guide the user to the background/foreground draw methods
 func NewWindow(cfg WindowCfg) (*Window, error) {
 	if err := sdl.Init(sdl.INIT_VIDEO); err != nil {
 		return nil, err
@@ -75,11 +84,8 @@ func NewWindow(cfg WindowCfg) (*Window, error) {
 		win:         w,
 		renderer:    r,
 		texture:     t,
-		engine: &engine{
-			running: true,
-			keys:    newKeyTracker(),
-		},
-		config: cfg,
+		engine:      newEngine(),
+		config:      cfg,
 	}, nil
 }
 
@@ -131,7 +137,10 @@ func (w *Window) Update() {
 		case *sdl.QuitEvent:
 			w.engine.running = false
 		case *sdl.KeyboardEvent:
-			w.engine.keys.eventHandler(e)
+			w.engine.keys.handleEvent(e)
+			w.engine.textMutator.handleEvent(e)
+		case *sdl.TextInputEvent:
+			w.engine.textMutator.Append(e.GetText())
 		}
 	}
 

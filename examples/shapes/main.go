@@ -90,6 +90,12 @@ func main() {
 		tgl.Vec{X: 280, Y: 230},
 		tgl.WithStyle(tgl.Style{Colour: color.RGBA{90, 65, 48, 255}, Thickness: 0}),
 	)
+	txtBox := tgl.NewTextBox(fgRect, "../../fonts/arial.ttf").
+		SetText("Click to edit text").
+		SetTextSize(16).
+		SetTextColour(tgl.Orange)
+	txtBox.SetSelectedCB(func() { txtBox.SetTextColour(tgl.Yellow) })
+	txtBox.SetDeselectedCB(func() { txtBox.SetTextColour(tgl.Orange) })
 
 	// Set variable alpha values to blend shape colours
 	circleRed := tgl.NewCircle(
@@ -124,7 +130,7 @@ func main() {
 			triangle,
 			txt,
 			circleButton,
-			fgRect,
+			txtBox,
 			circleRed,
 			circleBlue,
 			circleGreen,
@@ -139,8 +145,11 @@ func main() {
 			win.DrawBackground(shape)
 		}
 
+		// Dynamic components' Update method must be called
 		circleButton.Update(win)
+		txtBox.Update(win)
 
+		// Lastly, the window must be updated
 		win.Update()
 
 		loc := win.MouseLocation()

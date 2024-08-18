@@ -21,13 +21,60 @@ func (k *keyTracker) isPressed(key sdl.Keycode) bool {
 	return ok
 }
 
-// eventHandler is called every time a window updates, to process the current key presses.
-func (k *keyTracker) eventHandler(event *sdl.KeyboardEvent) {
+// handleEvent processes key press events to keep track of the pressed keys.
+func (k *keyTracker) handleEvent(event *sdl.KeyboardEvent) {
 	if event.State == sdl.PRESSED {
 		k.pressedKeys[event.Keysym.Sym] = struct{}{}
 	} else if event.State == sdl.RELEASED {
 		delete(k.pressedKeys, event.Keysym.Sym)
 	}
+}
+
+// textMutator allows the user to modify text.
+type textMutator struct {
+	buffer string
+}
+
+// newTextTracker constructs a text tracker object.
+func newTextTracker() *textMutator {
+	return &textMutator{}
+}
+
+// Load loads a string into the text mutator so it can be modified.
+func (t *textMutator) Load(s string) {
+	t.buffer = s
+}
+
+// Append appends a string to the text mutator.
+func (t *textMutator) Append(s string) {
+	t.buffer = t.buffer + s
+}
+
+// String returns the string stored in the text mutator.
+func (t *textMutator) String() string {
+	return t.buffer
+}
+
+// Flush returns the string stored in the text mutator, and empties it.
+func (t *textMutator) Flush() string {
+	s := t.buffer
+	t.buffer = ""
+	return s
+}
+
+// handleEvent processes key press events.
+func (t *textMutator) handleEvent(event *sdl.KeyboardEvent) {
+	if event.Keysym.Sym == KeyBackspace && event.State == sdl.PRESSED {
+		t.backspace()
+	}
+}
+
+// backspace removes the last character from the text.
+func (t *textMutator) backspace() {
+	if len(t.buffer) == 0 {
+		return
+	}
+	t.buffer = t.buffer[:len(t.buffer)-1]
 }
 
 const (

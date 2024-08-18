@@ -5,15 +5,15 @@ import (
 	"image/color"
 )
 
-// buttonable is an interface for shapes buttons can be built with.
-type buttonable interface {
+// hoverable is an interface for shapes can detect cursor hovering.
+type hoverable interface {
 	Shape
 	IsWithin(Vec) bool
 }
 
 // Button can be build on top of shapes to create pressable buttons.
 type Button struct {
-	Shape     buttonable       // the base shape the button is built on
+	Shape     hoverable        // the base shape the button is built on
 	Label     *Text            // the text to display on the button (if any)
 	CB        func(MouseState) // the callback function to execute on press
 	Trigger   MouseState       // which mouse button must be used to press the button
@@ -25,7 +25,7 @@ type Button struct {
 }
 
 // NewButton constructs a new button from any shape that satisfies the buttonable interface.
-func NewButton(shape buttonable, fontPath string) *Button {
+func NewButton(shape hoverable, fontPath string) *Button {
 	return &Button{
 		Shape:     shape,
 		Label:     NewText("", shape.GetPos(), fontPath),
