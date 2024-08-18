@@ -149,9 +149,9 @@ func (t *Text) Offset() Vec {
 	return t.labelOffset
 }
 
-// SetOffset sets the text's offset. Note: this only applies when alignment
-// is set to AlignCustom.
+// SetOffset sets the text's offset. Note: this overwrites previous alignment settings.
 func (t *Text) SetOffset(offset Vec) *Text {
+	t.SetAlignment(AlignCustom)
 	t.labelOffset = offset
 	return t
 }
