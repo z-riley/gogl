@@ -47,7 +47,7 @@ func (b *Button) SetCallback(callback func(MouseState)) *Button {
 func (b *Button) Draw(buf *FrameBuffer) {
 	b.Shape.Draw(buf)
 
-	// Get label pos depending on underlying shape, so text always appears centrally
+	// Align to centre of underlying shape
 	b.Label.SetPos(func() Vec {
 		switch b.Shape.(type) {
 		case *Rect:

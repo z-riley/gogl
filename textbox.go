@@ -31,9 +31,17 @@ func NewTextBox(shape hoverable, fontPath string) *TextBox {
 func (t *TextBox) Draw(buf *FrameBuffer) {
 	t.Shape.Draw(buf)
 
-	// Align text to the centre-left of the shape
-	pos := Vec{t.Shape.GetPos().X, t.Shape.GetPos().Y + t.Shape.Height()/2}
-	t.Body.SetPos(pos)
+	// Align to centre of underlying shape
+	t.Body.SetPos(func() Vec {
+		switch t.Shape.(type) {
+		case *Rect:
+			p := t.Shape.GetPos()
+			return Vec{p.X + t.Shape.Width()/2, p.Y + t.Shape.Height()/2}
+		default:
+			return t.Shape.GetPos()
+		}
+	}())
+
 	t.Body.Draw(buf)
 
 	if t.isEditing {
