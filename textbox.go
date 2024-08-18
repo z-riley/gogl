@@ -1,9 +1,7 @@
 package turdgl
 
 import (
-	"fmt"
 	"image/color"
-	"time"
 )
 
 // TextBox is a shape that can be typed in.
@@ -60,12 +58,9 @@ func (t *TextBox) Update(win *Window) {
 			t.isEditing = true
 			win.engine.textMutator.Load(t.Body.Text())
 			t.selectedCB() // user-defined callback
-			fmt.Println(time.Now().Nanosecond(), t.Shape, "select")
 		} else {
 			t.isEditing = false
-			fmt.Println(win.engine.textMutator.buffer)
 			t.deselectedCB() // user-defined callback
-			fmt.Println(time.Now().Nanosecond(), t.Shape, "deselect")
 		}
 	}
 
