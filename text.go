@@ -68,8 +68,8 @@ func NewText(body string, pos Vec, fontPath string) *Text {
 // Draw draws the text onto the provided frame buffer.
 func (t *Text) Draw(buf *FrameBuffer) {
 	// Calculate position offset depending on alignment config
+	bbox := t.textBoundry()
 	textOffset := func() Vec {
-		bbox := t.textBoundry()
 		switch t.alignment {
 		case AlignTopLeft:
 			return Vec{0, 0}
@@ -97,9 +97,10 @@ func (t *Text) Draw(buf *FrameBuffer) {
 	}()
 
 	// Draw pixels to frame buffer
-	// FIXME: mask may should get larger if needed to account for the textOffset
-	for i := 0; i < t.mask.Rect.Dy(); i++ {
-		for j := 0; j < t.mask.Rect.Dx(); j++ {
+	startX, startY := int(bbox.Pos.X), int(bbox.Pos.Y)
+	endX, endY := startX+int(bbox.w), startY+int(bbox.h)
+	for i := startY; i < endY; i++ {
+		for j := startX; j < endX; j++ {
 			rgba := t.mask.RGBAAt(j, i)
 			if rgba.A > 0 {
 				x := j + int(math.Round(textOffset.X))
