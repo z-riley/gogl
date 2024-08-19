@@ -102,9 +102,10 @@ func (f *FrameBuffer) Clear() {
 
 // Fill sets every pixel in the frame buffer to the provided colour.
 func (f *FrameBuffer) Fill(c color.Color) {
+	pixel := NewPixel(c)
 	for i := 0; i < len(*f); i++ {
 		for j := 0; j < len((*f)[0]); j++ {
-			(*f)[i][j] = NewPixel(c)
+			(*f)[i][j] = pixel
 		}
 	}
 }
