@@ -139,12 +139,6 @@ func NewRect(width, height float64, pos Vec, opts ...func(*shape)) *Rect {
 	return &Rect{newShape(width, height, pos, opts...)}
 }
 
-// IsWithin returns whether a position lies within the rectangle's perimeter.
-func (r *Rect) IsWithin(pos Vec) bool {
-	return (pos.X >= r.Pos.X) && (pos.X <= r.Pos.X+r.Width()) &&
-		(pos.Y >= r.Pos.Y) && (pos.Y <= r.Pos.Y+r.Height())
-}
-
 // Draw draws the rectangle onto the provided frame buffer.
 func (r *Rect) Draw(buf *FrameBuffer) {
 	if r.style.Thickness == 0 {
@@ -175,6 +169,12 @@ func (r *Rect) Draw(buf *FrameBuffer) {
 			WithStyle(Style{r.style.Colour, 0, 0}),
 		).Draw(buf)
 	}
+}
+
+// IsWithin returns whether a position lies within the rectangle's perimeter.
+func (r *Rect) IsWithin(pos Vec) bool {
+	return (pos.X >= r.Pos.X) && (pos.X <= r.Pos.X+r.Width()) &&
+		(pos.Y >= r.Pos.Y) && (pos.Y <= r.Pos.Y+r.Height())
 }
 
 // drawBloom draws a bloom effect around a rectangle.

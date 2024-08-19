@@ -99,7 +99,7 @@ func (w *Window) Destroy() {
 
 // Draw is an alias for DrawForeground.
 func (w *Window) Draw(s Drawable) {
-	w.engine.foregroundDrawQueue = append(w.engine.foregroundDrawQueue, s)
+	w.DrawForeground(s)
 }
 
 // DrawForeground draws a shape to the foreground layer.
