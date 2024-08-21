@@ -19,7 +19,7 @@ type engine struct {
 	foregroundDrawQueue []Drawable
 	backgroundDrawQueue []Drawable
 	running             bool
-	keys                *keyTracker
+	keyTracker          *keyTracker
 	textMutator         *textMutator
 }
 
@@ -27,14 +27,13 @@ type engine struct {
 func newEngine() *engine {
 	return &engine{
 		running:     true,
-		keys:        newKeyTracker(),
+		keyTracker:  newKeyTracker(),
 		textMutator: newTextTracker(),
 	}
 }
 
 // Window represents an OS Window.
 type Window struct {
-	KeyBindings map[sdl.Keycode]func()
 	Framebuffer *FrameBuffer
 	win         *sdl.Window
 	renderer    *sdl.Renderer
@@ -79,7 +78,6 @@ func NewWindow(cfg WindowCfg) (*Window, error) {
 	}
 
 	return &Window{
-		KeyBindings: make(map[sdl.Keycode]func()),
 		Framebuffer: NewFrameBuffer(cfg.Width, cfg.Height),
 		win:         w,
 		renderer:    r,
@@ -112,15 +110,15 @@ func (w *Window) DrawBackground(s Drawable) {
 	w.engine.backgroundDrawQueue = append(w.engine.backgroundDrawQueue, s)
 }
 
-// RegisterKeybind sets a callback function which is triggered every time
-// the Update method is called if the relevant key is pressed.
-func (w *Window) RegisterKeybind(key sdl.Keycode, cb func()) {
-	w.KeyBindings[key] = cb
+// RegisterKeybind sets a callback function which is executed when a key is pressed.
+// The callback can be executed always while the key is pressed, on press, or on release.
+func (w *Window) RegisterKeybind(key sdl.Keycode, mode KeybindMode, cb func()) {
+	w.engine.keyTracker.registerKeybind(key, mode, cb)
 }
 
 // KeyIsPressed returns whether a given key is currently pressed.
 func (w *Window) KeyIsPressed(key sdl.Keycode) bool {
-	return w.engine.keys.isPressed(key)
+	return w.engine.keyTracker.isPressed(key)
 }
 
 // SetBackground sets the background to a uniform colour.
@@ -137,7 +135,7 @@ func (w *Window) Update() {
 		case *sdl.QuitEvent:
 			w.engine.running = false
 		case *sdl.KeyboardEvent:
-			w.engine.keys.handleEvent(e)
+			w.engine.keyTracker.handleEvent(e)
 			w.engine.textMutator.handleEvent(e)
 		case *sdl.TextInputEvent:
 			w.engine.textMutator.Append(e.GetText())
@@ -145,11 +143,7 @@ func (w *Window) Update() {
 	}
 
 	// React to key presses
-	for key, fn := range w.KeyBindings {
-		if w.engine.keys.isPressed(key) {
-			fn()
-		}
-	}
+	w.engine.keyTracker.update()
 
 	// Draw shapes to frame buffer
 	for _, shape := range w.engine.backgroundDrawQueue {

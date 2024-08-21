@@ -20,8 +20,8 @@ func main() {
 
 	snake := NewSnake(tgl.Vec{X: 400, Y: 100})
 
-	win.RegisterKeybind(tgl.KeyEscape, func() { win.Quit() })
-	win.RegisterKeybind(tgl.KeyLCtrl, func() { win.Quit() })
+	win.RegisterKeybind(tgl.KeyEscape, tgl.KeyPress, func() { win.Quit() })
+	win.RegisterKeybind(tgl.KeyLCtrl, tgl.KeyPress, func() { win.Quit() })
 
 	prevTime := time.Now()
 

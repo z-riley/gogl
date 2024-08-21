@@ -7,12 +7,43 @@ import (
 // keyTracker is used to track which keys are pressed by the user and
 // react accordingly.
 type keyTracker struct {
+	keyBindingsInstant map[sdl.Keycode]func()
+	keyBindingsPress   map[sdl.Keycode]func()
+	keyBindingsRelease map[sdl.Keycode]func()
+
 	pressedKeys map[sdl.Keycode]struct{}
 }
 
 // newKeyTracker constructs a key tracker object.
 func newKeyTracker() *keyTracker {
-	return &keyTracker{pressedKeys: make(map[sdl.Keycode]struct{})}
+	return &keyTracker{
+		keyBindingsInstant: make(map[sdl.Keycode]func()),
+		keyBindingsPress:   make(map[sdl.Keycode]func()),
+		keyBindingsRelease: make(map[sdl.Keycode]func()),
+		pressedKeys:        make(map[sdl.Keycode]struct{}),
+	}
+}
+
+// KeybindMode describes how a callback is executed after a bound key is pressed.
+type KeybindMode int
+
+const (
+	Instantaneous KeybindMode = iota
+	KeyPress
+	KeyRelease
+)
+
+// registerKeybind sets a callback function which is executed when a key is pressed.
+// The callback can be executed always while the key is pressed, on press, or on release.
+func (k *keyTracker) registerKeybind(key sdl.Keycode, mode KeybindMode, cb func()) {
+	switch mode {
+	case Instantaneous:
+		k.keyBindingsInstant[key] = cb
+	case KeyPress:
+		k.keyBindingsPress[key] = cb
+	case KeyRelease:
+		k.keyBindingsRelease[key] = cb
+	}
 }
 
 // Is pressed returns true if a key is currently pressed.
@@ -21,12 +52,39 @@ func (k *keyTracker) isPressed(key sdl.Keycode) bool {
 	return ok
 }
 
-// handleEvent processes key press events to keep track of the pressed keys.
+// handleEvent processes key press events and keeps track of pressed keys.
 func (k *keyTracker) handleEvent(event *sdl.KeyboardEvent) {
 	if event.State == sdl.PRESSED {
+		// Execute on-press callback
+		if event.Repeat == 0 {
+			if fn, ok := k.keyBindingsPress[event.Keysym.Sym]; ok {
+				fn()
+			}
+		}
+
+		// Add key to tracker to handle instantaneous callbacks
 		k.pressedKeys[event.Keysym.Sym] = struct{}{}
+
 	} else if event.State == sdl.RELEASED {
+		// Execute on-release callback
+		if event.Repeat == 0 {
+			if fn, ok := k.keyBindingsRelease[event.Keysym.Sym]; ok {
+				fn()
+			}
+		}
+
+		// Remove key from tracker to handle instantaneous callbacks
 		delete(k.pressedKeys, event.Keysym.Sym)
+	}
+}
+
+// update executes callbacks for keys registered in instantaneous mode. If the key
+// is pressed down at the time update is called, the callback is executed.
+func (k keyTracker) update() {
+	for key, fn := range k.keyBindingsInstant {
+		if k.isPressed(key) {
+			fn()
+		}
 	}
 }
 

@@ -38,8 +38,8 @@ func main() {
 	}
 
 	// Keybinds
-	win.RegisterKeybind(tgl.KeyEscape, func() { win.Quit() })
-	win.RegisterKeybind(tgl.KeyLCtrl, func() { win.Quit() })
+	win.RegisterKeybind(tgl.KeyEscape, tgl.KeyPress, func() { win.Quit() })
+	win.RegisterKeybind(tgl.KeyLCtrl, tgl.KeyPress, func() { win.Quit() })
 
 	// Game state
 	leftScore := 0

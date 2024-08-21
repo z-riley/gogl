@@ -39,9 +39,9 @@ func main() {
 		SetColour(color.RGBA{255, 255, 255, 255})
 
 	// Keybinds
-	win.RegisterKeybind(tgl.KeyEscape, func() { win.Quit() })
-	win.RegisterKeybind(tgl.KeyLCtrl, func() { win.Quit() })
-	win.RegisterKeybind(tgl.KeyE, func() { polygon.Move(tgl.Vec{X: 1, Y: 1}) })
+	win.RegisterKeybind(tgl.KeyEscape, tgl.KeyPress, func() { win.Quit() })
+	win.RegisterKeybind(tgl.KeyLCtrl, tgl.KeyPress, func() { win.Quit() })
+	win.RegisterKeybind(tgl.KeyE, tgl.Instantaneous, func() { polygon.Move(tgl.Vec{X: 1, Y: 1}) })
 
 	for win.IsRunning() {
 		win.SetBackground(color.Black)

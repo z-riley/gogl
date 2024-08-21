@@ -34,24 +34,28 @@ func main() {
 	)
 
 	// Keybinds
-	win.RegisterKeybind(tgl.KeyEscape, func() { win.Quit() })
-	win.RegisterKeybind(tgl.KeyLCtrl, func() { win.Quit() })
-	win.RegisterKeybind(tgl.KeyW, func() {
-		rect2.Move(tgl.Vec{Y: -1})
-		circle2.Move(tgl.Vec{Y: -1})
-	})
-	win.RegisterKeybind(tgl.KeyS, func() {
-		rect2.Move(tgl.Vec{Y: 1})
-		circle2.Move(tgl.Vec{Y: 1})
-	})
-	win.RegisterKeybind(tgl.KeyA, func() {
-		rect2.Move(tgl.Vec{X: -1})
-		circle2.Move(tgl.Vec{X: -1})
-	})
-	win.RegisterKeybind(tgl.KeyD, func() {
-		rect2.Move(tgl.Vec{X: 1})
-		circle2.Move(tgl.Vec{X: 1})
-	})
+	win.RegisterKeybind(tgl.KeyEscape, tgl.KeyPress, func() { win.Quit() })
+	win.RegisterKeybind(tgl.KeyLCtrl, tgl.KeyPress, func() { win.Quit() })
+	win.RegisterKeybind(tgl.KeyW, tgl.Instantaneous,
+		func() {
+			rect2.Move(tgl.Vec{Y: -1})
+			circle2.Move(tgl.Vec{Y: -1})
+		})
+	win.RegisterKeybind(tgl.KeyS, tgl.Instantaneous,
+		func() {
+			rect2.Move(tgl.Vec{Y: 1})
+			circle2.Move(tgl.Vec{Y: 1})
+		})
+	win.RegisterKeybind(tgl.KeyA, tgl.Instantaneous,
+		func() {
+			rect2.Move(tgl.Vec{X: -1})
+			circle2.Move(tgl.Vec{X: -1})
+		})
+	win.RegisterKeybind(tgl.KeyD, tgl.Instantaneous,
+		func() {
+			rect2.Move(tgl.Vec{X: 1})
+			circle2.Move(tgl.Vec{X: 1})
+		})
 
 	for win.IsRunning() {
 		win.SetBackground(color.Black)
