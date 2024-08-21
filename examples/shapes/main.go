@@ -119,10 +119,6 @@ func main() {
 	win.RegisterKeybind(tgl.KeyLCtrl, tgl.KeyPress, func() { win.Quit() })
 	win.RegisterKeybind(tgl.KeyE, tgl.Instantaneous, func() { rectSolid.Move(tgl.Vec{X: 2, Y: 2}) })
 
-	// TEMP TEST CODE
-	win.RegisterKeybind(tgl.KeyO, tgl.KeyPress, func() { println("O pressed") })
-	win.RegisterKeybind(tgl.KeyP, tgl.KeyRelease, func() { println("P pressed") })
-
 	for win.IsRunning() {
 		win.SetBackground(color.RGBA{35, 39, 46, 255})
 

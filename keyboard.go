@@ -59,6 +59,13 @@ func (k *keyTracker) unregisterKeybind(key sdl.Keycode, mode KeybindMode) {
 	}
 }
 
+// DropKeybinds unregisters all keybinds.
+func (k *keyTracker) dropKeybinds() {
+	k.keyBindingsInstant = make(map[sdl.Keycode]func())
+	k.keyBindingsPress = make(map[sdl.Keycode]func())
+	k.keyBindingsRelease = make(map[sdl.Keycode]func())
+}
+
 // Is pressed returns true if a key is currently pressed.
 func (k *keyTracker) isPressed(key sdl.Keycode) bool {
 	_, ok := k.pressedKeys[key]

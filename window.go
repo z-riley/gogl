@@ -121,6 +121,11 @@ func (w *Window) UnregisterKeybind(key sdl.Keycode, mode KeybindMode) {
 	w.engine.keyTracker.unregisterKeybind(key, mode)
 }
 
+// DropKeybinds unregisters all keybinds.
+func (w *Window) DropKeybinds() {
+	w.engine.keyTracker.dropKeybinds()
+}
+
 // KeyIsPressed returns whether a given key is currently pressed.
 func (w *Window) KeyIsPressed(key sdl.Keycode) bool {
 	return w.engine.keyTracker.isPressed(key)
