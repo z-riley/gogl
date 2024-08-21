@@ -46,6 +46,19 @@ func (k *keyTracker) registerKeybind(key sdl.Keycode, mode KeybindMode, cb func(
 	}
 }
 
+// registerKeybind sets a callback function which is executed when a key is pressed.
+// The callback can be executed always while the key is pressed, on press, or on release.
+func (k *keyTracker) unregisterKeybind(key sdl.Keycode, mode KeybindMode) {
+	switch mode {
+	case Instantaneous:
+		delete(k.keyBindingsInstant, key)
+	case KeyPress:
+		delete(k.keyBindingsPress, key)
+	case KeyRelease:
+		delete(k.keyBindingsRelease, key)
+	}
+}
+
 // Is pressed returns true if a key is currently pressed.
 func (k *keyTracker) isPressed(key sdl.Keycode) bool {
 	_, ok := k.pressedKeys[key]

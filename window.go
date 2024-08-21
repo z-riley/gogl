@@ -116,6 +116,11 @@ func (w *Window) RegisterKeybind(key sdl.Keycode, mode KeybindMode, cb func()) {
 	w.engine.keyTracker.registerKeybind(key, mode, cb)
 }
 
+// RegisterKeybind removes a keybind for a specific key mode combination.
+func (w *Window) UnregisterKeybind(key sdl.Keycode, mode KeybindMode) {
+	w.engine.keyTracker.unregisterKeybind(key, mode)
+}
+
 // KeyIsPressed returns whether a given key is currently pressed.
 func (w *Window) KeyIsPressed(key sdl.Keycode) bool {
 	return w.engine.keyTracker.isPressed(key)
