@@ -5,6 +5,7 @@ import (
 	"image/color"
 	"math"
 	"os"
+	"strings"
 
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
@@ -264,7 +265,16 @@ func (t *Text) generateMask() error {
 		Face: face,
 		Dot:  fixed.P(int(t.pos.X), int(t.pos.Y)), // Set the position (x, y)
 	}
-	d.DrawString(t.body)
+
+	// Draw lines seperately
+	y := int(t.pos.Y)
+	lineHeight := face.Metrics().Height.Ceil()
+	for _, line := range strings.Split(t.body, "\n") {
+		d.Dot = fixed.P(int(t.pos.X), y)
+		d.DrawString(line)
+		y += lineHeight // move y position to next line
+	}
+
 	t.mask = img
 
 	return nil
