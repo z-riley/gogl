@@ -34,7 +34,7 @@ func (t *TextBox) Draw(buf *FrameBuffer) {
 	// Align to centre of underlying shape
 	t.Body.SetPos(func() Vec {
 		switch t.Shape.(type) {
-		case *Rect:
+		case *Rect, *CurvedRect:
 			p := t.Shape.GetPos()
 			return Vec{p.X + t.Shape.Width()/2, p.Y + t.Shape.Height()/2}
 		default:
@@ -50,7 +50,7 @@ func (t *TextBox) Draw(buf *FrameBuffer) {
 	}
 }
 
-// Update executes the callback function if the text has changed.
+// Update handles user interactions with the text box.
 func (t *TextBox) Update(win *Window) {
 	// Enter editing mode if text box is clicked
 	if win.MouseButtonState() == LeftClick {
