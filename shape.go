@@ -41,6 +41,7 @@ type Shape interface {
 	Height() float64
 	Draw(*FrameBuffer)
 	GetPos() Vec
+	SetPos(Vec)
 	GetStyle() Style
 	SetStyle(style Style)
 	Move(Vec)
