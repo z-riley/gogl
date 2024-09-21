@@ -38,7 +38,9 @@ func RandomStyle() Style {
 // Shape is an interface for shapes.
 type Shape interface {
 	Width() float64
+	SetWidth(float64)
 	Height() float64
+	SetHeight(float64)
 	Draw(*FrameBuffer)
 	GetPos() Vec
 	SetPos(Vec)
@@ -101,9 +103,19 @@ func (s *shape) Width() float64 {
 	return s.w
 }
 
+// SetWidth sets the width of the shape, in pixels.
+func (s *shape) SetWidth(w float64) {
+	s.w = w
+}
+
 // Height returns the height of the shape.
 func (s *shape) Height() float64 {
 	return s.h
+}
+
+// SetHeight sets the height of the shape, in pixels.
+func (s *shape) SetHeight(h float64) {
+	s.h = h
 }
 
 // Move modifies the position of the shape by the given vector.
