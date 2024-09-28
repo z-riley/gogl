@@ -28,13 +28,13 @@ func newKeyTracker() *keyTracker {
 type KeybindMode int
 
 const (
-	Instantaneous KeybindMode = iota
-	KeyPress
-	KeyRelease
+	Instantaneous KeybindMode = iota // callback executed continously while is pressed
+	KeyPress                         // callback executed on press
+	KeyRelease                       // callback executed on release
 )
 
 // registerKeybind sets a callback function which is executed when a key is pressed.
-// The callback can be executed always while the key is pressed, on press, or on release.
+// The callback is executed according to the KeybindMode.
 func (k *keyTracker) registerKeybind(key sdl.Keycode, mode KeybindMode, cb func()) {
 	switch mode {
 	case Instantaneous:

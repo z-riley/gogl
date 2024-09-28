@@ -320,7 +320,7 @@ func (c *Circle) EdgePoint(theta float64) Vec {
 	return Add(c.Pos, (c.Direction.SetMag(c.Width() / 2).Rotate(theta)))
 }
 
-// CurvedRect is a rectangle with curved edges, aligned to the top-left.
+// CurvedRect is a rectangle with rounded corners, aligned to the top-left.
 type CurvedRect struct {
 	*shape
 	radius float64
@@ -333,31 +333,36 @@ func NewCurvedRect(width, height, radius float64, pos Vec, opts ...func(*shape))
 
 // IsWithin returns whether a position lies within the curved rectangle's perimeter.
 func (r *CurvedRect) IsWithin(pos Vec) bool {
-	return false
+	// Note: this doesn't account for the rounded corners
+	return (pos.X >= r.Pos.X) && (pos.X <= r.Pos.X+r.Width()) &&
+		(pos.Y >= r.Pos.Y) && (pos.Y <= r.Pos.Y+r.Height())
 }
 
 // Draw draws the curved rectangle onto the provided frame buffer.
 func (r *CurvedRect) Draw(buf *FrameBuffer) {
-	thickness := r.style.Thickness
-	if r.style.Thickness == 0 { // for filled shape
-		thickness = math.Max(r.w, r.h) / 2
+	subRectHeight := r.style.Thickness
+	subRectWidth := r.style.Thickness
+	if r.style.Thickness == 0 {
+		// For filled shape
+		subRectWidth = r.w / 2
+		subRectHeight = r.h / 2
 	}
 
 	// Draw each edge as its own rectangle
 	NewRect(
-		r.w-2*(r.radius), thickness, Vec{r.Pos.X + r.radius, r.Pos.Y},
+		r.w-2*(r.radius), subRectHeight, Vec{r.Pos.X + r.radius, r.Pos.Y},
 		WithStyle(Style{r.style.Colour, 0, 0}),
 	).Draw(buf)
 	NewRect(
-		r.w-2*(r.radius), thickness, Vec{r.Pos.X + r.radius, r.Pos.Y + float64(r.h) - float64(thickness)},
+		r.w-2*(r.radius), subRectHeight, Vec{r.Pos.X + r.radius, r.Pos.Y + float64(r.h) - float64(subRectHeight)},
 		WithStyle(Style{r.style.Colour, 0, 0}),
 	).Draw(buf)
 	NewRect(
-		thickness, r.h-2*r.radius, Vec{r.Pos.X, r.Pos.Y + r.radius},
+		subRectWidth, r.h-2*r.radius, Vec{r.Pos.X, r.Pos.Y + r.radius},
 		WithStyle(Style{r.style.Colour, 0, 0}),
 	).Draw(buf)
 	NewRect(
-		thickness, r.h-2*r.radius, Vec{r.Pos.X + float64(r.w) - float64(thickness), r.Pos.Y + r.radius},
+		subRectWidth, r.h-2*r.radius, Vec{r.Pos.X + float64(r.w) - float64(subRectWidth), r.Pos.Y + r.radius},
 		WithStyle(Style{r.style.Colour, 0, 0}),
 	).Draw(buf)
 
@@ -369,7 +374,7 @@ func (r *CurvedRect) Draw(buf *FrameBuffer) {
 			for j := bbox.Pos.Y; j <= bbox.Pos.Y+bbox.h; j++ {
 				// Draw pixel if it's close enough to centre and in the right direction
 				dist := Dist(pos, Vec{i, j})
-				withinCircle := dist >= float64(r.radius-thickness) && dist <= float64(r.radius)
+				withinCircle := dist >= float64(r.radius-subRectWidth) && dist <= float64(r.radius)
 				if withinCircle && isCorrectDirection(Vec{i, j}, pos) {
 					buf.SetPixel(int(math.Round(j)), int(math.Round(i)), NewPixel(r.style.Colour))
 				}
