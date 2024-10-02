@@ -320,8 +320,8 @@ func (t *Text) textBoundry() *Rect {
 	}
 
 	return NewRect(
-		maxX-minX,
-		maxY-minY,
+		maxX-minX+1,
+		maxY-minY+1,
 		Vec{minX, minY},
 		WithStyle(Style{Colour: color.White, Thickness: 1}),
 	)
