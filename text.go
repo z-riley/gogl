@@ -42,13 +42,14 @@ type Text struct {
 	mask               *image.RGBA // pixel image to be drawn
 }
 
-// NewText constructs a new text object with default parameters.
+// NewText constructs a new text object with default parameters. The default font
+// size is 20.
 func NewText(body string, pos Vec, fontPath string) *Text {
 	t := Text{
 		body:      body,
 		pos:       pos,
 		alignment: AlignTopLeft,
-		colour:    color.RGBA{0xff, 0, 0, 0xff},
+		colour:    Red,
 		dpi:       80,
 		size:      20,
 		spacing:   1.5,
@@ -106,7 +107,9 @@ func (t *Text) Draw(buf *FrameBuffer) {
 			if rgba.A > 0 {
 				x := j + int(math.Round(textOffset.X))
 				y := i + int(math.Round(textOffset.Y))
-				buf.SetPixel(y, x, NewPixel(rgba))
+				// The RGB values for the anti-aliased borders are are already recuced,
+				// so use additive blending
+				buf.SetPixelFunc(y, x, NewPixel(rgba), AdditiveBlend)
 			}
 		}
 	}
@@ -266,7 +269,7 @@ func (t *Text) generateMask() error {
 		Dot:  fixed.P(int(t.pos.X), int(t.pos.Y)), // Set the position (x, y)
 	}
 
-	// Draw lines seperately
+	// Draw each line of text seperately
 	y := int(t.pos.Y)
 	lineHeight := face.Metrics().Height.Ceil()
 	for _, line := range strings.Split(t.body, "\n") {
@@ -323,7 +326,6 @@ func loadFont(path string) (*sfnt.Font, error) {
 		return nil, err
 	}
 	font, err := opentype.Parse(fontBytes)
-	// font, err := freetype.ParseFont(fontBytes)
 	if err != nil {
 		return nil, err
 	}
