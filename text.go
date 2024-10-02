@@ -98,18 +98,26 @@ func (t *Text) Draw(buf *FrameBuffer) {
 		}
 	}()
 
-	// Draw pixels to frame buffer
+	// Write pixels to frame buffer
+	r, g, b, a := RGBA8(t.colour)
 	startX, startY := int(bbox.Pos.X), int(bbox.Pos.Y)
 	endX, endY := startX+int(bbox.w), startY+int(bbox.h)
 	for i := startY; i < endY; i++ {
 		for j := startX; j < endX; j++ {
-			rgba := t.mask.RGBAAt(j, i)
-			if rgba.A > 0 {
+			maskRGBA := t.mask.RGBAAt(j, i)
+			if maskRGBA.A > 0 {
 				x := j + int(math.Round(textOffset.X))
 				y := i + int(math.Round(textOffset.Y))
-				// The RGB values for the anti-aliased borders are are already recuced,
-				// so use additive blending
-				buf.SetPixelFunc(y, x, NewPixel(rgba), AdditiveBlend)
+
+				// OpenType reduces the RGB values of boarder pixels for anti-aliasing.
+				// However, we will are using alpha blending, so reset the RBG values to
+				// their original, and only keep the alpha.
+				aaPixel := maskRGBA.A < a
+				if aaPixel {
+					buf.SetPixel(y, x, NewPixel(color.RGBA{r, g, b, maskRGBA.A}))
+				} else {
+					buf.SetPixel(y, x, NewPixel(maskRGBA))
+				}
 			}
 		}
 	}
