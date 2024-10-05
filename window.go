@@ -1,17 +1,24 @@
 package turdgl
 
 import (
+	"fmt"
 	"image/color"
 	"log"
+	"os"
 	"unsafe"
 
+	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
 // WindowCfg contains adjustable configuration for a window.
 type WindowCfg struct {
-	Title         string
+	// Title is the title of the window.
+	Title string
+	// Width, Height specifies the dimensions of the window, in pixels.
 	Width, Height int
+	// Icon is the image used for the window. Default if nil.
+	Icon *os.File
 }
 
 // engine contains constructs used to execute background logic.
@@ -75,6 +82,16 @@ func NewWindow(cfg WindowCfg) (*Window, error) {
 	)
 	if err != nil {
 		log.Fatalf("failed to create texture: %s", err)
+	}
+
+	// (Optional) set window icon
+	if cfg.Icon != nil {
+		iconSurface, err := img.Load(cfg.Icon.Name())
+		if err != nil {
+			return nil, fmt.Errorf("could not load icon: %w", err)
+		}
+		defer iconSurface.Free()
+		w.SetIcon(iconSurface)
 	}
 
 	return &Window{
