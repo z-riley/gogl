@@ -181,6 +181,10 @@ func (r *Rect) Draw(buf *FrameBuffer) {
 		NewRect(r.style.Thickness, r.h, Vec{r.Pos.X + float64(r.w) - float64(r.style.Thickness), r.Pos.Y},
 			WithStyle(Style{r.style.Colour, 0, 0}),
 		).Draw(buf)
+
+		if r.style.Bloom > 0 {
+			r.drawBloom(buf)
+		}
 	}
 }
 
@@ -190,18 +194,18 @@ func (r *Rect) IsWithin(pos Vec) bool {
 		(pos.Y >= r.Pos.Y) && (pos.Y <= r.Pos.Y+r.Height())
 }
 
-// drawBloom draws a bloom effect around a rectangle.
+// drawBloom draws a bloom effect around the shape.
 func (r *Rect) drawBloom(buf *FrameBuffer) {
 	// Draw borders around the rectangle of increasing size and decreasing intensity.
-	for rad := 1; rad <= r.style.Bloom; rad++ {
+	for dist := 1; dist <= r.style.Bloom; dist++ {
 		x, y := int(math.Round(r.Pos.X)), int(math.Round(r.Pos.Y))
-		topLeftX := x - rad
-		topLeftY := y - rad
-		topRightX := x + int(math.Round(r.w)) + rad
-		bottomLeftY := y + int(math.Round(r.h)) + rad
+		topLeftX := x - dist
+		topLeftY := y - dist
+		topRightX := x + int(math.Round(r.w)) + dist
+		bottomLeftY := y + int(math.Round(r.h)) + dist
 
 		// Calculate colour from distance away from shape body
-		brightness := 1 - (float64(rad) / float64(r.style.Bloom))
+		brightness := 1 - (float64(dist) / float64(r.style.Bloom))
 		r, g, b, a := RGBA8(r.style.Colour)
 		bloomColour := color.RGBA{r, g, b, uint8(brightness * float64(a))}
 
@@ -274,7 +278,7 @@ func (c *Circle) drawBloom(buf *FrameBuffer) {
 	for i := bbox.Pos.X; i <= bbox.Pos.X+bbox.w; i++ {
 		for j := bbox.Pos.Y; j <= bbox.Pos.Y+bbox.h; j++ {
 			dist := Dist(c.Pos, Vec{i, j})
-			if dist >= float64(radius) && dist <= float64(radius+bloom) {
+			if dist >= radius && dist <= radius+bloom {
 				brightness := 1 - ((dist - radius) / bloom)
 				if brightness < 0 {
 					fmt.Println(brightness)
@@ -367,6 +371,8 @@ func (r *CurvedRect) Draw(buf *FrameBuffer) {
 	).Draw(buf)
 
 	// Draw rounded corners
+	// TODO: optimise this by constraining the curved corners using a smaller bounding box
+	// rather than with isCorrectDirection()
 	drawCorner := func(pos Vec, isCorrectDirection func(Vec, Vec) bool) {
 		// Iterate over every pixel in the bounding box
 		bbox := NewRect(2*r.radius, 2*r.radius, Vec{pos.X - (r.radius), pos.Y - (r.radius)})
@@ -374,7 +380,7 @@ func (r *CurvedRect) Draw(buf *FrameBuffer) {
 			for j := bbox.Pos.Y; j <= bbox.Pos.Y+bbox.h; j++ {
 				// Draw pixel if it's close enough to centre and in the right direction
 				dist := Dist(pos, Vec{i, j})
-				withinCircle := dist >= float64(r.radius-subRectWidth) && dist <= float64(r.radius)
+				withinCircle := dist >= r.radius-subRectWidth && dist <= r.radius
 				if withinCircle && isCorrectDirection(Vec{i, j}, pos) {
 					buf.SetPixel(int(math.Round(j)), int(math.Round(i)), NewPixel(r.style.Colour))
 				}
@@ -383,21 +389,82 @@ func (r *CurvedRect) Draw(buf *FrameBuffer) {
 	}
 	// Top left
 	drawCorner(Vec{r.Pos.X + r.radius, r.Pos.Y + r.radius},
-		func(pixelPos, p Vec) bool {
-			return Theta(Rightwards, Sub(pixelPos, p)) >= math.Pi/2
-		})
+		func(pixelPos, p Vec) bool { return Theta(Rightwards, Sub(pixelPos, p)) >= math.Pi/2 })
 	// Top right
-	drawCorner(Vec{r.Pos.X + r.w - r.radius, r.Pos.Y + r.radius}, func(pixelPos, p Vec) bool {
-		return Theta(Leftwards, Sub(p, pixelPos)) <= math.Pi/2
-	})
+	drawCorner(Vec{r.Pos.X + r.w - r.radius, r.Pos.Y + r.radius},
+		func(pixelPos, p Vec) bool { return Theta(Leftwards, Sub(p, pixelPos)) <= math.Pi/2 })
 	// Bottom left
-	drawCorner(Vec{r.Pos.X + r.radius, r.Pos.Y + r.h - r.radius}, func(pixelPos, p Vec) bool {
-		return Theta(Leftwards, Sub(pixelPos, p)) <= math.Pi/2
-	})
+	drawCorner(Vec{r.Pos.X + r.radius, r.Pos.Y + r.h - r.radius},
+		func(pixelPos, p Vec) bool { return Theta(Leftwards, Sub(pixelPos, p)) <= math.Pi/2 })
 	// Bottom right
-	drawCorner(Vec{r.Pos.X + r.w - r.radius, r.Pos.Y + r.h - r.radius}, func(pixelPos, p Vec) bool {
-		return Theta(Rightwards, Sub(p, pixelPos)) >= math.Pi/2
-	})
+	drawCorner(Vec{r.Pos.X + r.w - r.radius, r.Pos.Y + r.h - r.radius},
+		func(pixelPos, p Vec) bool { return Theta(Rightwards, Sub(p, pixelPos)) >= math.Pi/2 })
+
+	if r.style.Bloom > 0 {
+		r.drawBloom(buf)
+	}
+}
+
+// drawBloom draws a bloom effect around the shape.
+func (r *CurvedRect) drawBloom(buf *FrameBuffer) {
+	bloom := float64(r.style.Bloom)
+
+	// Draw straight edge bloom
+	for dist := 1; dist <= r.style.Bloom; dist++ {
+		// Calculate colour from distance away from shape body
+		brightness := 1 - (float64(dist) / bloom)
+		R, G, B, A := RGBA8(r.style.Colour)
+		bloomColour := color.RGBA{R, G, B, uint8(brightness * float64(A))}
+
+		// Top and bottom bloom
+		for x := r.Pos.X + r.radius + 1; x < r.Pos.X+r.w-r.radius; x++ {
+			buf.SetPixel(int(r.Pos.Y)-dist, int(x), NewPixel(bloomColour))
+			buf.SetPixel(int(r.Pos.Y+r.h)+dist, int(x), NewPixel(bloomColour))
+		}
+
+		// Left and right
+		for y := r.Pos.Y + r.radius + 1; y < r.Pos.Y+r.h-r.radius; y++ {
+			buf.SetPixel(int(y), int(r.Pos.X)-dist, NewPixel(bloomColour))
+			buf.SetPixel(int(y), int(r.Pos.X+r.w)+dist, NewPixel(bloomColour))
+		}
+	}
+
+	// Draw rounded corner bloom
+	drawCorner := func(bbox *Rect, origin Vec) {
+		// Iterate over every pixel in the bounding box
+		for x := bbox.Pos.X; x <= bbox.Pos.X+bbox.w; x++ {
+			for y := bbox.Pos.Y; y <= bbox.Pos.Y+bbox.h; y++ {
+				dist := Dist(origin, Vec{x, y})
+				withinCircle := dist > r.radius && dist <= r.radius+bloom
+				if withinCircle {
+					// Calculate colour from distance away from shape body
+					brightness := 1 - (dist-r.radius)/(bloom)
+					r, g, b, a := RGBA8(r.style.Colour)
+
+					bloomColour := color.RGBA{r, g, b, uint8(brightness * float64(a))}
+					xInt, yInt := int(math.Round(x)), int(math.Round(y))
+					buf.SetPixel(yInt, xInt, NewPixel(bloomColour))
+				}
+			}
+		}
+	}
+
+	// Top left
+	bboxSize := bloom + r.radius
+	bbox := NewRect(bboxSize, bboxSize, Vec{r.Pos.X - bloom, r.Pos.Y - bloom})
+	drawCorner(bbox, Vec{bbox.Pos.X + bbox.w, bbox.Pos.Y + bbox.h})
+
+	// Top right
+	bbox = NewRect(bboxSize, bboxSize, Vec{r.Pos.X + r.w - r.radius, r.Pos.Y - bloom})
+	drawCorner(bbox, Vec{bbox.Pos.X, bbox.Pos.Y + bbox.h})
+
+	// Bottom left
+	bbox = NewRect(bboxSize, bboxSize, Vec{r.Pos.X - bloom, r.Pos.Y + r.h - r.radius})
+	drawCorner(bbox, Vec{bbox.Pos.X + bbox.w, bbox.Pos.Y})
+
+	// Bottom right
+	bbox = NewRect(bboxSize, bboxSize, Vec{r.Pos.X + r.w - r.radius, r.Pos.Y + r.h - r.radius})
+	drawCorner(bbox, Vec{bbox.Pos.X, bbox.Pos.Y})
 }
 
 // IsColliding returns true if two shapes are colliding.

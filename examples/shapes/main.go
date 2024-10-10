@@ -76,7 +76,7 @@ func main() {
 	curvedRect := tgl.NewCurvedRect(
 		120, 90, 12,
 		tgl.Vec{X: 50, Y: 200},
-		tgl.WithStyle(tgl.Style{Colour: color.RGBA{240, 170, 90, 255}, Thickness: 8}),
+		tgl.WithStyle(tgl.Style{Colour: tgl.LighSkyBlue, Thickness: 8, Bloom: 15}),
 	)
 
 	// Put shapes on the background layer to avoid interactions with other shapes
@@ -88,14 +88,14 @@ func main() {
 	fgRect := tgl.NewRect(
 		120, 90,
 		tgl.Vec{X: 280, Y: 230},
-		tgl.WithStyle(tgl.Style{Colour: color.RGBA{90, 65, 48, 255}, Thickness: 0}),
+		tgl.WithStyle(tgl.Style{Colour: tgl.RosyBrown, Thickness: 0}),
 	)
 	txtBox := tgl.NewTextBox(fgRect, "../../fonts/arial.ttf").
 		SetText("Click to edit text").
-		SetTextSize(16).
-		SetTextColour(tgl.Orange)
+		SetTextSize(46).
+		SetTextColour(color.RGBA{100, 255, 100, 100})
 	txtBox.SetSelectedCB(func() { txtBox.SetTextColour(tgl.Yellow) })
-	txtBox.SetDeselectedCB(func() { txtBox.SetTextColour(tgl.Orange) })
+	txtBox.SetDeselectedCB(func() { txtBox.SetTextColour(color.RGBA{100, 255, 100, 200}) })
 
 	// Set variable alpha values to blend shape colours
 	circleRed := tgl.NewCircle(

@@ -7,7 +7,7 @@ import (
 // TextBox is a shape that can be typed in.
 type TextBox struct {
 	Shape        hoverable // the base shape the text box is built on
-	Body         *Text     // the text in the text box
+	Text         *Text     // the text in the text box
 	selectedCB   func()    // callback function for when the text box is selected (optional)
 	deselectedCB func()    // callback function for when the text box is deselected (optional)
 	modifiedCB   func()    // callback function for when the text changes (optional)
@@ -20,7 +20,7 @@ type TextBox struct {
 func NewTextBox(shape hoverable, fontPath string) *TextBox {
 	return &TextBox{
 		Shape:        shape,
-		Body:         NewText("", shape.GetPos(), fontPath),
+		Text:         NewText("", shape.GetPos(), fontPath),
 		selectedCB:   func() {},
 		deselectedCB: func() {},
 		modifiedCB:   func() {},
@@ -32,7 +32,7 @@ func (t *TextBox) Draw(buf *FrameBuffer) {
 	t.Shape.Draw(buf)
 
 	// Align to centre of underlying shape
-	t.Body.SetPos(func() Vec {
+	t.Text.SetPos(func() Vec {
 		switch t.Shape.(type) {
 		case *Rect, *CurvedRect:
 			p := t.Shape.GetPos()
@@ -42,7 +42,7 @@ func (t *TextBox) Draw(buf *FrameBuffer) {
 		}
 	}())
 
-	t.Body.Draw(buf)
+	t.Text.Draw(buf)
 
 	if t.isEditing {
 		// Draw cursor
@@ -56,7 +56,7 @@ func (t *TextBox) Update(win *Window) {
 	if win.MouseButtonState() == LeftClick {
 		if t.Shape.IsWithin(win.MouseLocation()) {
 			t.isEditing = true
-			win.engine.textMutator.Load(t.Body.Text())
+			win.engine.textMutator.Load(t.Text.Text())
 			t.selectedCB() // user-defined callback
 		} else {
 			t.isEditing = false
@@ -68,11 +68,11 @@ func (t *TextBox) Update(win *Window) {
 		t.SetText(win.engine.textMutator.String())
 	}
 
-	if t.Body.body != t.prevText {
+	if t.Text.body != t.prevText {
 		t.modifiedCB()
 	}
 
-	t.prevText = t.Body.body
+	t.prevText = t.Text.body
 }
 
 // SetSelectedCB sets the callback function which is triggered when the text box is selected.
@@ -96,7 +96,7 @@ func (t *TextBox) SetModifiedCB(fn func()) *TextBox {
 // Move moves the text box by a given vector.
 func (t *TextBox) Move(mov Vec) {
 	t.Shape.Move(mov)
-	t.Body.Move(mov)
+	t.Text.Move(mov)
 }
 
 // SetCallback configures a callback function to execute every time the text
@@ -119,54 +119,54 @@ func (t *TextBox) SetEditing(editMode bool) *TextBox {
 
 // SetText sets the text to the given string.
 func (t *TextBox) SetText(s string) *TextBox {
-	t.Body.SetText(s)
+	t.Text.SetText(s)
 	return t
 }
 
 // SetTextAlignment sets the alignment of the text relative to the text box.
 func (t *TextBox) SetTextAlignment(align Alignment) *TextBox {
-	t.Body.SetAlignment(align)
+	t.Text.SetAlignment(align)
 	return t
 }
 
 // SetTextOffset manually sets the text's offset, providing the text is in AlignCustom mode.
 func (t *TextBox) SetTextOffset(offset Vec) *TextBox {
-	t.Body.SetOffset(offset)
+	t.Text.SetOffset(offset)
 	return t
 }
 
 // SetTextColour sets the text colour.
 func (t *TextBox) SetTextColour(c color.Color) *TextBox {
-	t.Body.SetColour(c)
+	t.Text.SetColour(c)
 	return t
 }
 
 // SetTextFont sets the path fo the .ttf file that is used to generate the text.
 func (t *TextBox) SetTextFont(path string) *TextBox {
-	t.Body.SetFont(path)
+	t.Text.SetFont(path)
 	return t
 }
 
 // SetTextDPI sets the DPI of the text font.
 func (t *TextBox) SetTextDPI(dpi float64) *TextBox {
-	t.Body.SetDPI(dpi)
+	t.Text.SetDPI(dpi)
 	return t
 }
 
 // SetTextSize sets the size of the text font.
 func (t *TextBox) SetTextSize(size float64) *TextBox {
-	t.Body.SetSize(size)
+	t.Text.SetSize(size)
 	return t
 }
 
 // SetTextSpacing sets the line spacing of the text.
 func (t *TextBox) SetTextSpacing(spacing float64) *TextBox {
-	t.Body.SetSpacing(spacing)
+	t.Text.SetSpacing(spacing)
 	return t
 }
 
 // SetTextMaskSize sets the size of the mask used to generate the text.
 func (t *TextBox) SetTextMaskSize(w, h int) *TextBox {
-	t.Body.SetMaskSize(w, h)
+	t.Text.SetMaskSize(w, h)
 	return t
 }
