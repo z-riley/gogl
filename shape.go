@@ -358,7 +358,7 @@ func (r *CurvedRect) Draw(buf *FrameBuffer) {
 		WithStyle(Style{r.style.Colour, 0, 0}),
 	).Draw(buf)
 	NewRect(
-		r.w-2*(r.radius), subRectHeight, Vec{r.Pos.X + r.radius, r.Pos.Y + float64(r.h) - float64(subRectHeight)},
+		r.w-2*(r.radius), subRectHeight, Vec{r.Pos.X + r.radius, r.Pos.Y + r.h - subRectHeight},
 		WithStyle(Style{r.style.Colour, 0, 0}),
 	).Draw(buf)
 	NewRect(
@@ -366,7 +366,7 @@ func (r *CurvedRect) Draw(buf *FrameBuffer) {
 		WithStyle(Style{r.style.Colour, 0, 0}),
 	).Draw(buf)
 	NewRect(
-		subRectWidth, r.h-2*r.radius, Vec{r.Pos.X + float64(r.w) - float64(subRectWidth), r.Pos.Y + r.radius},
+		subRectWidth, r.h-2*r.radius, Vec{r.Pos.X + r.w - subRectWidth, r.Pos.Y + r.radius},
 		WithStyle(Style{r.style.Colour, 0, 0}),
 	).Draw(buf)
 
@@ -376,7 +376,15 @@ func (r *CurvedRect) Draw(buf *FrameBuffer) {
 		for x := bbox.Pos.X; x <= bbox.Pos.X+bbox.w; x++ {
 			for y := bbox.Pos.Y; y <= bbox.Pos.Y+bbox.h; y++ {
 				dist := Dist(origin, Vec{x, y})
-				withinCircle := dist > r.radius-r.style.Thickness && dist <= r.radius
+
+				withinCircle := func() bool {
+					if r.style.Thickness == 0 {
+						return dist <= r.radius
+					} else {
+						return dist <= r.radius && dist > r.radius-r.style.Thickness
+					}
+				}()
+
 				if withinCircle {
 					buf.SetPixel(int(math.Round(y)), int(math.Round(x)), NewPixel(r.style.Colour))
 				}
