@@ -371,34 +371,35 @@ func (r *CurvedRect) Draw(buf *FrameBuffer) {
 	).Draw(buf)
 
 	// Draw rounded corners
-	// TODO: optimise this by constraining the curved corners using a smaller bounding box
-	// rather than with isCorrectDirection()
-	drawCorner := func(pos Vec, isCorrectDirection func(Vec, Vec) bool) {
+	drawCorner := func(bbox *Rect, origin Vec) {
 		// Iterate over every pixel in the bounding box
-		bbox := NewRect(2*r.radius, 2*r.radius, Vec{pos.X - (r.radius), pos.Y - (r.radius)})
-		for i := bbox.Pos.X; i <= bbox.Pos.X+bbox.w; i++ {
-			for j := bbox.Pos.Y; j <= bbox.Pos.Y+bbox.h; j++ {
-				// Draw pixel if it's close enough to centre and in the right direction
-				dist := Dist(pos, Vec{i, j})
-				withinCircle := dist >= r.radius-subRectWidth && dist <= r.radius
-				if withinCircle && isCorrectDirection(Vec{i, j}, pos) {
-					buf.SetPixel(int(math.Round(j)), int(math.Round(i)), NewPixel(r.style.Colour))
+		for x := bbox.Pos.X; x <= bbox.Pos.X+bbox.w; x++ {
+			for y := bbox.Pos.Y; y <= bbox.Pos.Y+bbox.h; y++ {
+				dist := Dist(origin, Vec{x, y})
+				withinCircle := dist > r.radius-r.style.Thickness && dist <= r.radius
+				if withinCircle {
+					buf.SetPixel(int(math.Round(y)), int(math.Round(x)), NewPixel(r.style.Colour))
 				}
 			}
 		}
 	}
+
 	// Top left
-	drawCorner(Vec{r.Pos.X + r.radius, r.Pos.Y + r.radius},
-		func(pixelPos, p Vec) bool { return Theta(Rightwards, Sub(pixelPos, p)) >= math.Pi/2 })
+	bboxSize := r.radius
+	bbox := NewRect(bboxSize, bboxSize, Vec{r.Pos.X, r.Pos.Y})
+	drawCorner(bbox, Vec{bbox.Pos.X + bbox.w, bbox.Pos.Y + bbox.h})
+
 	// Top right
-	drawCorner(Vec{r.Pos.X + r.w - r.radius, r.Pos.Y + r.radius},
-		func(pixelPos, p Vec) bool { return Theta(Leftwards, Sub(p, pixelPos)) <= math.Pi/2 })
+	bbox = NewRect(bboxSize, bboxSize, Vec{r.Pos.X + r.w - r.radius, r.Pos.Y})
+	drawCorner(bbox, Vec{bbox.Pos.X, bbox.Pos.Y + bbox.h})
+
 	// Bottom left
-	drawCorner(Vec{r.Pos.X + r.radius, r.Pos.Y + r.h - r.radius},
-		func(pixelPos, p Vec) bool { return Theta(Leftwards, Sub(pixelPos, p)) <= math.Pi/2 })
+	bbox = NewRect(bboxSize, bboxSize, Vec{r.Pos.X, r.Pos.Y + r.h - r.radius})
+	drawCorner(bbox, Vec{bbox.Pos.X + bbox.w, bbox.Pos.Y})
+
 	// Bottom right
-	drawCorner(Vec{r.Pos.X + r.w - r.radius, r.Pos.Y + r.h - r.radius},
-		func(pixelPos, p Vec) bool { return Theta(Rightwards, Sub(p, pixelPos)) >= math.Pi/2 })
+	bbox = NewRect(bboxSize, bboxSize, Vec{r.Pos.X + r.w - r.radius, r.Pos.Y + r.h - r.radius})
+	drawCorner(bbox, Vec{bbox.Pos.X, bbox.Pos.Y})
 
 	if r.style.Bloom > 0 {
 		r.drawBloom(buf)
@@ -442,8 +443,7 @@ func (r *CurvedRect) drawBloom(buf *FrameBuffer) {
 					r, g, b, a := RGBA8(r.style.Colour)
 
 					bloomColour := color.RGBA{r, g, b, uint8(brightness * float64(a))}
-					xInt, yInt := int(math.Round(x)), int(math.Round(y))
-					buf.SetPixel(yInt, xInt, NewPixel(bloomColour))
+					buf.SetPixel(int(math.Round(y)), int(math.Round(x)), NewPixel(bloomColour))
 				}
 			}
 		}

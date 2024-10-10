@@ -76,7 +76,7 @@ func main() {
 	curvedRect := tgl.NewCurvedRect(
 		120, 90, 12,
 		tgl.Vec{X: 50, Y: 200},
-		tgl.WithStyle(tgl.Style{Colour: tgl.LighSkyBlue, Thickness: 8, Bloom: 15}),
+		tgl.WithStyle(tgl.Style{Colour: tgl.Orange, Thickness: 8, Bloom: 0}),
 	)
 
 	// Put shapes on the background layer to avoid interactions with other shapes
