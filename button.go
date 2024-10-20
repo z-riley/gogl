@@ -110,6 +110,12 @@ func (b *Button) Update(win *Window) {
 	b.prevMouseLoc = win.MouseLocation()
 }
 
+// SetBehaviour sets how the button responds to being pressed.
+func (b *Button) SetBehaviour(behaviour ButtonBehaviour) *Button {
+	b.Behaviour = behaviour
+	return b
+}
+
 // Move moves the button by a given vector.
 func (b *Button) Move(mov Vec) {
 	b.Shape.Move(mov)
