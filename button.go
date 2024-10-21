@@ -15,6 +15,7 @@ type Button struct {
 	Shape     hoverable                // the base shape the button is built on
 	Label     *Text                    // the text to display on the button (if any)
 	Callbacks map[ButtonTrigger]func() // mapping of triggers to callback functions
+	IsEnabled bool                     // stops callbacks from executing if false
 
 	prevMouseState MouseState
 	prevHovering   bool
@@ -64,30 +65,32 @@ func (b *Button) Update(win *Window) {
 	mouseState := win.MouseButtonState()
 	hovering := b.Shape.IsWithin(win.MouseLocation())
 
-	for trigger, cb := range b.Callbacks {
-		stateMatchesTrigger := func() bool {
-			switch {
-			case trigger.Behaviour == OnAll:
-				return true
+	if b.IsEnabled {
+		for trigger, cb := range b.Callbacks {
+			stateMatchesTrigger := func() bool {
+				switch {
+				case trigger.Behaviour == OnAll:
+					return true
 
-			case (hovering && b.prevMouseState != trigger.State && mouseState == trigger.State),
-				(trigger.State == (NoClick) && !b.prevHovering && hovering):
-				return trigger.Behaviour == OnPress || trigger.Behaviour == OnPressAndRelease
+				case (hovering && b.prevMouseState != trigger.State && mouseState == trigger.State),
+					(trigger.State == (NoClick) && !b.prevHovering && hovering):
+					return trigger.Behaviour == OnPress || trigger.Behaviour == OnPressAndRelease
 
-			case (hovering && b.prevMouseState == trigger.State && mouseState != trigger.State),
-				(trigger.State == (NoClick) && b.prevHovering && !hovering):
-				return trigger.Behaviour == OnRelease || trigger.Behaviour == OnPressAndRelease
+				case (hovering && b.prevMouseState == trigger.State && mouseState != trigger.State),
+					(trigger.State == (NoClick) && b.prevHovering && !hovering):
+					return trigger.Behaviour == OnRelease || trigger.Behaviour == OnPressAndRelease
 
-			case hovering && mouseState == trigger.State:
-				return trigger.Behaviour == OnHold
+				case hovering && mouseState == trigger.State:
+					return trigger.Behaviour == OnHold
 
-			default:
-				return false
+				default:
+					return false
+				}
+			}()
+
+			if stateMatchesTrigger {
+				cb()
 			}
-		}()
-
-		if stateMatchesTrigger {
-			cb()
 		}
 	}
 
@@ -114,6 +117,18 @@ func (b *Button) SetCallback(trigger ButtonTrigger, callback func()) *Button {
 // nothing will happen.
 func (b *Button) UnsetCallback(trigger ButtonTrigger) *Button {
 	delete(b.Callbacks, trigger)
+	return b
+}
+
+// Disable disables the button. If it is already disabled, nothing happens.
+func (b *Button) Disable() *Button {
+	b.IsEnabled = false
+	return b
+}
+
+// Enable enables the button. If it is already enabled, nothing happens.
+func (b *Button) Enable() *Button {
+	b.IsEnabled = true
 	return b
 }
 
