@@ -28,6 +28,7 @@ func NewButton(shape hoverable, fontPath string) *Button {
 		Shape:     shape,
 		Label:     NewText("", shape.GetPos(), fontPath),
 		Callbacks: make(map[ButtonTrigger]func()),
+		IsEnabled: true,
 	}
 }
 
