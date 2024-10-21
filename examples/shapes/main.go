@@ -44,22 +44,26 @@ func main() {
 		SetLabelText("Press me").
 		SetLabelSize(16).
 		SetLabelColour(color.White)
-	circleButton.SetCallback(func(m tgl.MouseState) {
-		// Callback executes after every update
-		switch {
-		case m == tgl.LeftClick:
-			if circleButton.IsHovering() {
-				c.SetStyle(stylePressed)
-				circleButton.SetLabelText("Pressed!")
-			}
-		case circleButton.IsHovering():
+	circleButton.SetCallback(tgl.ButtonTrigger{State: tgl.NoClick, Behaviour: tgl.OnHold},
+		func() {
 			c.SetStyle(styleHover)
 			circleButton.SetLabelText("Hovering")
-		default:
-			c.SetStyle(styleUnpressed)
-			circleButton.SetLabelText("Press me")
-		}
-	})
+		}).
+		SetCallback(tgl.ButtonTrigger{State: tgl.NoClick, Behaviour: tgl.OnRelease},
+			func() {
+				c.SetStyle(styleUnpressed)
+				circleButton.SetLabelText("Press me")
+			}).
+		SetCallback(tgl.ButtonTrigger{State: tgl.LeftClick, Behaviour: tgl.OnPress},
+			func() {
+				c.SetStyle(stylePressed)
+				circleButton.SetLabelText("Pressed!")
+			}).
+		SetCallback(tgl.ButtonTrigger{State: tgl.LeftClick, Behaviour: tgl.OnRelease},
+			func() {
+				c.SetStyle(styleUnpressed)
+				circleButton.SetLabelText("Press me")
+			})
 	circleButton.Label.SetAlignment(tgl.AlignBottomCentre)
 
 	// More complex shapes with limited feature sets can also be created
@@ -74,9 +78,9 @@ func main() {
 		SetSize(40)
 
 	curvedRect := tgl.NewCurvedRect(
-		120, 90, 12,
+		120, 90, 20,
 		tgl.Vec{X: 50, Y: 200},
-		tgl.WithStyle(tgl.Style{Colour: tgl.Orange, Thickness: 8, Bloom: 0}),
+		tgl.WithStyle(tgl.Style{Colour: tgl.Orange, Thickness: 10, Bloom: 0}),
 	)
 
 	// Put shapes on the background layer to avoid interactions with other shapes
@@ -122,6 +126,10 @@ func main() {
 	for win.IsRunning() {
 		win.SetBackground(color.RGBA{35, 39, 46, 255})
 
+		// Dynamic components' Update method must be called
+		circleButton.Update(win)
+		txtBox.Update(win)
+
 		// Draw foreground shapes
 		for _, shape := range []tgl.Drawable{
 			rectSolid,
@@ -144,10 +152,6 @@ func main() {
 		} {
 			win.DrawBackground(shape)
 		}
-
-		// Dynamic components' Update method must be called
-		circleButton.Update(win)
-		txtBox.Update(win)
 
 		// Lastly, the window must be updated
 		win.Update()

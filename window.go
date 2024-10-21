@@ -221,6 +221,22 @@ const (
 	LeftAndRightClick MouseState = 5
 )
 
+// String returns the mouse state as a string.
+func (m MouseState) String() string {
+	switch m {
+	case NoClick:
+		return "no click"
+	case LeftClick:
+		return "left click"
+	case RightClick:
+		return "right click"
+	case LeftAndRightClick:
+		return "left and right click"
+	default:
+		return "invalid"
+	}
+}
+
 // MouseButtonState returns the current state of the mouse buttons.
 func (w *Window) MouseButtonState() MouseState {
 	_, _, s := sdl.GetMouseState()
