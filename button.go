@@ -39,7 +39,7 @@ func (b *Button) Draw(buf *FrameBuffer) {
 	// Align to centre of underlying shape
 	b.Label.SetPos(func() Vec {
 		switch b.Shape.(type) {
-		case *Rect:
+		case *Rect, *CurvedRect:
 			p := b.Shape.GetPos()
 			return Vec{p.X + b.Shape.Width()/2, p.Y + b.Shape.Height()/2}
 		default:

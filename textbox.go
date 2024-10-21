@@ -16,7 +16,7 @@ type TextBox struct {
 	prevText  string
 }
 
-// NewTextBox constructs a new text box from a shape.
+// NewTextBox constructs a new text box from a hoverable shape.
 func NewTextBox(shape hoverable, fontPath string) *TextBox {
 	return &TextBox{
 		Shape:        shape,
