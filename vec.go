@@ -29,6 +29,11 @@ func (v Vec) Rotate(theta float64) Vec {
 	}
 }
 
+// Round rounds the components of the vector to the nearest whole numbers.
+func (v Vec) Round() Vec {
+	return Vec{math.Round(v.X), math.Round(v.Y)}
+}
+
 // Normalise returns a unit vector with the same direction.
 func Normalise(v Vec) Vec {
 	mag := v.Mag()
