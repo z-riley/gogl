@@ -5,11 +5,11 @@ import (
 	"image/color"
 	"time"
 
-	tgl "github.com/z-riley/turdgl"
+	"github.com/z-riley/turdgl"
 )
 
 func main() {
-	win, err := tgl.NewWindow(tgl.WindowCfg{
+	win, err := turdgl.NewWindow(turdgl.WindowCfg{
 		Title:  "Basic Shapes Example",
 		Width:  1024,
 		Height: 768,
@@ -23,7 +23,7 @@ func main() {
 	frames := 0
 	second := time.Tick(time.Second)
 
-	polygon := tgl.NewPolygon([]tgl.Vec{
+	polygon := turdgl.NewPolygon([]turdgl.Vec{
 		{X: 560, Y: 120},
 		{X: 450, Y: 340},
 		{X: 250, Y: 220},
@@ -33,15 +33,15 @@ func main() {
 		{X: 800, Y: 600},
 		{X: 830, Y: 240},
 		{X: 680, Y: 250},
-	}).SetStyle(tgl.Style{Colour: color.RGBA{20, 70, 20, 255}})
+	}).SetStyle(turdgl.Style{Colour: color.RGBA{20, 70, 20, 255}})
 
-	txt := tgl.NewText("Press E to move", tgl.Vec{X: 100, Y: 600}, "../../fonts/arial.ttf").
+	txt := turdgl.NewText("Press E to move", turdgl.Vec{X: 100, Y: 600}, "../../fonts/arial.ttf").
 		SetColour(color.RGBA{255, 255, 255, 255})
 
 	// Keybinds
-	win.RegisterKeybind(tgl.KeyEscape, tgl.KeyPress, func() { win.Quit() })
-	win.RegisterKeybind(tgl.KeyLCtrl, tgl.KeyPress, func() { win.Quit() })
-	win.RegisterKeybind(tgl.KeyE, tgl.Instantaneous, func() { polygon.Move(tgl.Vec{X: 1, Y: 1}) })
+	win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyPress, func() { win.Quit() })
+	win.RegisterKeybind(turdgl.KeyLCtrl, turdgl.KeyPress, func() { win.Quit() })
+	win.RegisterKeybind(turdgl.KeyE, turdgl.Instantaneous, func() { polygon.Move(turdgl.Vec{X: 1, Y: 1}) })
 
 	for win.IsRunning() {
 		win.SetBackground(color.Black)

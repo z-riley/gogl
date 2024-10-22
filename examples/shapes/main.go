@@ -5,11 +5,11 @@ import (
 	"image/color"
 	"time"
 
-	tgl "github.com/z-riley/turdgl"
+	"github.com/z-riley/turdgl"
 )
 
 func main() {
-	win, err := tgl.NewWindow(tgl.WindowCfg{
+	win, err := turdgl.NewWindow(turdgl.WindowCfg{
 		Title:  "Basic Shapes Example",
 		Width:  1200,
 		Height: 768,
@@ -24,104 +24,104 @@ func main() {
 	second := time.Tick(time.Second)
 
 	// Shapes can be filled or have an outline of specified thickness
-	rectSolid := tgl.NewRect(
+	rectSolid := turdgl.NewRect(
 		120, 90,
-		tgl.Vec{X: 50, Y: 50},
-		tgl.WithStyle(tgl.Style{Colour: color.RGBA{0, 0, 255, 255}, Thickness: 0, Bloom: 30}),
+		turdgl.Vec{X: 50, Y: 50},
+		turdgl.WithStyle(turdgl.Style{Colour: color.RGBA{0, 0, 255, 255}, Thickness: 0, Bloom: 30}),
 	)
-	rectOutline := tgl.NewRect(
+	rectOutline := turdgl.NewRect(
 		120, 90,
-		tgl.Vec{X: 50, Y: 50},
-		tgl.WithStyle(tgl.Style{Colour: color.RGBA{255, 0, 0, 255}, Thickness: 2}),
+		turdgl.Vec{X: 50, Y: 50},
+		turdgl.WithStyle(turdgl.Style{Colour: color.RGBA{255, 0, 0, 255}, Thickness: 2}),
 	)
 
 	// Buttons can be constructed from shapes
-	styleHover := tgl.Style{Colour: color.RGBA{180, 180, 0, 255}, Thickness: 0, Bloom: 5}
-	stylePressed := tgl.Style{Colour: color.RGBA{255, 0, 0, 255}, Thickness: 0, Bloom: 10}
-	styleUnpressed := tgl.Style{Colour: color.RGBA{80, 0, 0, 255}, Thickness: 30}
-	c := tgl.NewCircle(100, tgl.Vec{X: 300, Y: 100}, tgl.WithStyle(styleUnpressed))
-	circleButton := tgl.NewButton(c, "../../fonts/arial.ttf").
+	styleHover := turdgl.Style{Colour: color.RGBA{180, 180, 0, 255}, Thickness: 0, Bloom: 5}
+	stylePressed := turdgl.Style{Colour: color.RGBA{255, 0, 0, 255}, Thickness: 0, Bloom: 10}
+	styleUnpressed := turdgl.Style{Colour: color.RGBA{80, 0, 0, 255}, Thickness: 30}
+	c := turdgl.NewCircle(100, turdgl.Vec{X: 300, Y: 100}, turdgl.WithStyle(styleUnpressed))
+	circleButton := turdgl.NewButton(c, "../../fonts/arial.ttf").
 		SetLabelText("Press me").
 		SetLabelSize(16).
 		SetLabelColour(color.White)
-	circleButton.SetCallback(tgl.ButtonTrigger{State: tgl.NoClick, Behaviour: tgl.OnHold},
+	circleButton.SetCallback(turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnHold},
 		func() {
 			c.SetStyle(styleHover)
 			circleButton.SetLabelText("Hovering")
 		}).
-		SetCallback(tgl.ButtonTrigger{State: tgl.NoClick, Behaviour: tgl.OnRelease},
+		SetCallback(turdgl.ButtonTrigger{State: turdgl.NoClick, Behaviour: turdgl.OnRelease},
 			func() {
 				c.SetStyle(styleUnpressed)
 				circleButton.SetLabelText("Press me")
 			}).
-		SetCallback(tgl.ButtonTrigger{State: tgl.LeftClick, Behaviour: tgl.OnPress},
+		SetCallback(turdgl.ButtonTrigger{State: turdgl.LeftClick, Behaviour: turdgl.OnPress},
 			func() {
 				c.SetStyle(stylePressed)
 				circleButton.SetLabelText("Pressed!")
 			}).
-		SetCallback(tgl.ButtonTrigger{State: tgl.LeftClick, Behaviour: tgl.OnRelease},
+		SetCallback(turdgl.ButtonTrigger{State: turdgl.LeftClick, Behaviour: turdgl.OnRelease},
 			func() {
 				c.SetStyle(styleUnpressed)
 				circleButton.SetLabelText("Press me")
 			})
-	circleButton.Label.SetAlignment(tgl.AlignBottomCentre)
+	circleButton.Label.SetAlignment(turdgl.AlignBottomCentre)
 
 	// More complex shapes with limited feature sets can also be created
-	triangle := tgl.NewTriangle(
-		tgl.Vec{X: 400, Y: 50},
-		tgl.Vec{X: 580, Y: 120},
-		tgl.Vec{X: 450, Y: 130},
-	).SetStyle(tgl.Style{Colour: color.RGBA{100, 10, 100, 255}})
+	triangle := turdgl.NewTriangle(
+		turdgl.Vec{X: 400, Y: 50},
+		turdgl.Vec{X: 580, Y: 120},
+		turdgl.Vec{X: 450, Y: 130},
+	).SetStyle(turdgl.Style{Colour: color.RGBA{100, 10, 100, 255}})
 
-	txt := tgl.NewText("Hello there", tgl.Vec{X: 800, Y: 80}, "../../fonts/arial.ttf").
+	txt := turdgl.NewText("Hello there", turdgl.Vec{X: 800, Y: 80}, "../../fonts/arial.ttf").
 		SetColour(color.RGBA{255, 255, 255, 255}).
 		SetSize(40)
 
-	curvedRect := tgl.NewCurvedRect(
+	curvedRect := turdgl.NewCurvedRect(
 		120, 90, 20,
-		tgl.Vec{X: 50, Y: 200},
-		tgl.WithStyle(tgl.Style{Colour: tgl.Orange, Thickness: 10, Bloom: 0}),
+		turdgl.Vec{X: 50, Y: 200},
+		turdgl.WithStyle(turdgl.Style{Colour: turdgl.Orange, Thickness: 10, Bloom: 0}),
 	)
 
 	// Put shapes on the background layer to avoid interactions with other shapes
-	bgRect := tgl.NewRect(
+	bgRect := turdgl.NewRect(
 		120, 90,
-		tgl.Vec{X: 250, Y: 200},
-		tgl.WithStyle(tgl.Style{Colour: color.RGBA{175, 136, 90, 255}, Thickness: 0}),
+		turdgl.Vec{X: 250, Y: 200},
+		turdgl.WithStyle(turdgl.Style{Colour: color.RGBA{175, 136, 90, 255}, Thickness: 0}),
 	)
-	fgRect := tgl.NewRect(
+	fgRect := turdgl.NewRect(
 		120, 90,
-		tgl.Vec{X: 280, Y: 230},
-		tgl.WithStyle(tgl.Style{Colour: tgl.RosyBrown, Thickness: 0}),
+		turdgl.Vec{X: 280, Y: 230},
+		turdgl.WithStyle(turdgl.Style{Colour: turdgl.RosyBrown, Thickness: 0}),
 	)
-	txtBox := tgl.NewTextBox(fgRect, "../../fonts/arial.ttf").
+	txtBox := turdgl.NewTextBox(fgRect, "../../fonts/arial.ttf").
 		SetText("Click to edit text").
 		SetTextSize(46).
 		SetTextColour(color.RGBA{100, 255, 100, 100})
-	txtBox.SetSelectedCB(func() { txtBox.SetTextColour(tgl.Yellow) })
+	txtBox.SetSelectedCB(func() { txtBox.SetTextColour(turdgl.Yellow) })
 	txtBox.SetDeselectedCB(func() { txtBox.SetTextColour(color.RGBA{100, 255, 100, 200}) })
 
 	// Set variable alpha values to blend shape colours
-	circleRed := tgl.NewCircle(
+	circleRed := turdgl.NewCircle(
 		100,
-		tgl.Vec{X: 550, Y: 210},
-		tgl.WithStyle(tgl.Style{Colour: color.RGBA{255, 0, 0, 100}}),
+		turdgl.Vec{X: 550, Y: 210},
+		turdgl.WithStyle(turdgl.Style{Colour: color.RGBA{255, 0, 0, 100}}),
 	)
-	circleGreen := tgl.NewCircle(
+	circleGreen := turdgl.NewCircle(
 		100,
-		tgl.Vec{X: 580, Y: 260},
-		tgl.WithStyle(tgl.Style{Colour: color.RGBA{0, 255, 0, 100}}),
+		turdgl.Vec{X: 580, Y: 260},
+		turdgl.WithStyle(turdgl.Style{Colour: color.RGBA{0, 255, 0, 100}}),
 	)
-	circleBlue := tgl.NewCircle(
+	circleBlue := turdgl.NewCircle(
 		100,
-		tgl.Vec{X: 520, Y: 260},
-		tgl.WithStyle(tgl.Style{Colour: color.RGBA{0, 0, 255, 100}}),
+		turdgl.Vec{X: 520, Y: 260},
+		turdgl.WithStyle(turdgl.Style{Colour: color.RGBA{0, 0, 255, 100}}),
 	)
 
 	// Register window-level keybinds
-	win.RegisterKeybind(tgl.KeyEscape, tgl.KeyPress, func() { win.Quit() })
-	win.RegisterKeybind(tgl.KeyLCtrl, tgl.KeyPress, func() { win.Quit() })
-	win.RegisterKeybind(tgl.KeyE, tgl.Instantaneous, func() { rectSolid.Move(tgl.Vec{X: 2, Y: 2}) })
+	win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyPress, func() { win.Quit() })
+	win.RegisterKeybind(turdgl.KeyLCtrl, turdgl.KeyPress, func() { win.Quit() })
+	win.RegisterKeybind(turdgl.KeyE, turdgl.Instantaneous, func() { rectSolid.Move(turdgl.Vec{X: 2, Y: 2}) })
 
 	for win.IsRunning() {
 		win.SetBackground(color.RGBA{35, 39, 46, 255})
@@ -131,7 +131,7 @@ func main() {
 		txtBox.Update(win)
 
 		// Draw foreground shapes
-		for _, shape := range []tgl.Drawable{
+		for _, shape := range []turdgl.Drawable{
 			rectSolid,
 			rectOutline,
 			curvedRect,
@@ -147,7 +147,7 @@ func main() {
 		}
 
 		// Shapes drawn to the background appear behind foreground shapes
-		for _, shape := range []tgl.Drawable{
+		for _, shape := range []turdgl.Drawable{
 			bgRect,
 		} {
 			win.DrawBackground(shape)

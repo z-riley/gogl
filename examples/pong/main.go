@@ -5,12 +5,12 @@ import (
 	"image/color"
 	"time"
 
-	tgl "github.com/z-riley/turdgl"
+	"github.com/z-riley/turdgl"
 	"golang.org/x/exp/constraints"
 )
 
 func main() {
-	win, err := tgl.NewWindow(tgl.WindowCfg{
+	win, err := turdgl.NewWindow(turdgl.WindowCfg{
 		Title:  "Pong Example",
 		Width:  1024,
 		Height: 768,
@@ -25,21 +25,21 @@ func main() {
 	second := time.Tick(time.Second)
 
 	// Shapes
-	paddleLeft := NewPaddle(tgl.Vec{X: 50, Y: 200})
-	paddleRight := NewPaddle(tgl.Vec{X: float64(win.GetConfig().Width) - 50, Y: 200})
-	ball := NewBall(tgl.Vec{
+	paddleLeft := NewPaddle(turdgl.Vec{X: 50, Y: 200})
+	paddleRight := NewPaddle(turdgl.Vec{X: float64(win.GetConfig().Width) - 50, Y: 200})
+	ball := NewBall(turdgl.Vec{
 		X: float64(win.GetConfig().Width / 2),
 		Y: float64(win.GetConfig().Height / 2),
 	})
-	scores := tgl.NewText("0 | 0", tgl.Vec{X: 470, Y: 20}, "../../fonts/arial.ttf").
+	scores := turdgl.NewText("0 | 0", turdgl.Vec{X: 470, Y: 20}, "../../fonts/arial.ttf").
 		SetSize(34).SetColour(color.White)
 	setScore := func(left, right int) {
 		scores.SetText(fmt.Sprintf("%d | %d", left, right))
 	}
 
 	// Keybinds
-	win.RegisterKeybind(tgl.KeyEscape, tgl.KeyPress, func() { win.Quit() })
-	win.RegisterKeybind(tgl.KeyLCtrl, tgl.KeyPress, func() { win.Quit() })
+	win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyPress, func() { win.Quit() })
+	win.RegisterKeybind(turdgl.KeyLCtrl, turdgl.KeyPress, func() { win.Quit() })
 
 	// Game state
 	leftScore := 0
@@ -51,16 +51,16 @@ func main() {
 		prevTime = time.Now()
 
 		// React to pressed keys
-		if win.KeyIsPressed(tgl.KeyW) {
+		if win.KeyIsPressed(turdgl.KeyW) {
 			paddleLeft.MovePos(dirUp, dt, win.Framebuffer)
 		}
-		if win.KeyIsPressed(tgl.KeyS) {
+		if win.KeyIsPressed(turdgl.KeyS) {
 			paddleLeft.MovePos(dirDown, dt, win.Framebuffer)
 		}
-		if win.KeyIsPressed(tgl.KeyUp) {
+		if win.KeyIsPressed(turdgl.KeyUp) {
 			paddleRight.MovePos(dirUp, dt, win.Framebuffer)
 		}
-		if win.KeyIsPressed(tgl.KeyDown) {
+		if win.KeyIsPressed(turdgl.KeyDown) {
 			paddleRight.MovePos(dirDown, dt, win.Framebuffer)
 		}
 
@@ -75,8 +75,8 @@ func main() {
 			rightScore++
 			setScore(leftScore, rightScore)
 		}
-		if tgl.IsColliding(ball.body, paddleLeft.body) ||
-			tgl.IsColliding(ball.body, paddleRight.body) {
+		if turdgl.IsColliding(ball.body, paddleLeft.body) ||
+			turdgl.IsColliding(ball.body, paddleRight.body) {
 			ball.velocity.X *= -1
 		}
 

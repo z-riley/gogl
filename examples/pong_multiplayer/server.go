@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/log"
-	tgl "github.com/z-riley/turdgl"
+	"github.com/z-riley/turdgl"
 )
 
 // Game contains the game's assets.
@@ -23,16 +23,16 @@ var gameServer Game
 
 // GameState contains the game's current state.
 type GameState struct {
-	LeftPaddlePos  tgl.Vec `json:"leftPaddlePos"`
-	RightPaddlePos tgl.Vec `json:"rightPaddlePos"`
-	BallPos        tgl.Vec `json:"ballPos"`
+	LeftPaddlePos  turdgl.Vec `json:"leftPaddlePos"`
+	RightPaddlePos turdgl.Vec `json:"rightPaddlePos"`
+	BallPos        turdgl.Vec `json:"ballPos"`
 }
 
 // pongServer is the entrypoint for a pong server instance.
 func pongServer() {
 	go NewServer("0.0.0.0", 3333).Run()
 
-	win, err := tgl.NewWindow(tgl.WindowCfg{
+	win, err := turdgl.NewWindow(turdgl.WindowCfg{
 		Title:  "Pong Server",
 		Width:  1024,
 		Height: 768,
@@ -47,9 +47,9 @@ func pongServer() {
 	second := time.Tick(time.Second)
 
 	// Shapes
-	gameServer.paddleLeft = NewPaddle(tgl.Vec{X: 50, Y: 200})
-	gameServer.paddleRight = NewPaddle(tgl.Vec{X: float64(win.GetConfig().Width) - 50, Y: 200})
-	gameServer.ball = NewBall(tgl.Vec{
+	gameServer.paddleLeft = NewPaddle(turdgl.Vec{X: 50, Y: 200})
+	gameServer.paddleRight = NewPaddle(turdgl.Vec{X: float64(win.GetConfig().Width) - 50, Y: 200})
+	gameServer.ball = NewBall(turdgl.Vec{
 		X: float64(win.GetConfig().Width / 2),
 		Y: float64(win.GetConfig().Height / 2),
 	})
@@ -60,16 +60,16 @@ func pongServer() {
 		prevTime = time.Now()
 
 		// React to pressed keys
-		if win.KeyIsPressed(tgl.KeyW) {
+		if win.KeyIsPressed(turdgl.KeyW) {
 			gameServer.paddleLeft.MovePos(dirUp, dt, win.Framebuffer)
 		}
-		if win.KeyIsPressed(tgl.KeyS) {
+		if win.KeyIsPressed(turdgl.KeyS) {
 			gameServer.paddleLeft.MovePos(dirDown, dt, win.Framebuffer)
 		}
 
 		gameServer.ball.Update(dt, win.Framebuffer)
-		if tgl.IsColliding(gameServer.ball.body, gameServer.paddleLeft.body) ||
-			tgl.IsColliding(gameServer.ball.body, gameServer.paddleRight.body) {
+		if turdgl.IsColliding(gameServer.ball.body, gameServer.paddleLeft.body) ||
+			turdgl.IsColliding(gameServer.ball.body, gameServer.paddleRight.body) {
 			gameServer.ball.velocity.X *= -1
 		}
 

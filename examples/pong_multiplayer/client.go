@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/charmbracelet/log"
-	tgl "github.com/z-riley/turdgl"
+	"github.com/z-riley/turdgl"
 )
 
 var gameClient Game
@@ -34,7 +34,7 @@ func pongClient() {
 
 // gameLoop is the main loop for the client.
 func gameLoop(conn *net.TCPConn) {
-	win, err := tgl.NewWindow(tgl.WindowCfg{
+	win, err := turdgl.NewWindow(turdgl.WindowCfg{
 		Title:  "Pong Client",
 		Width:  1024,
 		Height: 768,
@@ -49,9 +49,9 @@ func gameLoop(conn *net.TCPConn) {
 	second := time.Tick(time.Second)
 
 	// Shapes
-	gameClient.paddleLeft = NewPaddle(tgl.Vec{X: 50, Y: 200})
-	gameClient.paddleRight = NewPaddle(tgl.Vec{X: float64(win.GetConfig().Width) - 50, Y: 200})
-	gameClient.ball = NewBall(tgl.Vec{
+	gameClient.paddleLeft = NewPaddle(turdgl.Vec{X: 50, Y: 200})
+	gameClient.paddleRight = NewPaddle(turdgl.Vec{X: float64(win.GetConfig().Width) - 50, Y: 200})
+	gameClient.ball = NewBall(turdgl.Vec{
 		X: float64(win.GetConfig().Width / 2),
 		Y: float64(win.GetConfig().Height / 2),
 	})
@@ -62,17 +62,17 @@ func gameLoop(conn *net.TCPConn) {
 		prevTime = time.Now()
 
 		// React to pressed keys
-		if win.KeyIsPressed(tgl.KeyUp) {
+		if win.KeyIsPressed(turdgl.KeyUp) {
 			gameClient.paddleRight.MovePos(dirUp, dt, win.Framebuffer)
 		}
-		if win.KeyIsPressed(tgl.KeyDown) {
+		if win.KeyIsPressed(turdgl.KeyDown) {
 			gameClient.paddleRight.MovePos(dirDown, dt, win.Framebuffer)
 		}
 
 		// Ball movement
 		gameClient.ball.Update(dt, win.Framebuffer)
-		if tgl.IsColliding(gameClient.ball.body, gameClient.paddleLeft.body) ||
-			tgl.IsColliding(gameClient.ball.body, gameClient.paddleRight.body) {
+		if turdgl.IsColliding(gameClient.ball.body, gameClient.paddleLeft.body) ||
+			turdgl.IsColliding(gameClient.ball.body, gameClient.paddleRight.body) {
 			gameClient.ball.velocity.X *= -1
 		}
 
@@ -105,11 +105,11 @@ func gameLoop(conn *net.TCPConn) {
 
 // clientUpdate contains data to send to the server to update the game state.
 type ClientUpdate struct {
-	RightPaddlePos tgl.Vec `json:"rightPaddlePos"`
+	RightPaddlePos turdgl.Vec `json:"rightPaddlePos"`
 }
 
 // movePaddle sends a request to move the paddle to the game server.
-func movePaddle(conn *net.TCPConn, newPos tgl.Vec) error {
+func movePaddle(conn *net.TCPConn, newPos turdgl.Vec) error {
 	b, err := json.Marshal(ClientUpdate{RightPaddlePos: newPos})
 	if err != nil {
 		return fmt.Errorf("failed to marshal client update %w", err)
