@@ -45,25 +45,39 @@ func main() {
 		SetAlignment(turdgl.AlignBottomRight).
 		SetSize(50)
 	dynamicMarker := turdgl.NewRect(5, 5, dynamicAlignment.Pos())
-	go func() {
-		for {
-			for alignment, name := range map[turdgl.Alignment]string{
-				turdgl.AlignTopLeft:      "Top left alignment",
-				turdgl.AlignTopCentre:    "Top centre alignment",
-				turdgl.AlignTopRight:     "Top right alignment",
-				turdgl.AlignCentreLeft:   "Centre left alignment",
-				turdgl.AlignCentre:       "Centre alignment",
-				turdgl.AlignCentreRight:  "Centre right alignment",
-				turdgl.AlignBottomLeft:   "Bottom left alignment",
-				turdgl.AlignBottomCentre: "Bottom centre alignment",
-				turdgl.AlignBottomRight:  "Bottom right alignment",
-			} {
-				time.Sleep(time.Second)
-				dynamicAlignment.SetAlignment(alignment)
-				dynamicAlignment.SetText(name)
+	type alignPair struct {
+		alignment turdgl.Alignment
+		label     string
+	}
+	// Change alignment using mouse scroll wheel
+	alignments := []alignPair{
+		{turdgl.AlignTopLeft, "Top left alignment"},
+		{turdgl.AlignTopCentre, "Top centre alignment"},
+		{turdgl.AlignTopRight, "Top right alignment"},
+		{turdgl.AlignCentreLeft, "Centre left alignment"},
+		{turdgl.AlignCentre, "Centre alignment"},
+		{turdgl.AlignCentreRight, "Centre right alignment"},
+		{turdgl.AlignBottomLeft, "Bottom left alignment"},
+		{turdgl.AlignBottomCentre, "Bottom centre alignment"},
+		{turdgl.AlignBottomRight, "Bottom right alignment"},
+	}
+	i := 0
+	win.SetMouseScrollCallback(func(movement turdgl.Vec) {
+		if movement.IsScrollUp() {
+			i++
+			if i > len(alignments)-1 {
+				i = 0
+			}
+
+		} else if movement.IsScrollDown() {
+			i--
+			if i < 0 {
+				i = len(alignments) - 1
 			}
 		}
-	}()
+		dynamicAlignment.SetAlignment(alignments[i].alignment)
+		dynamicAlignment.SetText(alignments[i].label)
+	})
 
 	// Register window-level keybinds
 	win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyPress, func() { win.Quit() })

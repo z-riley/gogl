@@ -27,15 +27,17 @@ type engine struct {
 	backgroundDrawQueue []Drawable
 	running             bool
 	keyTracker          *keyTracker
+	mouseScrollTracker  *mouseScrollHandler
 	textMutator         *textMutator
 }
 
 // newEngine constructs a new turdgl engine.
 func newEngine() *engine {
 	return &engine{
-		running:     true,
-		keyTracker:  newKeyTracker(),
-		textMutator: newTextTracker(),
+		running:            true,
+		keyTracker:         newKeyTracker(),
+		mouseScrollTracker: newMouseScrollHandler(),
+		textMutator:        newTextTracker(),
 	}
 }
 
@@ -138,6 +140,11 @@ func (w *Window) UnregisterKeybind(key sdl.Keycode, mode KeybindMode) {
 	w.engine.keyTracker.unregisterKeybind(key, mode)
 }
 
+// SetMouseScrollCallback sets a callback to be executed on mouse scroll events.
+func (w *Window) SetMouseScrollCallback(cb MouseScrollCallback) {
+	w.engine.mouseScrollTracker.Callback = cb
+}
+
 // DropKeybinds unregisters all keybinds.
 func (w *Window) DropKeybinds() {
 	w.engine.keyTracker.dropKeybinds()
@@ -166,6 +173,8 @@ func (w *Window) Update() {
 			w.engine.textMutator.handleEvent(e)
 		case *sdl.TextInputEvent:
 			w.engine.textMutator.Append(e.GetText())
+		case *sdl.MouseWheelEvent:
+			w.engine.mouseScrollTracker.handleEvent(e)
 		}
 	}
 
