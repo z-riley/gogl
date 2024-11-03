@@ -285,14 +285,14 @@ func (t *Text) generateMask() error {
 			case AlignCentreRight:
 				return -w, h - (faceHeight * numLines / 2), nil
 			case AlignBottomLeft:
-				return 0, 0 - faceHeight*(numLines-1), nil
+				return 0, -faceHeight * (numLines - 1), nil
 			case AlignBottomCentre:
-				return -w / 2, 0 - faceHeight*(numLines-1), nil
+				return -w / 2, -faceHeight * (numLines - 1), nil
 			case AlignBottomRight:
-				return -w, 0 - faceHeight*(numLines-1), nil
+				return -w, -faceHeight * (numLines - 1), nil
 			case AlignCustom:
 				return -w/2 + int(math.Round(t.labelOffset.X)),
-					h - (faceHeight * numLines / 2) + int(math.Round(t.labelOffset.Y)),
+					-faceHeight*(numLines-1) + int(math.Round(t.labelOffset.Y)),
 					nil
 			default:
 				return 0, 0, errors.New("unsupported text alignment")
