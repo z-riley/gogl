@@ -1,8 +1,11 @@
 package turdgl
 
 import (
+	"errors"
+	"fmt"
 	"image"
 	"image/color"
+	"image/png"
 	"math"
 	"os"
 	"strings"
@@ -69,49 +72,18 @@ func NewText(body string, pos Vec, fontPath string) *Text {
 
 // Draw draws the text onto the provided frame buffer.
 func (t *Text) Draw(buf *FrameBuffer) {
-	// Calculate position offset depending on alignment config
-	bbox := t.textBoundry()
-	textOffset := func() Vec {
-		switch t.alignment {
-		case AlignTopLeft:
-			return Vec{0, 0}
-		case AlignTopCentre:
-			return Vec{-bbox.w / 2, 0}
-		case AlignTopRight:
-			return Vec{-bbox.w, 0}
-		case AlignCentreLeft:
-			return Vec{0, -bbox.h / 2}
-		case AlignCentre:
-			return Vec{-bbox.w / 2, -bbox.h / 2}
-		case AlignCentreRight:
-			return Vec{-bbox.w, 0 - bbox.h/2}
-		case AlignBottomLeft:
-			return Vec{0, -bbox.h}
-		case AlignBottomCentre:
-			return Vec{-bbox.w / 2, -bbox.h}
-		case AlignBottomRight:
-			return Vec{-bbox.w, -bbox.h}
-		case AlignCustom:
-			return Vec{(-bbox.w / 2) + t.labelOffset.X, (-bbox.h / 2) + t.labelOffset.Y}
-		default:
-			panic("Unsupported text alignment")
-		}
-	}()
-
 	// Write pixels to frame buffer
+	bbox := t.textBoundry()
 	r, g, b, a := RGBA8(t.colour)
 	startX, startY := int(bbox.Pos.X), int(bbox.Pos.Y)
-	endX, endY := startX+int(bbox.w), startY+int(bbox.h)
-	for i := startY; i < endY; i++ {
-		for j := startX; j < endX; j++ {
-			maskRGBA := t.mask.RGBAAt(j, i)
+	endX, endY := startX+int(bbox.w)+100, startY+int(bbox.h)+100
+	for y := startY; y < endY; y++ {
+		for x := startX; x < endX; x++ {
+			maskRGBA := t.mask.RGBAAt(x, y)
 			if maskRGBA.A > 0 {
-				x := j + int(math.Round(textOffset.X))
-				y := i + int(math.Round(textOffset.Y))
-
-				// OpenType reduces the RGB values of boarder pixels for anti-aliasing.
-				// However, we will are using alpha blending, so reset the RBG values to
-				// their original, and only keep the alpha.
+				// OpenType reduces the RGB values of border pixels for anti-aliasing.
+				// However, we are using alpha blending, so reset the RBG values to their
+				// original, and only keep the alpha channel.
 				aaPixel := maskRGBA.A < a
 				if aaPixel {
 					buf.SetPixel(y, x, NewPixel(color.RGBA{r, g, b, maskRGBA.A}))
@@ -259,36 +231,99 @@ func (t *Text) SetMaskSize(w, h int) *Text {
 // generateMask regenerates the mask used to generate the font pixel grid.
 // It should be called any time the text settings change.
 func (t *Text) generateMask() error {
+	// Load the font face
 	face, err := opentype.NewFace(t.font, &opentype.FaceOptions{
 		Size:    t.size,
 		DPI:     t.dpi,
 		Hinting: font.HintingFull,
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create font face: %w", err)
 	}
 	defer face.Close()
 
-	img := image.NewRGBA(image.Rect(0, 0, t.width, t.height))
+	// TODO: This could be optimised to only be the size of the text instead of the entire window
+	mask := image.NewRGBA(image.Rect(
+		0, 0,
+		t.width, t.height,
+	))
+
 	d := &font.Drawer{
-		Dst:  img,
+		Dst:  mask,
 		Src:  image.NewUniform(t.colour),
 		Face: face,
-		Dot:  fixed.P(int(t.pos.X), int(t.pos.Y)), // Set the position (x, y)
+		Dot:  fixed.Point26_6{}, // set later
 	}
+
+	faceHeight := face.Metrics().Height.Ceil()
+	bounds, _ := font.BoundString(face, t.body)
+	lineHeight := bounds.Max.Y.Ceil() - bounds.Min.Y.Floor()
 
 	// Draw each line of text seperately
-	y := int(t.pos.Y)
-	lineHeight := face.Metrics().Height.Ceil()
-	for _, line := range strings.Split(t.body, "\n") {
-		d.Dot = fixed.P(int(t.pos.X), y)
+	splitLines := strings.Split(t.body, "\n")
+	numLines := len(splitLines)
+	for i, line := range splitLines {
+		// Calculate offset caused by alignment option
+		xOffset, yOffset, err := func() (int, int, error) {
+			bounds, _ := font.BoundString(face, line)
+			w := bounds.Max.X.Ceil() - bounds.Min.X.Floor()
+
+			bounds, _ = font.BoundString(face, t.body)
+			h := lineHeight
+
+			switch t.alignment {
+			case AlignTopLeft:
+				return 0, h, nil
+			case AlignTopCentre:
+				return -w / 2, h, nil
+			case AlignTopRight:
+				return -w, h, nil
+			case AlignCentreLeft:
+				return 0, h - (faceHeight * numLines / 2), nil
+			case AlignCentre:
+				return -w / 2, h - (faceHeight * numLines / 2), nil
+			case AlignCentreRight:
+				return -w, h - (faceHeight * numLines / 2), nil
+			case AlignBottomLeft:
+				return 0, 0 - faceHeight*(numLines-1), nil
+			case AlignBottomCentre:
+				return -w / 2, 0 - faceHeight*(numLines-1), nil
+			case AlignBottomRight:
+				return -w, 0 - faceHeight*(numLines-1), nil
+			case AlignCustom:
+				return -w/2 + int(math.Round(t.labelOffset.X)),
+					h - (faceHeight * numLines / 2) + int(math.Round(t.labelOffset.Y)),
+					nil
+			default:
+				return 0, 0, errors.New("unsupported text alignment")
+			}
+		}()
+		if err != nil {
+			return fmt.Errorf("failed to generate text mask: %w", err)
+		}
+
+		// Move the dot to correct position and draw the line
+		d.Dot = fixed.P(
+			int(t.pos.X)+xOffset,
+			int(t.pos.Y)+(i*faceHeight)+yOffset,
+		)
 		d.DrawString(line)
-		y += lineHeight // move y position to next line
 	}
 
-	t.mask = img
+	t.mask = mask
 
 	return nil
+}
+
+func SaveImageAsPNG(img image.Image, filepath string) {
+	file, err := os.Create(filepath)
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+	if err := png.Encode(file, img); err != nil {
+		panic(err)
+	}
 }
 
 // textBoundry returns a bounding box precisely surrounding the rendered text.
