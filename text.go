@@ -120,7 +120,6 @@ func (t *Text) Alignment() Alignment {
 }
 
 // SetText sets the text alignment.
-// Warning: use with caution becuase the alignment is consistent, but often innaccurate.
 func (t *Text) SetAlignment(align Alignment) *Text {
 	t.alignment = align
 	if err := t.generateMask(); err != nil {

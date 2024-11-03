@@ -94,8 +94,7 @@ func main() {
 		turdgl.Vec{X: 280, Y: 230},
 		turdgl.WithStyle(turdgl.Style{Colour: turdgl.RosyBrown, Thickness: 0}),
 	)
-	txtBox := turdgl.NewTextBox(fgRect, "../../fonts/arial.ttf").
-		SetText("Click to edit text").
+	txtBox := turdgl.NewTextBox(fgRect, "Click to edit text", "../../fonts/arial.ttf").
 		SetTextSize(46).
 		SetTextColour(color.RGBA{100, 255, 100, 100})
 	txtBox.SetSelectedCB(func() { txtBox.SetTextColour(turdgl.Yellow) })

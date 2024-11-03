@@ -17,13 +17,14 @@ type TextBox struct {
 }
 
 // NewTextBox constructs a new text box from a hoverable shape.
-func NewTextBox(shape hoverable, fontPath string) *TextBox {
+func NewTextBox(shape hoverable, text, fontPath string) *TextBox {
 	return &TextBox{
 		Shape:        shape,
-		Text:         NewText("", shape.GetPos(), fontPath),
+		Text:         NewText(text, shape.GetPos(), fontPath),
 		selectedCB:   func() {},
 		deselectedCB: func() {},
 		modifiedCB:   func() {},
+		prevText:     text,
 	}
 }
 
