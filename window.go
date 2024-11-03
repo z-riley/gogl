@@ -19,6 +19,8 @@ type WindowCfg struct {
 	Width, Height int
 	// Icon is the image used for the window. Default if nil.
 	Icon *os.File
+	// Resizable can be set to true to allow the window to be resizable.
+	Resizable bool
 }
 
 // engine contains constructs used to execute background logic.
@@ -57,13 +59,18 @@ func NewWindow(cfg WindowCfg) (*Window, error) {
 		return nil, err
 	}
 
+	var resizableFlag uint32 = sdl.WINDOW_RESIZABLE
+	if cfg.Resizable {
+		resizableFlag = 0
+	}
+
 	w, err := sdl.CreateWindow(
 		cfg.Title,
 		sdl.WINDOWPOS_UNDEFINED,
 		sdl.WINDOWPOS_UNDEFINED,
 		int32(cfg.Width),
 		int32(cfg.Height),
-		sdl.WINDOW_SHOWN|sdl.WINDOW_RESIZABLE,
+		sdl.WINDOW_SHOWN|resizableFlag,
 	)
 	if err != nil {
 		return nil, err

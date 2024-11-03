@@ -10,9 +10,10 @@ import (
 
 func main() {
 	win, err := turdgl.NewWindow(turdgl.WindowCfg{
-		Title:  "Basic Shapes Example",
-		Width:  1200,
-		Height: 768,
+		Title:     "Basic Shapes Example",
+		Width:     1200,
+		Height:    768,
+		Resizable: true,
 	})
 	if err != nil {
 		panic(err)
