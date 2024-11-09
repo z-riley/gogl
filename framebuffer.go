@@ -34,30 +34,6 @@ func (p Pixel) B() uint8 { return p[2] }
 // A returns the value of the alpha channel.
 func (p Pixel) A() uint8 { return p[3] }
 
-// average returns the average value of any number of pixels.
-func average(pixels ...Pixel) Pixel {
-	if len(pixels) == 0 {
-		return Pixel{}
-	} else if len(pixels) == 1 {
-		return pixels[0]
-	}
-
-	var sumR, sumG, sumB, sumA int
-	for _, p := range pixels {
-		sumR += int(p.R())
-		sumG += int(p.G())
-		sumB += int(p.B())
-		sumA += int(p.A())
-	}
-
-	return Pixel{
-		uint8(sumR / len(pixels)),
-		uint8(sumG / len(pixels)),
-		uint8(sumB / len(pixels)),
-		uint8(sumA / len(pixels)),
-	}
-}
-
 // FrameBuffer is a 2D slice of pixels which represents a screen.
 type FrameBuffer [][]Pixel
 

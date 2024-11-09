@@ -1,8 +1,8 @@
 package turdgl
 
 import (
+	"fmt"
 	"image/color"
-	"reflect"
 
 	"golang.org/x/exp/rand"
 )
@@ -94,8 +94,7 @@ func IsColliding(s1, s2 Shape) bool {
 				return false
 			}
 		default:
-			t := reflect.TypeOf(s2).String()
-			panic("collision detection is unsupported for type: %s" + t)
+			panic(fmt.Sprintf("collision detection is unsupported for type: %s" + s2.String()))
 		}
 	case *Circle:
 		switch s2.(type) {
@@ -118,13 +117,11 @@ func IsColliding(s1, s2 Shape) bool {
 				return false
 			}
 		default:
-			t := reflect.TypeOf(s2).String()
-			panic("collision detection is unsupported for type: %s" + t)
+			panic(fmt.Sprintf("collision detection is unsupported for type: %s" + s2.String()))
 		}
 	case *CurvedRect:
 		panic("todo")
 	default:
-		t := reflect.TypeOf(s1).String()
-		panic("collision detection is unsupported for type: %s" + t)
+		panic(fmt.Sprintf("collision detection is unsupported for type: %s" + s1.String()))
 	}
 }
