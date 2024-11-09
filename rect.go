@@ -49,9 +49,9 @@ func (r *Rect) Draw(buf *FrameBuffer) {
 		NewRect(r.w, r.style.Thickness, Vec{r.Pos.X, r.Pos.Y + float64(r.h) - float64(r.style.Thickness)}).
 			SetStyle(Style{r.style.Colour, 0, 0}).
 			Draw(buf)
-		NewRect(r.style.Thickness, r.h, r.Pos). // TODO: CAN JUST BE r.Pos?
-							SetStyle(Style{r.style.Colour, 0, 0}).
-							Draw(buf)
+		NewRect(r.style.Thickness, r.h, r.Pos).
+			SetStyle(Style{r.style.Colour, 0, 0}).
+			Draw(buf)
 		NewRect(r.style.Thickness, r.h, Vec{r.Pos.X + float64(r.w) - float64(r.style.Thickness), r.Pos.Y}).
 			SetStyle(Style{r.style.Colour, 0, 0}).
 			Draw(buf)
@@ -62,56 +62,46 @@ func (r *Rect) Draw(buf *FrameBuffer) {
 	}
 }
 
-// Width implements Shape.
 func (r *Rect) Width() float64 {
 	return r.w
 }
 
-// SetWidth implements Shape.
 func (r *Rect) SetWidth(px float64) *Rect {
 	r.w = px
 	return r
 }
 
-// Height implements Shape.
 func (r *Rect) Height() float64 {
 	return r.h
 }
 
-// SetHeight implements Shape.
 func (r *Rect) SetHeight(px float64) *Rect {
 	r.h = px
 	return r
 }
 
-// GetPos implements Shape.
 func (r *Rect) GetPos() Vec {
 	return r.Pos
 }
 
-// SetPos implements Shape.
 func (r *Rect) SetPos(pos Vec) *Rect {
 	r.Pos = pos
 	return r
 }
 
-// GetStyle implements Shape.
 func (r *Rect) GetStyle() Style {
 	return r.style
 }
 
-// SetStyle implements Shape.
 func (r *Rect) SetStyle(style Style) *Rect {
 	r.style = style
 	return r
 }
 
-// Move implements Shape.
 func (r *Rect) Move(px Vec) {
 	r.Pos = Add(r.Pos, px)
 }
 
-// String implements Shape.
 func (r *Rect) String() string {
 	return "rectangle"
 }
@@ -160,6 +150,7 @@ type CurvedRect struct {
 }
 
 var _ Shape = (*CurvedRect)(nil)
+var _ hoverable = (*Rect)(nil)
 
 // NewCurvedRect constructs a new curved rectangle.
 func NewCurvedRect(width, height, radius float64, pos Vec) *CurvedRect {
@@ -248,56 +239,46 @@ func (r *CurvedRect) Draw(buf *FrameBuffer) {
 	}
 }
 
-// Width implements Shape.
 func (r *CurvedRect) Width() float64 {
 	return r.w
 }
 
-// SetWidth implements Shape.
 func (r *CurvedRect) SetWidth(px float64) *CurvedRect {
 	r.w = px
 	return r
 }
 
-// Height implements Shape.
 func (r *CurvedRect) Height() float64 {
 	return r.h
 }
 
-// SetHeight implements Shape.
 func (r *CurvedRect) SetHeight(px float64) *CurvedRect {
 	r.h = px
 	return r
 }
 
-// GetPos implements Shape.
 func (r *CurvedRect) GetPos() Vec {
 	return r.Pos
 }
 
-// SetPos implements Shape.
 func (r *CurvedRect) SetPos(pos Vec) *CurvedRect {
 	r.Pos = pos
 	return r
 }
 
-// GetStyle implements Shape.
 func (r *CurvedRect) GetStyle() Style {
 	return r.style
 }
 
-// SetStyle implements Shape.
 func (r *CurvedRect) SetStyle(style Style) *CurvedRect {
 	r.style = style
 	return r
 }
 
-// Move implements Shape.
 func (r *CurvedRect) Move(px Vec) {
 	r.Pos = Add(r.Pos, px)
 }
 
-// String implements Shape.
 func (r *CurvedRect) String() string {
 	return "curved rectangle"
 }

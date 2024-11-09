@@ -38,7 +38,7 @@ func main() {
 	styleHover := turdgl.Style{Colour: color.RGBA{180, 180, 0, 255}, Thickness: 0, Bloom: 5}
 	stylePressed := turdgl.Style{Colour: color.RGBA{255, 0, 0, 255}, Thickness: 0, Bloom: 10}
 	styleUnpressed := turdgl.Style{Colour: color.RGBA{80, 0, 0, 255}, Thickness: 30}
-	c := turdgl.NewCircle(100, turdgl.Vec{X: 300, Y: 100}, turdgl.WithStyle(styleUnpressed))
+	c := turdgl.NewCircle(100, turdgl.Vec{X: 300, Y: 100}).SetStyle(styleUnpressed)
 	circleButton := turdgl.NewButton(c, "../../fonts/arial.ttf").
 		SetLabelText("Press me").
 		SetLabelSize(16).
@@ -100,18 +100,15 @@ func main() {
 	circleRed := turdgl.NewCircle(
 		100,
 		turdgl.Vec{X: 550, Y: 210},
-		turdgl.WithStyle(turdgl.Style{Colour: color.RGBA{255, 0, 0, 100}}),
-	)
+	).SetStyle(turdgl.Style{Colour: color.RGBA{255, 0, 0, 100}})
 	circleGreen := turdgl.NewCircle(
 		100,
 		turdgl.Vec{X: 580, Y: 260},
-		turdgl.WithStyle(turdgl.Style{Colour: color.RGBA{0, 255, 0, 100}}),
-	)
+	).SetStyle(turdgl.Style{Colour: color.RGBA{0, 255, 0, 100}})
 	circleBlue := turdgl.NewCircle(
 		100,
 		turdgl.Vec{X: 520, Y: 260},
-		turdgl.WithStyle(turdgl.Style{Colour: color.RGBA{0, 0, 255, 100}}),
-	)
+	).SetStyle(turdgl.Style{Colour: color.RGBA{0, 0, 255, 100}})
 
 	// Register window-level keybinds
 	win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyPress, func() { win.Quit() })

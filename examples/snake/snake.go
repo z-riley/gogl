@@ -28,8 +28,7 @@ func NewSnake(headPos turdgl.Vec) *snake {
 	h := turdgl.NewCircle(
 		headSize,
 		headPos,
-		turdgl.WithStyle(turdgl.Style{Colour: color.RGBA{255, 255, 255, 255}, Thickness: 0}),
-	)
+	).SetStyle(turdgl.Style{Colour: color.RGBA{255, 255, 255, 255}, Thickness: 0})
 	h.Direction = turdgl.Vec{X: 0, Y: -1} // faces upwards
 
 	// Construct body with segments stretched out...
@@ -39,8 +38,7 @@ func NewSnake(headPos turdgl.Vec) *snake {
 		segment := turdgl.NewCircle(
 			segmentDiameter,
 			turdgl.Vec{X: headPos.X, Y: headPos.Y + headSize*float64(i) + 1},
-			turdgl.WithStyle(turdgl.Style{Colour: color.RGBA{255, 255, 255, 255}, Thickness: 4}),
-		)
+		).SetStyle(turdgl.Style{Colour: color.RGBA{255, 255, 255, 255}, Thickness: 4})
 		b = append(b, segment)
 	}
 	s := snake{
@@ -67,13 +65,13 @@ func (s *snake) Draw(buf *turdgl.FrameBuffer) {
 	s.head.Draw(buf)
 	// Draw head markers
 	lMarkerHead := s.head.EdgePoint(math.Pi / 2)
-	lMarker := turdgl.NewCircle(markerSize, lMarkerHead, turdgl.WithStyle(markerStyle))
+	lMarker := turdgl.NewCircle(markerSize, lMarkerHead).SetStyle(markerStyle)
 	lMarker.Draw(buf)
 	rMarkerHead := s.head.EdgePoint(math.Pi / 2 * 3)
-	rMarker := turdgl.NewCircle(markerSize, rMarkerHead, turdgl.WithStyle(markerStyle))
+	rMarker := turdgl.NewCircle(markerSize, rMarkerHead).SetStyle(markerStyle)
 	rMarker.Draw(buf)
 	fMarkerHead := s.head.EdgePoint(0)
-	fMarker := turdgl.NewCircle(markerSize, fMarkerHead, turdgl.WithStyle(markerStyle))
+	fMarker := turdgl.NewCircle(markerSize, fMarkerHead).SetStyle(markerStyle)
 	fMarker.Draw(buf)
 
 	// Draw body
@@ -84,10 +82,10 @@ func (s *snake) Draw(buf *turdgl.FrameBuffer) {
 
 		// Draw body markers
 		lPos := c.EdgePoint(math.Pi / 2)
-		turdgl.NewCircle(markerSize, lPos, turdgl.WithStyle(markerStyle)).Draw(buf)
+		turdgl.NewCircle(markerSize, lPos).SetStyle(markerStyle).Draw(buf)
 
 		rPos := c.EdgePoint(math.Pi / 2 * 3)
-		turdgl.NewCircle(markerSize, rPos, turdgl.WithStyle(markerStyle)).Draw(buf)
+		turdgl.NewCircle(markerSize, rPos).SetStyle(markerStyle).Draw(buf)
 
 		markers[i+1] = lPos
 		markers[2*(len(s.body))-i] = rPos
@@ -107,7 +105,7 @@ func (s *snake) Draw(buf *turdgl.FrameBuffer) {
 	for _, point := range splinePoints {
 		pointStyle := turdgl.Style{Colour: color.RGBA{0, 255, 0, 255}, Thickness: 0}
 		const pointSize = 3
-		turdgl.NewCircle(pointSize, point, turdgl.WithStyle(pointStyle)).Draw(buf)
+		turdgl.NewCircle(pointSize, point).SetStyle(pointStyle).Draw(buf)
 	}
 
 }

@@ -28,9 +28,8 @@ func main() {
 	rect2 := turdgl.NewRect(130, 50, turdgl.Vec{X: 500, Y: 300}).
 		SetStyle(turdgl.Style{Colour: color.RGBA{0, 0, 255, 255}})
 	circle1 := turdgl.NewCircle(88, turdgl.Vec{X: 500, Y: 600})
-	circle2 := turdgl.NewCircle(130, turdgl.Vec{X: 600, Y: 500},
-		turdgl.WithStyle(turdgl.Style{Colour: color.RGBA{0, 0, 255, 255}}),
-	)
+	circle2 := turdgl.NewCircle(130, turdgl.Vec{X: 600, Y: 500}).
+		SetStyle(turdgl.Style{Colour: color.RGBA{0, 0, 255, 255}})
 
 	// Keybinds
 	win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyPress, func() { win.Quit() })
