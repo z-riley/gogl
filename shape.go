@@ -37,16 +37,28 @@ func RandomStyle() Style {
 
 // Shape is an interface for shapes.
 type Shape interface {
+	Drawable
+
+	// Width returns the width of the shape in pixels.
 	Width() float64
-	SetWidth(float64)
+	// SetWidth sets the width of the shape in pixels.
+	// SetWidth(float64)
+	// Height returns the height of she shape in pixels.
 	Height() float64
-	SetHeight(float64)
-	Draw(*FrameBuffer)
+	// SetHeight sets the height of the shape in pixels.
+	// SetHeight(float64)
+	// GetPos returns the position of the shape.
 	GetPos() Vec
-	SetPos(Vec)
-	GetStyle() Style
-	SetStyle(style Style)
+	// SetPos sets the position of the shape.
+	// SetPos(Vec)
+	// GetStyle returns the shape's style.
+	// GetStyle() Style
+	// SetStyle sets the shape's style.
+	// SetStyle(Style)
+	// Move moves the shape by a pixel vector.
 	Move(Vec)
+	// String returns the name of the shape.
+	String() string
 }
 
 // shape contains the generic attributes for a 2D shape.
@@ -144,86 +156,15 @@ func (s *shape) SetStyle(style Style) {
 	s.style = style
 }
 
-// Rect is a rectangle shape, aligned to the top-left corner.
-type Rect struct{ *shape }
-
-// NewRect constructs a new rectangle shape.
-func NewRect(width, height float64, pos Vec, opts ...func(*shape)) *Rect {
-	return &Rect{newShape(width, height, pos, opts...)}
-}
-
-// Draw draws the rectangle onto the provided frame buffer.
-func (r *Rect) Draw(buf *FrameBuffer) {
-	if r.style.Thickness == 0 {
-		width := int(math.Round(r.w))
-		height := int(math.Round(r.h))
-		for i := 0; i <= width; i++ {
-			for j := 0; j <= height; j++ {
-				xInt, yInt := int(math.Round(r.Pos.X)), int(math.Round(r.Pos.Y))
-				buf.SetPixel(yInt+j, xInt+i, NewPixel(r.style.Colour))
-			}
-		}
-		if r.style.Bloom > 0 {
-			r.drawBloom(buf)
-		}
-	} else {
-		// Draw each edge as its own rectangle
-		NewRect(r.w, r.style.Thickness, r.Pos,
-			WithStyle(Style{r.style.Colour, 0, 0}),
-		).Draw(buf)
-		NewRect(
-			r.w, r.style.Thickness, Vec{r.Pos.X, r.Pos.Y + float64(r.h) - float64(r.style.Thickness)},
-			WithStyle(Style{r.style.Colour, 0, 0}),
-		).Draw(buf)
-		NewRect(r.style.Thickness, r.h, Vec{r.Pos.X, r.Pos.Y},
-			WithStyle(Style{r.style.Colour, 0, 0}),
-		).Draw(buf)
-		NewRect(r.style.Thickness, r.h, Vec{r.Pos.X + float64(r.w) - float64(r.style.Thickness), r.Pos.Y},
-			WithStyle(Style{r.style.Colour, 0, 0}),
-		).Draw(buf)
-
-		if r.style.Bloom > 0 {
-			r.drawBloom(buf)
-		}
-	}
-}
-
-// IsWithin returns whether a position lies within the rectangle's perimeter.
-func (r *Rect) IsWithin(pos Vec) bool {
-	return (pos.X >= r.Pos.X) && (pos.X <= r.Pos.X+r.Width()) &&
-		(pos.Y >= r.Pos.Y) && (pos.Y <= r.Pos.Y+r.Height())
-}
-
-// drawBloom draws a bloom effect around the shape.
-func (r *Rect) drawBloom(buf *FrameBuffer) {
-	// Draw borders around the rectangle of increasing size and decreasing intensity.
-	for dist := 1; dist <= r.style.Bloom; dist++ {
-		x, y := int(math.Round(r.Pos.X)), int(math.Round(r.Pos.Y))
-		topLeftX := x - dist
-		topLeftY := y - dist
-		topRightX := x + int(math.Round(r.w)) + dist
-		bottomLeftY := y + int(math.Round(r.h)) + dist
-
-		// Calculate colour from distance away from shape body
-		brightness := 1 - (float64(dist) / float64(r.style.Bloom))
-		r, g, b, a := RGBA8(r.style.Colour)
-		bloomColour := color.RGBA{r, g, b, uint8(brightness * float64(a))}
-
-		// Draw top and bottom bloom
-		for i := topLeftX + 1; i < topRightX; i++ {
-			buf.SetPixel(topLeftY, i, NewPixel(bloomColour))
-			buf.SetPixel(bottomLeftY, i, NewPixel(bloomColour))
-		}
-		// Draw left and right bloom
-		for i := topLeftY; i <= bottomLeftY; i++ {
-			buf.SetPixel(i, topLeftX, NewPixel(bloomColour))
-			buf.SetPixel(i, topRightX, NewPixel(bloomColour))
-		}
-	}
+// String returns the name of the shape.
+func (s *shape) String() string {
+	return "shape"
 }
 
 // Cicle is a circle shape, aligned to the centre of the circle.
 type Circle struct{ *shape }
+
+var _ Shape = (*Circle)(nil)
 
 // NewCircle constructs a new circle.
 func NewCircle(diameter float64, pos Vec, opts ...func(*shape)) *Circle {
@@ -322,157 +263,6 @@ func (c *Circle) DrawCircleSegment(limitDir Vec, buf *FrameBuffer) {
 // clockwise from the circle's direction.
 func (c *Circle) EdgePoint(theta float64) Vec {
 	return Add(c.Pos, (c.Direction.SetMag(c.Width() / 2).Rotate(theta)))
-}
-
-// CurvedRect is a rectangle with rounded corners, aligned to the top-left.
-type CurvedRect struct {
-	*shape
-	radius float64
-}
-
-// NewCurvedRect constructs a new curved rectangle.
-func NewCurvedRect(width, height, radius float64, pos Vec, opts ...func(*shape)) *CurvedRect {
-	return &CurvedRect{newShape(width, height, pos, opts...), radius}
-}
-
-// IsWithin returns whether a position lies within the curved rectangle's perimeter.
-func (r *CurvedRect) IsWithin(pos Vec) bool {
-	// Note: this doesn't account for the rounded corners
-	return (pos.X >= r.Pos.X) && (pos.X <= r.Pos.X+r.Width()) &&
-		(pos.Y >= r.Pos.Y) && (pos.Y <= r.Pos.Y+r.Height())
-}
-
-// Draw draws the curved rectangle onto the provided frame buffer.
-func (r *CurvedRect) Draw(buf *FrameBuffer) {
-	subRectHeight := r.style.Thickness
-	subRectWidth := r.style.Thickness
-	if r.style.Thickness == 0 {
-		// For filled shape
-		subRectWidth = r.w / 2
-		subRectHeight = r.h / 2
-	}
-
-	// Draw each edge as its own rectangle
-	NewRect(
-		r.w-2*(r.radius), subRectHeight, Vec{r.Pos.X + r.radius, r.Pos.Y},
-		WithStyle(Style{r.style.Colour, 0, 0}),
-	).Draw(buf)
-	NewRect(
-		r.w-2*(r.radius), subRectHeight, Vec{r.Pos.X + r.radius, r.Pos.Y + r.h - subRectHeight},
-		WithStyle(Style{r.style.Colour, 0, 0}),
-	).Draw(buf)
-	NewRect(
-		subRectWidth, r.h-2*r.radius, Vec{r.Pos.X, r.Pos.Y + r.radius},
-		WithStyle(Style{r.style.Colour, 0, 0}),
-	).Draw(buf)
-	NewRect(
-		subRectWidth, r.h-2*r.radius, Vec{r.Pos.X + r.w - subRectWidth, r.Pos.Y + r.radius},
-		WithStyle(Style{r.style.Colour, 0, 0}),
-	).Draw(buf)
-
-	// Draw rounded corners
-	drawCorner := func(bbox *Rect, origin Vec) {
-		// Iterate over every pixel in the bounding box
-		for x := bbox.Pos.X; x <= bbox.Pos.X+bbox.w; x++ {
-			for y := bbox.Pos.Y; y <= bbox.Pos.Y+bbox.h; y++ {
-				dist := Dist(origin, Vec{x, y})
-
-				withinCircle := func() bool {
-					if r.style.Thickness == 0 {
-						return dist <= r.radius
-					} else {
-						return dist <= r.radius && dist > r.radius-r.style.Thickness
-					}
-				}()
-
-				if withinCircle {
-					buf.SetPixel(int(math.Round(y)), int(math.Round(x)), NewPixel(r.style.Colour))
-				}
-			}
-		}
-	}
-
-	// Top left
-	bboxSize := r.radius
-	bbox := NewRect(bboxSize, bboxSize, Vec{r.Pos.X, r.Pos.Y})
-	drawCorner(bbox, Vec{bbox.Pos.X + bbox.w, bbox.Pos.Y + bbox.h})
-
-	// Top right
-	bbox = NewRect(bboxSize, bboxSize, Vec{r.Pos.X + r.w - r.radius, r.Pos.Y})
-	drawCorner(bbox, Vec{bbox.Pos.X, bbox.Pos.Y + bbox.h})
-
-	// Bottom left
-	bbox = NewRect(bboxSize, bboxSize, Vec{r.Pos.X, r.Pos.Y + r.h - r.radius})
-	drawCorner(bbox, Vec{bbox.Pos.X + bbox.w, bbox.Pos.Y})
-
-	// Bottom right
-	bbox = NewRect(bboxSize, bboxSize, Vec{r.Pos.X + r.w - r.radius, r.Pos.Y + r.h - r.radius})
-	drawCorner(bbox, Vec{bbox.Pos.X, bbox.Pos.Y})
-
-	if r.style.Bloom > 0 {
-		r.drawBloom(buf)
-	}
-}
-
-// drawBloom draws a bloom effect around the shape.
-func (r *CurvedRect) drawBloom(buf *FrameBuffer) {
-	bloom := float64(r.style.Bloom)
-
-	// Draw straight edge bloom
-	for dist := 1; dist <= r.style.Bloom; dist++ {
-		// Calculate colour from distance away from shape body
-		brightness := 1 - (float64(dist) / bloom)
-		R, G, B, A := RGBA8(r.style.Colour)
-		bloomColour := color.RGBA{R, G, B, uint8(brightness * float64(A))}
-
-		// Top and bottom bloom
-		for x := r.Pos.X + r.radius + 1; x < r.Pos.X+r.w-r.radius; x++ {
-			buf.SetPixel(int(r.Pos.Y)-dist, int(x), NewPixel(bloomColour))
-			buf.SetPixel(int(r.Pos.Y+r.h)+dist, int(x), NewPixel(bloomColour))
-		}
-
-		// Left and right
-		for y := r.Pos.Y + r.radius + 1; y < r.Pos.Y+r.h-r.radius; y++ {
-			buf.SetPixel(int(y), int(r.Pos.X)-dist, NewPixel(bloomColour))
-			buf.SetPixel(int(y), int(r.Pos.X+r.w)+dist, NewPixel(bloomColour))
-		}
-	}
-
-	// Draw rounded corner bloom
-	drawCorner := func(bbox *Rect, origin Vec) {
-		// Iterate over every pixel in the bounding box
-		for x := bbox.Pos.X; x <= bbox.Pos.X+bbox.w; x++ {
-			for y := bbox.Pos.Y; y <= bbox.Pos.Y+bbox.h; y++ {
-				dist := Dist(origin, Vec{x, y})
-				withinCircle := dist > r.radius && dist <= r.radius+bloom
-				if withinCircle {
-					// Calculate colour from distance away from shape body
-					brightness := 1 - (dist-r.radius)/(bloom)
-					r, g, b, a := RGBA8(r.style.Colour)
-
-					bloomColour := color.RGBA{r, g, b, uint8(brightness * float64(a))}
-					buf.SetPixel(int(math.Round(y)), int(math.Round(x)), NewPixel(bloomColour))
-				}
-			}
-		}
-	}
-
-	// Top left
-	bboxSize := bloom + r.radius
-	bbox := NewRect(bboxSize, bboxSize, Vec{r.Pos.X - bloom, r.Pos.Y - bloom})
-	drawCorner(bbox, Vec{bbox.Pos.X + bbox.w, bbox.Pos.Y + bbox.h})
-
-	// Top right
-	bbox = NewRect(bboxSize, bboxSize, Vec{r.Pos.X + r.w - r.radius, r.Pos.Y - bloom})
-	drawCorner(bbox, Vec{bbox.Pos.X, bbox.Pos.Y + bbox.h})
-
-	// Bottom left
-	bbox = NewRect(bboxSize, bboxSize, Vec{r.Pos.X - bloom, r.Pos.Y + r.h - r.radius})
-	drawCorner(bbox, Vec{bbox.Pos.X + bbox.w, bbox.Pos.Y})
-
-	// Bottom right
-	bbox = NewRect(bboxSize, bboxSize, Vec{r.Pos.X + r.w - r.radius, r.Pos.Y + r.h - r.radius})
-	drawCorner(bbox, Vec{bbox.Pos.X, bbox.Pos.Y})
 }
 
 // IsColliding returns true if two shapes are colliding.

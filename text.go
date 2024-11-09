@@ -357,7 +357,6 @@ func (t *Text) textBoundry() *Rect {
 		maxX-minX+1,
 		maxY-minY+1,
 		Vec{minX, minY},
-		WithStyle(Style{Colour: color.White, Thickness: 1}),
 	)
 }
 

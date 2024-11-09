@@ -25,9 +25,8 @@ func main() {
 
 	// Shapes
 	rect1 := turdgl.NewRect(100, 60, turdgl.Vec{X: 500, Y: 200})
-	rect2 := turdgl.NewRect(130, 50, turdgl.Vec{X: 500, Y: 300},
-		turdgl.WithStyle(turdgl.Style{Colour: color.RGBA{0, 0, 255, 255}}),
-	)
+	rect2 := turdgl.NewRect(130, 50, turdgl.Vec{X: 500, Y: 300}).
+		SetStyle(turdgl.Style{Colour: color.RGBA{0, 0, 255, 255}})
 	circle1 := turdgl.NewCircle(88, turdgl.Vec{X: 500, Y: 600})
 	circle2 := turdgl.NewCircle(130, turdgl.Vec{X: 600, Y: 500},
 		turdgl.WithStyle(turdgl.Style{Colour: color.RGBA{0, 0, 255, 255}}),

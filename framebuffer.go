@@ -7,6 +7,7 @@ import (
 
 // Drawable is an interface for things that can be drawn onto a frame buffer.
 type Drawable interface {
+	// Draw draws to a frame buffer.
 	Draw(*FrameBuffer)
 }
 

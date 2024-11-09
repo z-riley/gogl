@@ -27,13 +27,12 @@ func main() {
 	rectSolid := turdgl.NewRect(
 		120, 90,
 		turdgl.Vec{X: 50, Y: 50},
-		turdgl.WithStyle(turdgl.Style{Colour: color.RGBA{0, 0, 255, 255}, Thickness: 0, Bloom: 30}),
-	)
+	).SetStyle(turdgl.Style{Colour: color.RGBA{0, 0, 255, 255}, Thickness: 0, Bloom: 30})
+
 	rectOutline := turdgl.NewRect(
 		120, 90,
 		turdgl.Vec{X: 50, Y: 50},
-		turdgl.WithStyle(turdgl.Style{Colour: color.RGBA{255, 0, 0, 255}, Thickness: 2}),
-	)
+	).SetStyle(turdgl.Style{Colour: color.RGBA{255, 0, 0, 255}, Thickness: 2})
 
 	// Buttons can be constructed from shapes
 	styleHover := turdgl.Style{Colour: color.RGBA{180, 180, 0, 255}, Thickness: 0, Bloom: 5}
@@ -80,20 +79,17 @@ func main() {
 	curvedRect := turdgl.NewCurvedRect(
 		120, 90, 20,
 		turdgl.Vec{X: 50, Y: 200},
-		turdgl.WithStyle(turdgl.Style{Colour: turdgl.Orange, Thickness: 10, Bloom: 0}),
-	)
+	).SetStyle(turdgl.Style{Colour: turdgl.Orange, Thickness: 10, Bloom: 0})
 
 	// Put shapes on the background layer to avoid interactions with other shapes
 	bgRect := turdgl.NewRect(
 		120, 90,
 		turdgl.Vec{X: 250, Y: 200},
-		turdgl.WithStyle(turdgl.Style{Colour: color.RGBA{175, 136, 90, 255}, Thickness: 0}),
-	)
+	).SetStyle(turdgl.Style{Colour: color.RGBA{175, 136, 90, 255}, Thickness: 0})
 	fgRect := turdgl.NewRect(
 		120, 90,
 		turdgl.Vec{X: 280, Y: 230},
-		turdgl.WithStyle(turdgl.Style{Colour: turdgl.RosyBrown, Thickness: 0}),
-	)
+	).SetStyle(turdgl.Style{Colour: turdgl.RosyBrown, Thickness: 0})
 	txtBox := turdgl.NewTextBox(fgRect, "Click to edit text", "../../fonts/arial.ttf").
 		SetTextSize(46).
 		SetTextColour(color.RGBA{100, 255, 100, 100})
