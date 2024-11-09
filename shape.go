@@ -39,32 +39,17 @@ type Shape interface {
 
 	// Width returns the width of the shape in pixels.
 	Width() float64
-	// SetWidth sets the width of the shape in pixels.
-	// SetWidth(float64)
 	// Height returns the height of she shape in pixels.
 	Height() float64
-	// SetHeight sets the height of the shape in pixels.
-	// SetHeight(float64)
 	// GetPos returns the position of the shape.
 	GetPos() Vec
-	// SetPos sets the position of the shape.
-	// SetPos(Vec)
 	// GetStyle returns the shape's style.
-	// GetStyle() Style
-	// SetStyle sets the shape's style.
-	// SetStyle(Style)
+	GetStyle() Style
 	// Move moves the shape by a pixel vector.
 	Move(Vec)
 	// String returns the name of the shape.
 	String() string
 }
-
-var (
-	Upwards    = Vec{0, -1}
-	Downwards  = Vec{0, 1}
-	Leftwards  = Vec{-1, 0}
-	Rightwards = Vec{1, 0}
-)
 
 // IsColliding returns true if two shapes are colliding.
 func IsColliding(s1, s2 Shape) bool {

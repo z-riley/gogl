@@ -159,3 +159,10 @@ func (c *Circle) Move(px Vec) {
 func (c *Circle) String() string {
 	return "circle"
 }
+
+var (
+	Upwards    = Vec{0, -1}
+	Downwards  = Vec{0, 1}
+	Leftwards  = Vec{-1, 0}
+	Rightwards = Vec{1, 0}
+)
