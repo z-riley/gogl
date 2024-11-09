@@ -23,7 +23,7 @@ func main() {
 	// For measuring FPS
 	frames := 0
 	second := time.Tick(time.Second)
-	fpsCounter := turdgl.NewText("Measuing FPS...", turdgl.Vec{X: 1000, Y: 50}, "../../fonts/arial.ttf").
+	fpsCounter := turdgl.NewText("Measuring FPS...", turdgl.Vec{X: 1000, Y: 50}, "../../fonts/arial.ttf").
 		SetColour(color.RGBA{255, 255, 255, 255}).
 		SetSize(20)
 
@@ -87,7 +87,7 @@ func main() {
 	for win.IsRunning() {
 		win.SetBackground(color.RGBA{35, 39, 46, 255})
 
-		// Draw foreground shapes
+		// Draw shapes
 		for _, shape := range []turdgl.Drawable{
 			fpsCounter,
 			dynamicText,

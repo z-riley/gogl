@@ -25,12 +25,11 @@ type WindowCfg struct {
 
 // engine contains constructs used to execute background logic.
 type engine struct {
-	foregroundDrawQueue []Drawable
-	backgroundDrawQueue []Drawable
-	running             bool
-	keyTracker          *keyTracker
-	mouseScrollTracker  *mouseScrollHandler
-	textMutator         *textMutator
+	drawQueue          []Drawable
+	running            bool
+	keyTracker         *keyTracker
+	mouseScrollTracker *mouseScrollHandler
+	textMutator        *textMutator
 }
 
 // newEngine constructs a new turdgl engine.
@@ -121,19 +120,9 @@ func (w *Window) Destroy() {
 	w.texture.Destroy()
 }
 
-// Draw is an alias for DrawForeground.
+// Draw draws a shape to the window.
 func (w *Window) Draw(s Drawable) {
-	w.DrawForeground(s)
-}
-
-// DrawForeground draws a shape to the foreground layer.
-func (w *Window) DrawForeground(s Drawable) {
-	w.engine.foregroundDrawQueue = append(w.engine.foregroundDrawQueue, s)
-}
-
-// DrawBackground draws a shape to the background layer.
-func (w *Window) DrawBackground(s Drawable) {
-	w.engine.backgroundDrawQueue = append(w.engine.backgroundDrawQueue, s)
+	w.engine.drawQueue = append(w.engine.drawQueue, s)
 }
 
 // RegisterKeybind sets a callback function which is executed when a key is pressed.
@@ -189,14 +178,10 @@ func (w *Window) Update() {
 	w.engine.keyTracker.update()
 
 	// Draw shapes to frame buffer
-	for _, shape := range w.engine.backgroundDrawQueue {
+	for _, shape := range w.engine.drawQueue {
 		shape.Draw(w.Framebuffer)
 	}
-	w.engine.backgroundDrawQueue = nil
-	for _, shape := range w.engine.foregroundDrawQueue {
-		shape.Draw(w.Framebuffer)
-	}
-	w.engine.foregroundDrawQueue = nil
+	w.engine.drawQueue = nil
 
 	// Render latest frame buffer to window
 	pixels := w.Framebuffer.Bytes()

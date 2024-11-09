@@ -129,8 +129,9 @@ func main() {
 		circleButton.Update(win)
 		txtBox.Update(win)
 
-		// Draw foreground shapes
+		// Draw shapes
 		for _, shape := range []turdgl.Drawable{
+			bgRect,
 			rectSolid,
 			rectOutline,
 			curvedRect,
@@ -143,13 +144,6 @@ func main() {
 			circleGreen,
 		} {
 			win.Draw(shape)
-		}
-
-		// Shapes drawn to the background appear behind foreground shapes
-		for _, shape := range []turdgl.Drawable{
-			bgRect,
-		} {
-			win.DrawBackground(shape)
 		}
 
 		// Lastly, the window must be updated
