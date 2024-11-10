@@ -43,6 +43,7 @@ type Text struct {
 	dpi, size, spacing float64     // settings for generating mask
 	width, height      int         // dimensions of the generated mask
 	mask               *image.RGBA // pixel image to be drawn
+	bbox               *Rect
 }
 
 // NewText constructs a new text object with default parameters. The default font
@@ -58,6 +59,7 @@ func NewText(body string, pos Vec, fontPath string) *Text {
 		spacing:   1.5,
 		width:     1200, // FIXME: this information should come from the window
 		height:    768,  // FIXME: this information should come from the window
+		bbox:      NewRect(0, 0, Vec{}),
 	}
 	var err error
 	t.font, err = loadFont(fontPath)
@@ -73,10 +75,9 @@ func NewText(body string, pos Vec, fontPath string) *Text {
 // Draw draws the text onto the provided frame buffer.
 func (t *Text) Draw(buf *FrameBuffer) {
 	// Write pixels to frame buffer
-	bbox := t.textBoundry()
 	r, g, b, a := RGBA8(t.colour)
-	startX, startY := int(bbox.Pos.X), int(bbox.Pos.Y)
-	endX, endY := startX+int(bbox.w)+100, startY+int(bbox.h)+100
+	startX, startY := int(t.bbox.Pos.X), int(t.bbox.Pos.Y)
+	endX, endY := startX+int(t.bbox.w), startY+int(t.bbox.h)
 	for y := startY; y < endY; y++ {
 		for x := startX; x < endX; x++ {
 			maskRGBA := t.mask.RGBAAt(x, y)
@@ -241,7 +242,7 @@ func (t *Text) generateMask() error {
 	}
 	defer face.Close()
 
-	// TODO: This could be optimised to only be the size of the text instead of the entire window
+	// NOTE: This could be optimised to only be the size of the text instead of the entire window
 	mask := image.NewRGBA(image.Rect(
 		0, 0,
 		t.width, t.height,
@@ -310,6 +311,8 @@ func (t *Text) generateMask() error {
 	}
 
 	t.mask = mask
+
+	t.bbox = t.textBoundry()
 
 	return nil
 }
