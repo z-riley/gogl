@@ -92,7 +92,7 @@ func (t *Text) Draw(buf *FrameBuffer) {
 			return -t.mask.Rect.Dx(), -t.mask.Rect.Dy()
 		case AlignCustom:
 			return -t.mask.Rect.Dx()/2 + int(math.Round(t.customOffset.X)),
-				-t.mask.Rect.Dy()/2 + int(math.Round(t.customOffset.Y))
+				-t.mask.Rect.Dy() + int(math.Round(t.customOffset.Y))
 		default:
 			panic(fmt.Errorf("unsupported text alignment: %v", t.alignment))
 		}
