@@ -287,7 +287,7 @@ func (t *Text) generateMask() error {
 		switch t.alignment {
 		case AlignTopLeft, AlignCentreLeft, AlignBottomLeft:
 			drawer.Dot = fixed.P(0, lineHeight+(i*faceHeight))
-		case AlignCentre, AlignTopCentre, AlignBottomCentre:
+		case AlignCentre, AlignTopCentre, AlignBottomCentre, AlignCustom:
 			_, adv := font.BoundString(face, line)
 			drawer.Dot = fixed.P((maskWidth-adv.Ceil())/2, lineHeight+(i*faceHeight))
 		case AlignTopRight, AlignCentreRight, AlignBottomRight:
