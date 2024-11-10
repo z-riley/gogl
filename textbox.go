@@ -94,6 +94,12 @@ func (t *TextBox) SetModifiedCB(fn func()) *TextBox {
 	return t
 }
 
+// SetPos sets the position of the text box.
+func (t *TextBox) SetPos(pos Vec) *TextBox {
+	t.Shape.SetPos(pos)
+	return t
+}
+
 // Move moves the text box by a given vector.
 func (t *TextBox) Move(mov Vec) {
 	t.Shape.Move(mov)
