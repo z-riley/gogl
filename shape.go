@@ -43,6 +43,8 @@ type Shape interface {
 	Height() float64
 	// GetPos returns the position of the shape.
 	GetPos() Vec
+	// SetPos sets the position of the shape.
+	SetPos(Vec)
 	// GetStyle returns the shape's style.
 	GetStyle() Style
 	// Move moves the shape by a pixel vector.

@@ -138,9 +138,8 @@ func (c *Circle) GetPos() Vec {
 	return c.Pos
 }
 
-func (c *Circle) SetPos(pos Vec) *Circle {
+func (c *Circle) SetPos(pos Vec) {
 	c.Pos = pos
-	return c
 }
 
 func (c *Circle) GetStyle() Style {

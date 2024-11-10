@@ -39,13 +39,13 @@ func main() {
 		}
 	}()
 
-	bottomRight := turdgl.NewText("Bottom-right alignment", turdgl.Vec{X: 300, Y: 200}, "../../fonts/arial.ttf").
+	bottomRight := turdgl.NewText("Bottom right alignment", turdgl.Vec{X: 300, Y: 200}, "../../fonts/arial.ttf").
 		SetAlignment(turdgl.AlignBottomRight)
 
 	dynamicAlignment := turdgl.NewText("Scroll to change\nalignment", turdgl.Vec{X: 1000, Y: 400}, "../../fonts/arial.ttf").
 		SetAlignment(turdgl.AlignCentre).
 		SetSize(40)
-	dynamicMarker := turdgl.NewRect(5, 5, dynamicAlignment.Pos())
+	marker := turdgl.NewRect(5, 5, dynamicAlignment.Pos())
 	type alignPair struct {
 		alignment turdgl.Alignment
 		label     string
@@ -92,7 +92,7 @@ func main() {
 			fpsCounter,
 			dynamicText,
 			bottomRight,
-			dynamicMarker,
+			marker,
 			dynamicAlignment,
 		} {
 			win.Draw(shape)

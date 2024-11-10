@@ -84,9 +84,8 @@ func (r *Rect) GetPos() Vec {
 	return r.Pos
 }
 
-func (r *Rect) SetPos(pos Vec) *Rect {
+func (r *Rect) SetPos(pos Vec) {
 	r.Pos = pos
-	return r
 }
 
 func (r *Rect) GetStyle() Style {
@@ -261,9 +260,8 @@ func (r *CurvedRect) GetPos() Vec {
 	return r.Pos
 }
 
-func (r *CurvedRect) SetPos(pos Vec) *CurvedRect {
+func (r *CurvedRect) SetPos(pos Vec) {
 	r.Pos = pos
-	return r
 }
 
 func (r *CurvedRect) GetStyle() Style {
