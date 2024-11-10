@@ -165,9 +165,3 @@ func (t *TextBox) SetTextSpacing(spacing float64) *TextBox {
 	t.Text.SetSpacing(spacing)
 	return t
 }
-
-// SetTextMaskSize sets the size of the mask used to generate the text.
-func (t *TextBox) SetTextMaskSize(w, h int) *TextBox {
-	t.Text.SetMaskSize(w, h)
-	return t
-}

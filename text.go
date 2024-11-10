@@ -216,18 +216,6 @@ func (t *Text) SetSpacing(spacing float64) *Text {
 	return t
 }
 
-// MaskSize returns the dimensions of the generated mask.
-func (t *Text) MaskSize() (int, int) { return t.width, t.height }
-
-// SetMaskSize sets the size of the mask used to generate the text on.
-func (t *Text) SetMaskSize(w, h int) *Text {
-	t.width, t.height = w, h
-	if err := t.generateMask(); err != nil {
-		panic(err)
-	}
-	return t
-}
-
 // generateMask regenerates the mask used to generate the font pixel grid.
 // It should be called any time the text settings change.
 func (t *Text) generateMask() error {
@@ -312,7 +300,7 @@ func (t *Text) generateMask() error {
 
 	t.mask = mask
 
-	t.bbox = t.textBoundry()
+	t.bbox = t.textBoundary()
 
 	return nil
 }
@@ -328,8 +316,8 @@ func SaveImageAsPNG(img image.Image, filepath string) {
 	}
 }
 
-// textBoundry returns a bounding box precisely surrounding the rendered text.
-func (t *Text) textBoundry() *Rect {
+// textBoundary returns a bounding box precisely surrounding the rendered text.
+func (t *Text) textBoundary() *Rect {
 	minX := float64(t.mask.Rect.Dx())
 	maxY := 0.0
 	minY := float64(t.mask.Rect.Dy())

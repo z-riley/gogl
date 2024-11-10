@@ -197,9 +197,3 @@ func (b *Button) SetLabelSpacing(spacing float64) *Button {
 	b.Label.SetSpacing(spacing)
 	return b
 }
-
-// SetLabelMaskSize sets the size of the mask used to generate the label.
-func (b *Button) SetLabelMaskSize(w, h int) *Button {
-	b.Label.SetMaskSize(w, h)
-	return b
-}
