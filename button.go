@@ -26,7 +26,7 @@ type Button struct {
 func NewButton(shape hoverable, fontPath string) *Button {
 	return &Button{
 		Shape:     shape,
-		Label:     NewText("", shape.GetPos(), fontPath).SetAlignment(AlignBottomCentre),
+		Label:     NewText("", shape.GetPos(), fontPath).SetAlignment(AlignCentre),
 		Callbacks: make(map[ButtonTrigger]func()),
 		IsEnabled: true,
 	}
