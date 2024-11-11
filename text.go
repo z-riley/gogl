@@ -268,9 +268,13 @@ func (t *Text) generateMask() error {
 		return w
 	}()
 
-	// Draw the font into the mask
+	// Make the mask height slightly larger to allow for characters that are drawn
+	// below the line (like underscore)
 	faceHeight := face.Metrics().Height.Ceil()
-	mask := image.NewRGBA(image.Rect(0, 0, maskWidth, faceHeight*len(splitLines)))
+	maskHeight := float64(faceHeight*len(splitLines)) + (0.3 * float64(faceHeight))
+
+	// Draw the font into the mask
+	mask := image.NewRGBA(image.Rect(0, 0, maskWidth, int(maskHeight)))
 	drawer := &font.Drawer{
 		Dst:  mask,
 		Src:  image.NewUniform(t.colour),
@@ -278,21 +282,18 @@ func (t *Text) generateMask() error {
 		Dot:  fixed.Point26_6{}, // set later
 	}
 
-	bounds, _ := font.BoundString(face, t.body)
-	lineHeight := bounds.Max.Y.Ceil() - bounds.Min.Y.Floor()
-
 	// Draw each line of text seperately
 	for i, line := range splitLines {
 		// Move the dot to correct position
 		switch t.alignment {
 		case AlignTopLeft, AlignCentreLeft, AlignBottomLeft:
-			drawer.Dot = fixed.P(0, lineHeight+(i*faceHeight))
+			drawer.Dot = fixed.P(0, faceHeight*(1+i))
 		case AlignCentre, AlignTopCentre, AlignBottomCentre, AlignCustom:
 			_, adv := font.BoundString(face, line)
-			drawer.Dot = fixed.P((maskWidth-adv.Ceil())/2, lineHeight+(i*faceHeight))
+			drawer.Dot = fixed.P((maskWidth-adv.Ceil())/2, faceHeight*(1+i))
 		case AlignTopRight, AlignCentreRight, AlignBottomRight:
 			_, adv := font.BoundString(face, line)
-			drawer.Dot = fixed.P(maskWidth-adv.Ceil(), lineHeight+(i*faceHeight))
+			drawer.Dot = fixed.P(maskWidth-adv.Ceil(), faceHeight*(1+i))
 		}
 
 		// Draw the line
@@ -300,6 +301,10 @@ func (t *Text) generateMask() error {
 	}
 
 	t.mask = mask
+
+	if strings.Contains(t.body, "-") {
+		saveImageAsPNG(t.mask, "bruh.png")
+	}
 
 	return nil
 }
