@@ -271,7 +271,7 @@ func (t *Text) generateMask() error {
 	// Make the mask height slightly larger to allow for characters that are drawn
 	// below the line (like underscore)
 	faceHeight := face.Metrics().Height.Ceil()
-	maskHeight := float64(faceHeight*len(splitLines)) + (0.3 * float64(faceHeight))
+	maskHeight := float64(faceHeight*len(splitLines)) + (0.4 * float64(faceHeight))
 
 	// Draw the font into the mask
 	mask := image.NewRGBA(image.Rect(0, 0, maskWidth, int(maskHeight)))
