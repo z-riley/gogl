@@ -302,10 +302,6 @@ func (t *Text) generateMask() error {
 
 	t.mask = mask
 
-	if strings.Contains(t.body, "-") {
-		saveImageAsPNG(t.mask, "bruh.png")
-	}
-
 	return nil
 }
 
