@@ -47,7 +47,7 @@ func (t *TextBox) Draw(buf *FrameBuffer) {
 
 	if t.isEditing {
 		// Draw cursor
-		// TODO: this is complicated. Text editing should ideally be a separate package
+		// TODO: this is complicated. Text editing may need its own package
 	}
 }
 
@@ -149,9 +149,8 @@ func (t *TextBox) SetTextColour(c color.Color) *TextBox {
 }
 
 // SetTextFont sets the path fo the .ttf file that is used to generate the text.
-func (t *TextBox) SetTextFont(path string) *TextBox {
-	t.Text.SetFont(path)
-	return t
+func (t *TextBox) SetTextFont(path string) error {
+	return t.Text.SetFont(path)
 }
 
 // SetTextDPI sets the DPI of the text font.

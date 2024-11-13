@@ -1,0 +1,56 @@
+linters:
+  disable:
+    - depguard
+    - err113
+    - exhaustive
+    - exhaustruct
+    - forcetypeassert
+    - funlen
+    - gochecknoglobals
+    - gosec
+    - inamedparam
+    - ireturn
+    - mnd
+    - musttag
+    - nlreturn
+    - nonamedreturns
+    - paralleltest
+    - testpackage
+    - varnamelen
+    - wrapcheck
+    - wsl
+
+    - govet
+
+    - deadcode # deprecated
+    - exhaustivestruct # deprecated
+    - golint # deprecated
+    - ifshort # deprecated
+    - interfacer # deprecated
+    - maligned # deprecated
+    - gomnd # deprecated
+    - nosnakecase # deprecated
+    - scopelint # deprecated
+    - structcheck # deprecated
+    - varcheck # deprecated
+  presets:
+    - bugs
+    - comment
+    - complexity
+    - error
+    - format
+    - import
+    - metalinter
+    - module
+    - performance
+    - sql
+    - style
+    - unused
+
+issues:
+  max-issues-per-linter: 0 # unlimited
+  max-same-issues: 0 # unlimited
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - dupl

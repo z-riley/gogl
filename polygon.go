@@ -81,13 +81,13 @@ func getVertex(node *ring.Ring) vertex {
 func triangulateEarClipping(vecs []Vec) []*Triangle {
 	// Construct ring list of vertices for easier manipulation
 	r := ring.New(len(vecs))
-	for i := 0; i < r.Len(); i++ {
+	for i := range r.Len() {
 		r.Value = vertex{pos: vecs[i]}
 		r = r.Next()
 	}
 
 	// Mark which vertices are ears
-	for i := 0; i < r.Len(); i++ {
+	for range r.Len() {
 		calculateIsEar(r)
 		r = r.Next()
 	}
@@ -104,8 +104,8 @@ func triangulateEarClipping(vecs []Vec) []*Triangle {
 			fmt.Println("Ear clipping emergency exit triggered due to not enough ears found")
 			break
 		}
-		// FIXME: this branch is sometimes not always triggered enough times, meaning the loop
-		// would run forever without the emergency exit. This is because the algorithm fails to
+		// FIXME: this branch is sometimes not triggered enough times, meaning the loop would
+		// run forever without the emergency exit. This is because the algorithm fails to
 		// triangulate complex geometry properly. Run examples/snake/main.go to trigger the bug.
 		if getVertex(r).isEar {
 			// Save triangle
@@ -128,7 +128,7 @@ func triangulateEarClipping(vecs []Vec) []*Triangle {
 	return segments
 }
 
-// isError keeps track of whether there's a polgyon error.
+// isError keeps track of whether there's a polygon error.
 var isError bool
 
 // triangulatePoly2Tri triangulates a polygon defined by a slice of vectors
@@ -188,7 +188,7 @@ func calculateIsEar(vert *ring.Ring) {
 		getVertex(vert.Prev()).pos,
 	)
 	v := vert.Next()
-	for i := 0; i < v.Len()-1; i++ {
+	for range v.Len() - 1 {
 		current := getVertex(v)
 		switch {
 		case slices.Contains([]Vec{triangle.v1, triangle.v2, triangle.v3}, current.pos):

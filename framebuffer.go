@@ -13,7 +13,7 @@ type Drawable interface {
 
 const pxLen = 4
 
-// Pixel represents a pixel, with bytes [red, green, blue, alpha]
+// Pixel represents a pixel, with bytes [red, green, blue, alpha].
 type Pixel [pxLen]uint8
 
 // NewPixel constructs a new coloured pixel.
@@ -80,8 +80,8 @@ func (f *FrameBuffer) Clear() {
 // Fill sets every pixel in the frame buffer to the provided colour.
 func (f *FrameBuffer) Fill(c color.Color) {
 	pixel := NewPixel(c)
-	for i := 0; i < len(*f); i++ {
-		for j := 0; j < len((*f)[0]); j++ {
+	for i := range len(*f) {
+		for j := range len((*f)[0]) {
 			(*f)[i][j] = pixel
 		}
 	}
@@ -102,7 +102,7 @@ func (f *FrameBuffer) Bytes() []byte {
 	buf := *f
 	out := make([]byte, len(buf)*len(buf[0])*pxLen)
 	offset := 0
-	for i := 0; i < len(buf); i++ {
+	for i := range buf {
 		slice := buf[i]
 		for _, pixel := range slice {
 			// Copy the bytes of each pixel in reverse order

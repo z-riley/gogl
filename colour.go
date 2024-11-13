@@ -38,7 +38,6 @@ var (
 )
 
 // Extra colours for if you're feeling artistic.
-// FIXME: most of these are too bright.
 var (
 	DarkRed              = color.RGBA{139, 0, 0, 255}
 	Brown                = color.RGBA{165, 42, 42, 255}

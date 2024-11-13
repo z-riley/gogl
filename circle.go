@@ -1,7 +1,6 @@
 package turdgl
 
 import (
-	"fmt"
 	"image/color"
 	"math"
 )
@@ -77,9 +76,6 @@ func (c *Circle) drawBloom(buf *FrameBuffer) {
 			dist := Dist(c.Pos, Vec{i, j})
 			if dist >= radius && dist <= radius+bloom {
 				brightness := 1 - ((dist - radius) / bloom)
-				if brightness < 0 {
-					fmt.Println(brightness)
-				}
 				bloomColour := color.RGBA{r, g, b, uint8(brightness * float64(a))}
 				buf.SetPixel(int(j), int(i), NewPixel(bloomColour))
 			}

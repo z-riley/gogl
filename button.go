@@ -19,7 +19,6 @@ type Button struct {
 
 	prevMouseState MouseState
 	prevHovering   bool
-	prevLabel      string
 }
 
 // NewButton constructs a new button from any shape that satisfies the buttonable interface.
@@ -175,9 +174,8 @@ func (b *Button) SetLabelColour(c color.Color) *Button {
 }
 
 // SetLabelFont sets the path of the .ttf file that is used to generate the label.
-func (b *Button) SetLabelFont(path string) *Button {
-	b.Label.SetFont(path)
-	return b
+func (b *Button) SetLabelFont(path string) error {
+	return b.Label.SetFont(path)
 }
 
 // SetLabelDPI sets the DPI of the label font.

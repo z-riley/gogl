@@ -204,9 +204,8 @@ func (r *CurvedRect) Draw(buf *FrameBuffer) {
 				withinCircle := func() bool {
 					if r.style.Thickness == 0 {
 						return dist <= r.radius
-					} else {
-						return dist <= r.radius && dist > r.radius-r.style.Thickness
 					}
+					return dist <= r.radius && dist > r.radius-r.style.Thickness
 				}()
 
 				if withinCircle {

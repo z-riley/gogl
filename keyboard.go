@@ -74,7 +74,8 @@ func (k *keyTracker) isPressed(key sdl.Keycode) bool {
 
 // handleEvent processes key press events and keeps track of pressed keys.
 func (k *keyTracker) handleEvent(event *sdl.KeyboardEvent) {
-	if event.State == sdl.PRESSED {
+	switch event.State {
+	case sdl.PRESSED:
 		// Execute on-press callback
 		if event.Repeat == 0 {
 			if fn, ok := k.keyBindingsPress[event.Keysym.Sym]; ok {
@@ -85,7 +86,7 @@ func (k *keyTracker) handleEvent(event *sdl.KeyboardEvent) {
 		// Add key to tracker to handle instantaneous callbacks
 		k.pressedKeys[event.Keysym.Sym] = struct{}{}
 
-	} else if event.State == sdl.RELEASED {
+	case sdl.RELEASED:
 		// Execute on-release callback
 		if event.Repeat == 0 {
 			if fn, ok := k.keyBindingsRelease[event.Keysym.Sym]; ok {
@@ -125,7 +126,7 @@ func (t *textMutator) Load(s string) {
 
 // Append appends a string to the text mutator.
 func (t *textMutator) Append(s string) {
-	t.buffer = t.buffer + s
+	t.buffer += s
 }
 
 // String returns the string stored in the text mutator.
@@ -300,7 +301,7 @@ const (
 
 	KeyApplication   = sdl.K_APPLICATION    // "Application" (the Application / Compose / Context Menu (Windows) key)
 	KeyPower         = sdl.K_POWER          // "Power" (The USB document says this is a status flag, not a physical key - but some Mac keyboards do have a power key.)
-	KeyKp_equals     = sdl.K_KP_EQUALS      // "Keypad =" (the = key (numeric keypad))
+	KeyKPEquals      = sdl.K_KP_EQUALS      // "Keypad =" (the = key (numeric keypad))
 	KeyF13           = sdl.K_F13            // "F13"
 	KeyF14           = sdl.K_F14            // "F14"
 	KeyF15           = sdl.K_F15            // "F15"

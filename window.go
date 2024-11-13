@@ -115,9 +115,9 @@ func NewWindow(cfg WindowCfg) (*Window, error) {
 // Destroy deallocates the window's resources. Call it at the end of your application.
 func (w *Window) Destroy() {
 	sdl.Quit()
-	w.win.Destroy()
-	w.renderer.Destroy()
-	w.texture.Destroy()
+	_ = w.win.Destroy()
+	_ = w.renderer.Destroy()
+	_ = w.texture.Destroy()
 }
 
 // Draw draws a shape to the window.
@@ -185,8 +185,12 @@ func (w *Window) Update() {
 
 	// Render latest frame buffer to window
 	pixels := w.Framebuffer.Bytes()
-	w.texture.Update(nil, unsafe.Pointer(&pixels[0]), w.config.Width*pxLen)
-	w.renderer.Copy(w.texture, nil, nil)
+	if err := w.texture.Update(nil, unsafe.Pointer(&pixels[0]), w.config.Width*pxLen); err != nil {
+		fmt.Println("SDL texture failed to update from frame buffer")
+	}
+	if err := w.renderer.Copy(w.texture, nil, nil); err != nil {
+		fmt.Println("SDL renderer failed to copy texture")
+	}
 	w.renderer.Present()
 }
 

@@ -68,7 +68,6 @@ func NewText(body string, pos Vec, fontPath string) *Text {
 
 // Draw draws the text onto the provided frame buffer.
 func (t *Text) Draw(buf *FrameBuffer) {
-
 	// Calculate the offset caused by alignment option
 	xAlignmentOffset, yAlignmentOffset := func() (int, int) {
 		switch t.alignment {
@@ -282,7 +281,7 @@ func (t *Text) generateMask() error {
 		Dot:  fixed.Point26_6{}, // set later
 	}
 
-	// Draw each line of text seperately
+	// Draw each line of text separately
 	for i, line := range splitLines {
 		// Move the dot to correct position
 		switch t.alignment {
