@@ -47,22 +47,26 @@ type Text struct {
 // size is 20.
 func NewText(body string, pos Vec, fontPath string) *Text {
 	t := Text{
-		body:      body,
-		pos:       pos,
-		alignment: AlignTopLeft,
-		colour:    Red,
-		dpi:       80,
-		size:      20,
-		spacing:   1.5,
+		body:         body,
+		pos:          pos,
+		alignment:    AlignTopLeft,
+		customOffset: Vec{0, 0},
+		colour:       Red,
+		dpi:          80,
+		size:         20,
+		spacing:      1.5,
 	}
+
 	var err error
 	t.font, err = loadFont(fontPath)
 	if err != nil {
 		panic(err)
 	}
+
 	if err := t.generateMask(); err != nil {
 		panic(err)
 	}
+
 	return &t
 }
 

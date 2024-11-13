@@ -35,6 +35,7 @@ type engine struct {
 // newEngine constructs a new turdgl engine.
 func newEngine() *engine {
 	return &engine{
+		drawQueue:          []Drawable{},
 		running:            true,
 		keyTracker:         newKeyTracker(),
 		mouseScrollTracker: newMouseScrollHandler(),
@@ -127,8 +128,8 @@ func (w *Window) Draw(s Drawable) {
 
 // RegisterKeybind sets a callback function which is executed when a key is pressed.
 // The callback can be executed always while the key is pressed, on press, or on release.
-func (w *Window) RegisterKeybind(key sdl.Keycode, mode KeybindMode, cb func()) {
-	w.engine.keyTracker.registerKeybind(key, mode, cb)
+func (w *Window) RegisterKeybind(key sdl.Keycode, mode KeybindMode, callback func()) {
+	w.engine.keyTracker.registerKeybind(key, mode, callback)
 }
 
 // RegisterKeybind removes a keybind for a specific key mode combination.

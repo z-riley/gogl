@@ -24,6 +24,7 @@ func NewTextBox(shape hoverable, text, fontPath string) *TextBox {
 		selectedCB:   func() {},
 		deselectedCB: func() {},
 		modifiedCB:   func() {},
+		isEditing:    false,
 		prevText:     text,
 	}
 }
@@ -38,6 +39,7 @@ func (t *TextBox) Draw(buf *FrameBuffer) {
 		case *Rect, *CurvedRect:
 			p := t.Shape.GetPos()
 			return Vec{p.X + t.Shape.Width()/2, p.Y + t.Shape.Height()/2}
+
 		default:
 			return t.Shape.GetPos()
 		}
@@ -46,8 +48,8 @@ func (t *TextBox) Draw(buf *FrameBuffer) {
 	t.Text.Draw(buf)
 
 	if t.isEditing {
-		// Draw cursor
-		// TODO: this is complicated. Text editing may need its own package
+		// TODO: Draw cursor
+		// NOTE: this is complicated. Text editing may need its own package
 	}
 }
 

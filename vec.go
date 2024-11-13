@@ -23,6 +23,7 @@ func (v Vec) Rotate(theta float64) Vec {
 	// Apply rotation matrix
 	cosTheta := math.Cos(theta)
 	sinTheta := math.Sin(theta)
+
 	return Vec{
 		X: v.X*cosTheta + v.Y*sinTheta,
 		Y: -v.X*sinTheta + v.Y*cosTheta,

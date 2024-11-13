@@ -30,6 +30,7 @@ func RandomStyle() Style {
 			A: byte(rand.Intn(256)),
 		},
 		Thickness: 0,
+		Bloom:     0,
 	}
 }
 
@@ -64,6 +65,7 @@ func IsColliding(s1, s2 Shape) bool {
 			onRight := s2.GetPos().X > s1.GetPos().X+s1.Width()
 			above := s1.GetPos().Y > s2.GetPos().Y+s2.Height()
 			below := s2.GetPos().Y > s1.GetPos().Y+s1.Height()
+
 			if !onRight && !onLeft && !above && !below {
 				return true
 			} else {
@@ -75,6 +77,7 @@ func IsColliding(s1, s2 Shape) bool {
 			onRight := s2.GetPos().X-s2.Width()/2 > s1.GetPos().X+s1.Width()
 			above := s1.GetPos().Y > s2.GetPos().Y+s2.Height()/2
 			below := s2.GetPos().Y-s2.Height()/2 > s1.GetPos().Y+s1.Height()
+
 			if !onRight && !onLeft && !above && !below {
 				return true
 			} else {
@@ -91,6 +94,7 @@ func IsColliding(s1, s2 Shape) bool {
 			onRight := s1.GetPos().X-s1.Width()/2 > s2.GetPos().X+s2.Width()
 			above := s2.GetPos().Y > s1.GetPos().Y+s1.Height()/2
 			below := s1.GetPos().Y-s1.Height()/2 > s2.GetPos().Y+s2.Height()
+
 			if !onRight && !onLeft && !above && !below {
 				return true
 			} else {

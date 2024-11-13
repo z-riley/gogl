@@ -1,13 +1,11 @@
 linters:
   disable:
     - depguard
-    - err113
-    - exhaustive
     - exhaustruct
-    - forcetypeassert
-    - funlen
+    - forbidigo
     - gochecknoglobals
     - gosec
+    - govet
     - inamedparam
     - ireturn
     - mnd
@@ -19,9 +17,6 @@ linters:
     - varnamelen
     - wrapcheck
     - wsl
-
-    - govet
-
     - deadcode # deprecated
     - exhaustivestruct # deprecated
     - golint # deprecated

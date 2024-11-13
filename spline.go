@@ -7,6 +7,7 @@ func GenerateCatmullRomSpline(points []Vec, steps int) []Vec {
 	if n < 4 {
 		return nil
 	}
+
 	splinePoints := []Vec{}
 	// First point
 	for j := 0; j <= steps; j++ {
@@ -28,6 +29,7 @@ func GenerateCatmullRomSpline(points []Vec, steps int) []Vec {
 		splinePoints = append(splinePoints,
 			catmullRomSpline(points[n-3], points[n-2], points[n-1], points[n-1], t))
 	}
+
 	return splinePoints
 }
 

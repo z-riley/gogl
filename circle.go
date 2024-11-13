@@ -20,7 +20,7 @@ var _ hoverable = (*Circle)(nil)
 func NewCircle(diameter float64, pos Vec) *Circle {
 	return &Circle{
 		Pos:       pos,
-		Direction: Vec{},
+		Direction: Vec{0, 0},
 		d:         diameter,
 		style:     DefaultStyle,
 	}

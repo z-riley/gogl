@@ -28,21 +28,21 @@ func newKeyTracker() *keyTracker {
 type KeybindMode int
 
 const (
-	Instantaneous KeybindMode = iota // callback executed continously while is pressed
+	Instantaneous KeybindMode = iota // callback executed continuously while is pressed
 	KeyPress                         // callback executed on press
 	KeyRelease                       // callback executed on release
 )
 
 // registerKeybind sets a callback function which is executed when a key is pressed.
 // The callback is executed according to the KeybindMode.
-func (k *keyTracker) registerKeybind(key sdl.Keycode, mode KeybindMode, cb func()) {
+func (k *keyTracker) registerKeybind(key sdl.Keycode, mode KeybindMode, callback func()) {
 	switch mode {
 	case Instantaneous:
-		k.keyBindingsInstant[key] = cb
+		k.keyBindingsInstant[key] = callback
 	case KeyPress:
-		k.keyBindingsPress[key] = cb
+		k.keyBindingsPress[key] = callback
 	case KeyRelease:
-		k.keyBindingsRelease[key] = cb
+		k.keyBindingsRelease[key] = callback
 	}
 }
 
@@ -300,7 +300,7 @@ const (
 	KeyKPPeriod     = sdl.K_KP_PERIOD    // "Keypad ." (the . key (numeric keypad))
 
 	KeyApplication   = sdl.K_APPLICATION    // "Application" (the Application / Compose / Context Menu (Windows) key)
-	KeyPower         = sdl.K_POWER          // "Power" (The USB document says this is a status flag, not a physical key - but some Mac keyboards do have a power key.)
+	KeyPower         = sdl.K_POWER          // "Power" (The USB document says this is a status flag, not a physical key - but some Mac keyboards do have a power key)
 	KeyKPEquals      = sdl.K_KP_EQUALS      // "Keypad =" (the = key (numeric keypad))
 	KeyF13           = sdl.K_F13            // "F13"
 	KeyF14           = sdl.K_F14            // "F14"

@@ -104,6 +104,7 @@ func triangulateEarClipping(vecs []Vec) []*Triangle {
 			fmt.Println("Ear clipping emergency exit triggered due to not enough ears found")
 			break
 		}
+
 		// FIXME: this branch is sometimes not triggered enough times, meaning the loop would
 		// run forever without the emergency exit. This is because the algorithm fails to
 		// triangulate complex geometry properly. Run examples/snake/main.go to trigger the bug.
@@ -167,6 +168,7 @@ func triangulatePoly2Tri(vecs []Vec) []*Triangle {
 		c := Vec{t.Points[2].X, t.Points[2].Y}
 		triangles = append(triangles, NewTriangle(a, b, c))
 	}
+
 	return triangles
 }
 
@@ -282,8 +284,10 @@ func edgeFunction(a, b, c Vec) float64 {
 // This function uses the barycentric coordinate method.
 func (t *Triangle) pointInTriangle(p Vec) bool {
 	denominator := ((t.v2.Y-t.v3.Y)*(t.v1.X-t.v3.X) + (t.v3.X-t.v2.X)*(t.v1.Y-t.v3.Y))
+
 	a := ((t.v2.Y-t.v3.Y)*(p.X-t.v3.X) + (t.v3.X-t.v2.X)*(p.Y-t.v3.Y)) / denominator
 	b := ((t.v3.Y-t.v1.Y)*(p.X-t.v3.X) + (t.v1.X-t.v3.X)*(p.Y-t.v3.Y)) / denominator
 	c := 1 - a - b
+
 	return 0 <= a && a <= 1 && 0 <= b && b <= 1 && 0 <= c && c <= 1
 }

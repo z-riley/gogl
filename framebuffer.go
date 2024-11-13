@@ -102,6 +102,7 @@ func (f *FrameBuffer) Bytes() []byte {
 	buf := *f
 	out := make([]byte, len(buf)*len(buf[0])*pxLen)
 	offset := 0
+
 	for i := range buf {
 		slice := buf[i]
 		for _, pixel := range slice {
@@ -112,6 +113,7 @@ func (f *FrameBuffer) Bytes() []byte {
 			}
 		}
 	}
+
 	return out
 }
 
@@ -132,19 +134,23 @@ func DrawLine(v1, v2 Vec, buf *FrameBuffer) {
 	if v1.X > v2.X {
 		sx = -1
 	}
+
 	dy := -math.Abs(v2.Y - v1.Y)
 	sy := 1
 	if v1.Y > v2.Y {
 		sy = -1
 	}
+
 	err := dx + dy
 	x1, y1 := int(math.Round(v1.X)), int(math.Round(v1.Y))
+
 	for {
 		buf.SetPixel(y1, x1, NewPixel(color.White))
 		x2, y2 := int(math.Round(v2.X)), int(math.Round(v2.Y))
 		if x1 == x2 && y1 == y2 {
 			break
 		}
+
 		e2 := 2 * err
 		if e2 >= dy {
 			err += dy
