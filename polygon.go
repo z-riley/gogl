@@ -274,12 +274,6 @@ func (t *Triangle) Draw(buf *FrameBuffer) {
 	}
 }
 
-// edgeFunction returns double the signed area of a triangle which has
-// vertices a, b and c.
-func edgeFunction(a, b, c Vec) float64 {
-	return (b.X-a.X)*(c.Y-a.Y) - (b.Y-a.Y)*(c.X-a.X)
-}
-
 // pointInTriangle returns true if point p exists within the area of the triangle.
 // This function uses the barycentric coordinate method.
 func (t *Triangle) pointInTriangle(p Vec) bool {
@@ -290,4 +284,10 @@ func (t *Triangle) pointInTriangle(p Vec) bool {
 	c := 1 - a - b
 
 	return 0 <= a && a <= 1 && 0 <= b && b <= 1 && 0 <= c && c <= 1
+}
+
+// edgeFunction returns double the signed area of a triangle which has
+// vertices a, b and c.
+func edgeFunction(a, b, c Vec) float64 {
+	return (b.X-a.X)*(c.Y-a.Y) - (b.Y-a.Y)*(c.X-a.X)
 }

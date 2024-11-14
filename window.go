@@ -23,26 +23,6 @@ type WindowCfg struct {
 	Resizable bool
 }
 
-// engine contains constructs used to execute background logic.
-type engine struct {
-	drawQueue          []Drawable
-	running            bool
-	keyTracker         *keyTracker
-	mouseScrollTracker *mouseScrollHandler
-	textMutator        *textMutator
-}
-
-// newEngine constructs a new turdgl engine.
-func newEngine() *engine {
-	return &engine{
-		drawQueue:          []Drawable{},
-		running:            true,
-		keyTracker:         newKeyTracker(),
-		mouseScrollTracker: newMouseScrollHandler(),
-		textMutator:        newTextTracker(),
-	}
-}
-
 // Window represents an OS Window.
 type Window struct {
 	Framebuffer *FrameBuffer
@@ -264,4 +244,24 @@ func (w *Window) Height() int {
 // SetTitle sets the title of the window to the provided string.
 func (w *Window) SetTitle(title string) {
 	w.win.SetTitle(title)
+}
+
+// engine contains constructs used to execute background logic.
+type engine struct {
+	drawQueue          []Drawable
+	running            bool
+	keyTracker         *keyTracker
+	mouseScrollTracker *mouseScrollHandler
+	textMutator        *textMutator
+}
+
+// newEngine constructs a new turdgl engine.
+func newEngine() *engine {
+	return &engine{
+		drawQueue:          []Drawable{},
+		running:            true,
+		keyTracker:         newKeyTracker(),
+		mouseScrollTracker: newMouseScrollHandler(),
+		textMutator:        newTextTracker(),
+	}
 }

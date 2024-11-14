@@ -60,29 +60,8 @@ func (c *Circle) Draw(buf *FrameBuffer) {
 	}
 }
 
-// drawBloom draws a bloom effect around a circle.
-func (c *Circle) drawBloom(buf *FrameBuffer) {
-	bloom := float64(c.style.Bloom)
-
-	// Construct bounding box
-	radius := c.d / 2
-	bbBoxPos := Vec{c.Pos.X - radius - bloom, c.Pos.Y - radius - bloom}
-	bbox := NewRect(c.d+bloom+bloom, c.d+bloom+bloom, bbBoxPos)
-
-	// Iterate over every pixel in the bounding box
-	r, g, b, a := RGBA8(c.style.Colour)
-	for x := bbox.Pos.X; x <= bbox.Pos.X+bbox.w; x++ {
-		for y := bbox.Pos.Y; y <= bbox.Pos.Y+bbox.h; y++ {
-			dist := Dist(c.Pos, Vec{x, y})
-			if dist >= radius && dist <= radius+bloom {
-				brightness := 1 - ((dist - radius) / bloom)
-				bloomColour := color.RGBA{r, g, b, uint8(brightness * float64(a))}
-				buf.SetPixel(int(x), int(y), NewPixel(bloomColour))
-			}
-		}
-	}
-}
-
+// DrawCircleSegment draws only a segment of the circle to the frame buffer, limited by the
+// provided vector.
 func (c *Circle) DrawCircleSegment(limitDir Vec, buf *FrameBuffer) {
 	// Construct bounding box
 	radius := c.d / 2
@@ -117,42 +96,74 @@ func (c *Circle) EdgePoint(theta float64) Vec {
 	return Add(c.Pos, (c.Direction.SetMag(c.Width() / 2).Rotate(theta)))
 }
 
+// Width returns the pixel width of the circle.
 func (c *Circle) Width() float64 {
 	return c.d
 }
 
+// SetDiameter sets the diameter of the circle, in pixels.
 func (c *Circle) SetDiameter(px float64) *Circle {
 	c.d = px
 	return c
 }
 
+// Height returns the pixel height of the circle.
 func (c *Circle) Height() float64 {
 	return c.d
 }
 
+// GetPos returns the position of the circle.
 func (c *Circle) GetPos() Vec {
 	return c.Pos
 }
 
+// SetPos sets the position of the circle.
 func (c *Circle) SetPos(pos Vec) {
 	c.Pos = pos
 }
 
+// GetStyle returns the style of the circle.
 func (c *Circle) GetStyle() Style {
 	return c.style
 }
 
+// SetStyle sets the style of the circle.
 func (c *Circle) SetStyle(style Style) *Circle {
 	c.style = style
 	return c
 }
 
+// Move moves the circle's position by the given pixel vector.
 func (c *Circle) Move(px Vec) {
 	c.Pos = Add(c.Pos, px)
 }
 
+// String returns the type of shape as a string.
 func (c *Circle) String() string {
 	return "circle"
+}
+
+// drawBloom draws a bloom effect around a circle.
+func (c *Circle) drawBloom(buf *FrameBuffer) {
+	bloom := float64(c.style.Bloom)
+
+	// Construct bounding box
+	radius := c.d / 2
+	bbBoxPos := Vec{c.Pos.X - radius - bloom, c.Pos.Y - radius - bloom}
+	bbox := NewRect(c.d+bloom+bloom, c.d+bloom+bloom, bbBoxPos)
+
+	// Iterate over every pixel in the bounding box
+	r, g, b, a := RGBA8(c.style.Colour)
+	for x := bbox.Pos.X; x <= bbox.Pos.X+bbox.w; x++ {
+		for y := bbox.Pos.Y; y <= bbox.Pos.Y+bbox.h; y++ {
+			dist := Dist(c.Pos, Vec{x, y})
+			if dist >= radius && dist <= radius+bloom {
+				brightness := 1 - ((dist - radius) / bloom)
+				bloomColour := color.RGBA{r, g, b, uint8(brightness * float64(a))}
+				buf.SetPixel(int(x), int(y), NewPixel(bloomColour))
+			}
+		}
+	}
 }
 
 var (

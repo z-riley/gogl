@@ -60,45 +60,55 @@ func (r *Rect) Draw(buf *FrameBuffer) {
 	}
 }
 
+// Width returns the pixel width of the rectangle.
 func (r *Rect) Width() float64 {
 	return r.w
 }
 
+// SetWidth sets the width of the rectangle.
 func (r *Rect) SetWidth(px float64) *Rect {
 	r.w = px
 	return r
 }
 
+// Height returns the pixel height of the rectangle.
 func (r *Rect) Height() float64 {
 	return r.h
 }
 
+// SetHeight sets the height of the rectangle.
 func (r *Rect) SetHeight(px float64) *Rect {
 	r.h = px
 	return r
 }
 
+// GetPos returns the position of the rectangle.
 func (r *Rect) GetPos() Vec {
 	return r.Pos
 }
 
+// SetPos sets the position of the rectangle.
 func (r *Rect) SetPos(pos Vec) {
 	r.Pos = pos
 }
 
+// GetStyle returns's the rectangle's style.
 func (r *Rect) GetStyle() Style {
 	return r.style
 }
 
+// SetStyle sets the style of the rectangle.
 func (r *Rect) SetStyle(style Style) *Rect {
 	r.style = style
 	return r
 }
 
+// Move moves the rectangle by the given vector.
 func (r *Rect) Move(px Vec) {
 	r.Pos = Add(r.Pos, px)
 }
 
+// String returns the type of shape as a string.
 func (r *Rect) String() string {
 	return "rectangle"
 }
@@ -235,45 +245,55 @@ func (r *CurvedRect) Draw(buf *FrameBuffer) {
 	}
 }
 
+// Width returns the pixel width of the curved rectangle.
 func (r *CurvedRect) Width() float64 {
 	return r.w
 }
 
+// SetWidth sets the width of the curved rectangle.
 func (r *CurvedRect) SetWidth(px float64) *CurvedRect {
 	r.w = px
 	return r
 }
 
+// Height returns the pixel height of the curved rectangle.
 func (r *CurvedRect) Height() float64 {
 	return r.h
 }
 
+// SetHeight sets the height of the curved rectangle.
 func (r *CurvedRect) SetHeight(px float64) *CurvedRect {
 	r.h = px
 	return r
 }
 
+// GetPos returns the position of the curved rectangle.
 func (r *CurvedRect) GetPos() Vec {
 	return r.Pos
 }
 
+// SetPos sets the position of the curved rectangle.
 func (r *CurvedRect) SetPos(pos Vec) {
 	r.Pos = pos
 }
 
+// GetStyle returns's the curved rectangle's style.
 func (r *CurvedRect) GetStyle() Style {
 	return r.style
 }
 
+// SetStyle sets the style of the curved rectangle.
 func (r *CurvedRect) SetStyle(style Style) *CurvedRect {
 	r.style = style
 	return r
 }
 
+// Move moves the curved rectangle by the given vector.
 func (r *CurvedRect) Move(px Vec) {
 	r.Pos = Add(r.Pos, px)
 }
 
+// String returns the type of shape as a string.
 func (r *CurvedRect) String() string {
 	return "curved rectangle"
 }

@@ -14,6 +14,7 @@ type Style struct {
 	Bloom     int     // bloom reach, in pixels
 }
 
+// DefaultStyle is the default style for new shapes.
 var DefaultStyle = Style{
 	Colour:    color.RGBA{0xff, 0xff, 0xff, 0xff},
 	Thickness: 0,
