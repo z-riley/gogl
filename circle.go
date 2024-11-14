@@ -49,7 +49,7 @@ func (c *Circle) Draw(buf *FrameBuffer) {
 			// Draw pixel if it's close enough to centre
 			dist := Dist(c.Pos, Vec{i, j})
 			if dist >= float64(radius-thickness) && dist <= float64(radius) {
-				buf.SetPixel(int(j), int(i), NewPixel(c.style.Colour))
+				buf.SetPixel(int(i), int(j), NewPixel(c.style.Colour))
 			}
 		}
 	}
@@ -77,7 +77,7 @@ func (c *Circle) drawBloom(buf *FrameBuffer) {
 			if dist >= radius && dist <= radius+bloom {
 				brightness := 1 - ((dist - radius) / bloom)
 				bloomColour := color.RGBA{r, g, b, uint8(brightness * float64(a))}
-				buf.SetPixel(int(j), int(i), NewPixel(bloomColour))
+				buf.SetPixel(int(i), int(j), NewPixel(bloomColour))
 			}
 		}
 	}
@@ -98,13 +98,13 @@ func (c *Circle) DrawCircleSegment(limitDir Vec, buf *FrameBuffer) {
 			if c.style.Thickness == 0 {
 				// Solid fill
 				if dist <= float64(radius) && Theta(c.Direction, Sub(Vec{i, j}, c.Pos)) >= 0 {
-					buf.SetPixel(jInt, iInt, NewPixel(c.style.Colour))
+					buf.SetPixel(iInt, jInt, NewPixel(c.style.Colour))
 				}
 			} else {
 				// Outline
 				if dist >= float64(radius-c.style.Thickness) && dist <= float64(radius) &&
 					Theta(c.Direction, Sub(Vec{i, j}, c.Pos)) >= Theta(Upwards, limitDir) {
-					buf.SetPixel(jInt, iInt, NewPixel(color.White))
+					buf.SetPixel(iInt, jInt, NewPixel(color.White))
 				}
 			}
 		}

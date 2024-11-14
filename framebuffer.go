@@ -58,7 +58,7 @@ func (f *FrameBuffer) GetPixel(x, y int) Pixel {
 type BlendFunc func(src, dst Pixel) Pixel
 
 // SetPixelFunc sets a pixe in the frame buffer using the specified blend function.
-func (f *FrameBuffer) SetPixelFunc(y, x int, p Pixel, fn BlendFunc) {
+func (f *FrameBuffer) SetPixelFunc(x, y int, p Pixel, fn BlendFunc) {
 	if y > f.Height()-1 || y < 0 || x > f.Width()-1 || x < 0 {
 		return
 	}
@@ -68,8 +68,8 @@ func (f *FrameBuffer) SetPixelFunc(y, x int, p Pixel, fn BlendFunc) {
 // SetPixel sets a pixel in the frame buffer. If the requested pixel is out of
 // bounds, nothing happens. The default alpha blending technique is used. To use
 // other blending methods, see SetPixelFunc.
-func (f *FrameBuffer) SetPixel(y, x int, p Pixel) {
-	f.SetPixelFunc(y, x, p, AlphaBlend)
+func (f *FrameBuffer) SetPixel(x, y int, p Pixel) {
+	f.SetPixelFunc(x, y, p, AlphaBlend)
 }
 
 // Clear sets every pixel in the frame buffer to zero.
@@ -145,7 +145,7 @@ func DrawLine(v1, v2 Vec, buf *FrameBuffer) {
 	x1, y1 := int(math.Round(v1.X)), int(math.Round(v1.Y))
 
 	for {
-		buf.SetPixel(y1, x1, NewPixel(color.White))
+		buf.SetPixel(x1, y1, NewPixel(color.White))
 		x2, y2 := int(math.Round(v2.X)), int(math.Round(v2.Y))
 		if x1 == x2 && y1 == y2 {
 			break

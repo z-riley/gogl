@@ -115,9 +115,9 @@ func (t *Text) Draw(buf *FrameBuffer) {
 				// original, and only keep the alpha channel.
 				isBorderPixel := maskRGBA.A < a
 				if isBorderPixel {
-					buf.SetPixel(posY, posX, NewPixel(color.RGBA{r, g, b, maskRGBA.A}))
+					buf.SetPixel(posX, posY, NewPixel(color.RGBA{r, g, b, maskRGBA.A}))
 				} else {
-					buf.SetPixel(posY, posX, NewPixel(maskRGBA))
+					buf.SetPixel(posX, posY, NewPixel(maskRGBA))
 				}
 			}
 		}

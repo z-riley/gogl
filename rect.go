@@ -35,7 +35,7 @@ func (r *Rect) Draw(buf *FrameBuffer) {
 		for i := 0; i <= width; i++ {
 			for j := 0; j <= height; j++ {
 				xInt, yInt := int(math.Round(r.Pos.X)), int(math.Round(r.Pos.Y))
-				buf.SetPixel(yInt+j, xInt+i, NewPixel(r.style.Colour))
+				buf.SetPixel(xInt+i, yInt+j, NewPixel(r.style.Colour))
 			}
 		}
 		if r.style.Bloom > 0 {
@@ -128,13 +128,13 @@ func (r *Rect) drawBloom(buf *FrameBuffer) {
 
 		// Draw top and bottom bloom
 		for i := topLeftX + 1; i < topRightX; i++ {
-			buf.SetPixel(topLeftY, i, NewPixel(bloomColour))
-			buf.SetPixel(bottomLeftY, i, NewPixel(bloomColour))
+			buf.SetPixel(i, topLeftY, NewPixel(bloomColour))
+			buf.SetPixel(i, bottomLeftY, NewPixel(bloomColour))
 		}
 		// Draw left and right bloom
 		for i := topLeftY; i <= bottomLeftY; i++ {
-			buf.SetPixel(i, topLeftX, NewPixel(bloomColour))
-			buf.SetPixel(i, topRightX, NewPixel(bloomColour))
+			buf.SetPixel(topLeftX, i, NewPixel(bloomColour))
+			buf.SetPixel(topRightX, i, NewPixel(bloomColour))
 		}
 	}
 }
@@ -209,7 +209,7 @@ func (r *CurvedRect) Draw(buf *FrameBuffer) {
 				}()
 
 				if withinCircle {
-					buf.SetPixel(int(math.Round(y)), int(math.Round(x)), NewPixel(r.style.Colour))
+					buf.SetPixel(int(math.Round(x)), int(math.Round(y)), NewPixel(r.style.Colour))
 				}
 			}
 		}
@@ -293,14 +293,14 @@ func (r *CurvedRect) drawBloom(buf *FrameBuffer) {
 
 		// Top and bottom bloom
 		for x := r.Pos.X + r.radius + 1; x < r.Pos.X+r.w-r.radius; x++ {
-			buf.SetPixel(int(r.Pos.Y)-dist, int(x), NewPixel(bloomColour))
-			buf.SetPixel(int(r.Pos.Y+r.h)+dist, int(x), NewPixel(bloomColour))
+			buf.SetPixel(int(x), int(r.Pos.Y)-dist, NewPixel(bloomColour))
+			buf.SetPixel(int(x), int(r.Pos.Y+r.h)+dist, NewPixel(bloomColour))
 		}
 
 		// Left and right
 		for y := r.Pos.Y + r.radius + 1; y < r.Pos.Y+r.h-r.radius; y++ {
-			buf.SetPixel(int(y), int(r.Pos.X)-dist, NewPixel(bloomColour))
-			buf.SetPixel(int(y), int(r.Pos.X+r.w)+dist, NewPixel(bloomColour))
+			buf.SetPixel(int(r.Pos.X)-dist, int(y), NewPixel(bloomColour))
+			buf.SetPixel(int(r.Pos.X+r.w)+dist, int(y), NewPixel(bloomColour))
 		}
 	}
 
@@ -317,7 +317,7 @@ func (r *CurvedRect) drawBloom(buf *FrameBuffer) {
 					r, g, b, a := RGBA8(r.style.Colour)
 
 					bloomColour := color.RGBA{r, g, b, uint8(brightness * float64(a))}
-					buf.SetPixel(int(math.Round(y)), int(math.Round(x)), NewPixel(bloomColour))
+					buf.SetPixel(int(math.Round(x)), int(math.Round(y)), NewPixel(bloomColour))
 				}
 			}
 		}

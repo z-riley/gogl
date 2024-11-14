@@ -268,7 +268,7 @@ func (t *Triangle) Draw(buf *FrameBuffer) {
 			if (isClockwise && ABP >= 0 && BCP >= 0 && CAP >= 0) ||
 				(!isClockwise && ABP <= 0 && BCP <= 0 && CAP <= 0) {
 				jInt, iInt := int(math.Round(j)), int(math.Round(i))
-				buf.SetPixel(jInt, iInt, NewPixel(t.style.Colour))
+				buf.SetPixel(iInt, jInt, NewPixel(t.style.Colour))
 			}
 		}
 	}
