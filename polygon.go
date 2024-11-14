@@ -256,9 +256,9 @@ func (t *Triangle) Draw(buf *FrameBuffer) {
 	isClockwise := edgeFunction(t.v1, t.v2, t.v3) > 0
 
 	// Iterate over pixels in bounding box
-	for i := bbox.Pos.X; i <= bbox.Pos.X+bbox.w; i++ {
-		for j := bbox.Pos.Y; j <= bbox.Pos.Y+bbox.h; j++ {
-			p := Vec{float64(i), float64(j)}
+	for x := bbox.Pos.X; x <= bbox.Pos.X+bbox.w; x++ {
+		for y := bbox.Pos.Y; y <= bbox.Pos.Y+bbox.h; y++ {
+			p := Vec{float64(x), float64(y)}
 			ABP := edgeFunction(t.v1, t.v2, p)
 			BCP := edgeFunction(t.v2, t.v3, p)
 			CAP := edgeFunction(t.v3, t.v1, p)
@@ -267,7 +267,7 @@ func (t *Triangle) Draw(buf *FrameBuffer) {
 			// If it's anticlockwise, check for all edge functions being <= 0.
 			if (isClockwise && ABP >= 0 && BCP >= 0 && CAP >= 0) ||
 				(!isClockwise && ABP <= 0 && BCP <= 0 && CAP <= 0) {
-				jInt, iInt := int(math.Round(j)), int(math.Round(i))
+				jInt, iInt := int(math.Round(y)), int(math.Round(x))
 				buf.SetPixel(iInt, jInt, NewPixel(t.style.Colour))
 			}
 		}

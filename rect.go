@@ -30,12 +30,10 @@ func NewRect(width, height float64, pos Vec) *Rect {
 // Draw draws the rectangle onto the provided frame buffer.
 func (r *Rect) Draw(buf *FrameBuffer) {
 	if r.style.Thickness == 0 {
-		width := int(math.Round(r.w))
-		height := int(math.Round(r.h))
-		for i := 0; i <= width; i++ {
-			for j := 0; j <= height; j++ {
+		for x := 0; x <= int(math.Round(r.w)); x++ {
+			for y := 0; y <= int(math.Round(r.h)); y++ {
 				xInt, yInt := int(math.Round(r.Pos.X)), int(math.Round(r.Pos.Y))
-				buf.SetPixel(xInt+i, yInt+j, NewPixel(r.style.Colour))
+				buf.SetPixel(xInt+x, yInt+y, NewPixel(r.style.Colour))
 			}
 		}
 		if r.style.Bloom > 0 {

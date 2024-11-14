@@ -44,12 +44,12 @@ func (c *Circle) Draw(buf *FrameBuffer) {
 	bbox := NewRect(c.d, c.d, bbBoxPos)
 
 	// Iterate over every pixel in the bounding box
-	for i := bbox.Pos.X; i <= bbox.Pos.X+bbox.w; i++ {
-		for j := bbox.Pos.Y; j <= bbox.Pos.Y+bbox.h; j++ {
+	for x := bbox.Pos.X; x <= bbox.Pos.X+bbox.w; x++ {
+		for y := bbox.Pos.Y; y <= bbox.Pos.Y+bbox.h; y++ {
 			// Draw pixel if it's close enough to centre
-			dist := Dist(c.Pos, Vec{i, j})
+			dist := Dist(c.Pos, Vec{x, y})
 			if dist >= float64(radius-thickness) && dist <= float64(radius) {
-				buf.SetPixel(int(i), int(j), NewPixel(c.style.Colour))
+				buf.SetPixel(int(x), int(y), NewPixel(c.style.Colour))
 			}
 		}
 	}
@@ -71,13 +71,13 @@ func (c *Circle) drawBloom(buf *FrameBuffer) {
 
 	// Iterate over every pixel in the bounding box
 	r, g, b, a := RGBA8(c.style.Colour)
-	for i := bbox.Pos.X; i <= bbox.Pos.X+bbox.w; i++ {
-		for j := bbox.Pos.Y; j <= bbox.Pos.Y+bbox.h; j++ {
-			dist := Dist(c.Pos, Vec{i, j})
+	for x := bbox.Pos.X; x <= bbox.Pos.X+bbox.w; x++ {
+		for y := bbox.Pos.Y; y <= bbox.Pos.Y+bbox.h; y++ {
+			dist := Dist(c.Pos, Vec{x, y})
 			if dist >= radius && dist <= radius+bloom {
 				brightness := 1 - ((dist - radius) / bloom)
 				bloomColour := color.RGBA{r, g, b, uint8(brightness * float64(a))}
-				buf.SetPixel(int(i), int(j), NewPixel(bloomColour))
+				buf.SetPixel(int(x), int(y), NewPixel(bloomColour))
 			}
 		}
 	}
@@ -90,20 +90,20 @@ func (c *Circle) DrawCircleSegment(limitDir Vec, buf *FrameBuffer) {
 	bbox := NewRect(c.d, c.d, bbBoxPos)
 
 	// Iterate over every pixel in the bounding box
-	for i := bbox.Pos.X; i <= bbox.Pos.X+bbox.w; i++ {
-		for j := bbox.Pos.Y; j <= bbox.Pos.Y+bbox.h; j++ {
+	for x := bbox.Pos.X; x <= bbox.Pos.X+bbox.w; x++ {
+		for y := bbox.Pos.Y; y <= bbox.Pos.Y+bbox.h; y++ {
 			// Draw pixel if it's close enough to centre
-			dist := Dist(c.Pos, Vec{i, j})
-			jInt, iInt := int(math.Round(j)), int(math.Round(i))
+			dist := Dist(c.Pos, Vec{x, y})
+			jInt, iInt := int(math.Round(y)), int(math.Round(x))
 			if c.style.Thickness == 0 {
 				// Solid fill
-				if dist <= float64(radius) && Theta(c.Direction, Sub(Vec{i, j}, c.Pos)) >= 0 {
+				if dist <= float64(radius) && Theta(c.Direction, Sub(Vec{x, y}, c.Pos)) >= 0 {
 					buf.SetPixel(iInt, jInt, NewPixel(c.style.Colour))
 				}
 			} else {
 				// Outline
 				if dist >= float64(radius-c.style.Thickness) && dist <= float64(radius) &&
-					Theta(c.Direction, Sub(Vec{i, j}, c.Pos)) >= Theta(Upwards, limitDir) {
+					Theta(c.Direction, Sub(Vec{x, y}, c.Pos)) >= Theta(Upwards, limitDir) {
 					buf.SetPixel(iInt, jInt, NewPixel(color.White))
 				}
 			}
