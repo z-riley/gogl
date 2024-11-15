@@ -98,11 +98,12 @@ func main() {
 			win.Draw(shape)
 		}
 
-		// Lastly, the window must be updated
-		win.Update()
-
 		loc := win.MouseLocation()
-		win.SetTitle(fmt.Sprint(loc, win.Framebuffer.GetPixel(int(loc.X), int(loc.Y))))
+		win.SetTitle(
+			fmt.Sprintf("Location: %s | Colour: %v", loc, win.Framebuffer.GetPixel(int(loc.X), int(loc.Y))),
+		)
+
+		win.Update()
 
 		// Count FPS
 		frames++

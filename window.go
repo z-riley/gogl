@@ -34,6 +34,8 @@ type Window struct {
 }
 
 // NewWindow constructs a new window according to the provided configuration.
+//
+// Call Destroy to deallocate the window.
 func NewWindow(cfg WindowCfg) (*Window, error) {
 	if err := sdl.Init(sdl.INIT_VIDEO); err != nil {
 		return nil, err

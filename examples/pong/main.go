@@ -11,7 +11,7 @@ import (
 
 func main() {
 	win, err := turdgl.NewWindow(turdgl.WindowCfg{
-		Title:  "Pong Example",
+		Title:  "Turdgl Pong Example",
 		Width:  1024,
 		Height: 768,
 	})
@@ -20,11 +20,7 @@ func main() {
 	}
 	defer win.Destroy()
 
-	// For measuring FPS
-	frames := 0
-	second := time.Tick(time.Second)
-
-	// Shapes
+	// Initialise shapes
 	paddleLeft := NewPaddle(turdgl.Vec{X: 50, Y: 200})
 	paddleRight := NewPaddle(turdgl.Vec{X: float64(win.GetConfig().Width) - 50, Y: 200})
 	ball := NewBall(turdgl.Vec{
@@ -37,13 +33,13 @@ func main() {
 		scores.SetText(fmt.Sprintf("%d | %d", left, right))
 	}
 
-	// Keybinds
 	win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyPress, func() { win.Quit() })
-	win.RegisterKeybind(turdgl.KeyLCtrl, turdgl.KeyPress, func() { win.Quit() })
 
 	// Game state
-	leftScore := 0
-	rightScore := 0
+	var (
+		leftScore  = 0
+		rightScore = 0
+	)
 
 	prevTime := time.Now()
 	for win.IsRunning() {
@@ -64,7 +60,7 @@ func main() {
 			paddleRight.MovePos(dirDown, dt, win.Framebuffer)
 		}
 
-		// Ball movement
+		// Process ball movement
 		event := ball.Update(dt, win.Framebuffer)
 		switch event {
 		case noWin:
@@ -80,26 +76,14 @@ func main() {
 			ball.velocity.X *= -1
 		}
 
-		// Set background colour
 		win.SetBackground(color.RGBA{39, 45, 53, 255})
 
-		// Modify frame buffer
 		win.Draw(scores)
 		win.Draw(paddleLeft)
 		win.Draw(paddleRight)
 		win.Draw(ball)
 
-		// Render screen
 		win.Update()
-
-		// Count FPS
-		frames++
-		select {
-		case <-second:
-			win.SetTitle(fmt.Sprintf("%s | FPS: %d", win.GetConfig().Title, frames))
-			frames = 0
-		default:
-		}
 	}
 }
 

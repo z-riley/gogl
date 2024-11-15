@@ -19,9 +19,9 @@ func main() {
 	defer win.Destroy()
 
 	snake := NewSnake(turdgl.Vec{X: 400, Y: 100})
+	instruction := turdgl.NewText("Use WASD to move", turdgl.Vec{X: 10}, "../../fonts/arial.ttf")
 
 	win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyPress, func() { win.Quit() })
-	win.RegisterKeybind(turdgl.KeyLCtrl, turdgl.KeyPress, func() { win.Quit() })
 
 	prevTime := time.Now()
 
@@ -48,11 +48,10 @@ func main() {
 			snake.Update(dt, win.Framebuffer)
 		}
 
-		// Set background colour
 		win.SetBackground(color.RGBA{39, 45, 53, 0})
 
-		// Modify frame buffer
 		win.Draw(snake)
+		win.Draw(instruction)
 
 		win.Update()
 	}

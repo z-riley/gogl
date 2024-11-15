@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"image/color"
+	"log"
 	"net"
 	"time"
 
-	"github.com/charmbracelet/log"
 	"github.com/z-riley/turdgl"
 )
 
@@ -44,17 +44,15 @@ func gameLoop(conn *net.TCPConn) {
 	}
 	defer win.Destroy()
 
-	// For measuring FPS
-	frames := 0
-	second := time.Tick(time.Second)
-
-	// Shapes
+	// Initialise shapes
 	gameClient.paddleLeft = NewPaddle(turdgl.Vec{X: 50, Y: 200})
 	gameClient.paddleRight = NewPaddle(turdgl.Vec{X: float64(win.GetConfig().Width) - 50, Y: 200})
 	gameClient.ball = NewBall(turdgl.Vec{
 		X: float64(win.GetConfig().Width / 2),
 		Y: float64(win.GetConfig().Height / 2),
 	})
+
+	win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyPress, func() { win.Quit() })
 
 	prevTime := time.Now()
 	for win.IsRunning() {
@@ -79,10 +77,9 @@ func gameLoop(conn *net.TCPConn) {
 		// Send paddle move update to server
 		err := movePaddle(conn, gameClient.paddleRight.body.GetPos())
 		if err != nil {
-			log.Error("failed to move paddle: " + err.Error())
+			log.Println("failed to move paddle:", err)
 		}
 
-		// Set background colour
 		win.SetBackground(color.RGBA{39, 45, 53, 255})
 
 		// Draw shapes
@@ -91,15 +88,6 @@ func gameLoop(conn *net.TCPConn) {
 		win.Draw(gameClient.ball)
 
 		win.Update()
-
-		// Count FPS
-		frames++
-		select {
-		case <-second:
-			win.SetTitle(fmt.Sprintf("%s | FPS: %d", win.GetConfig().Title, frames))
-			frames = 0
-		default:
-		}
 	}
 }
 
@@ -128,11 +116,10 @@ func movePaddle(conn *net.TCPConn, newPos turdgl.Vec) error {
 	if err != nil {
 		return fmt.Errorf("failed to read server reply to server failed: %w", err)
 	}
+
 	// Remove delimiter from message
 	i := bytes.IndexByte(resp, ';')
 	resp = bytes.Trim(resp, ";")[:i]
-
-	log.Info("New game state: " + string(resp))
 
 	var gs GameState
 	err = json.Unmarshal(resp, &gs)

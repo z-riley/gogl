@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"image/color"
+	"log"
 	"net"
 	"time"
 
-	"github.com/charmbracelet/log"
 	"github.com/z-riley/turdgl"
 )
 
@@ -42,17 +42,15 @@ func pongServer() {
 	}
 	defer win.Destroy()
 
-	// For measuring FPS
-	frames := 0
-	second := time.Tick(time.Second)
-
-	// Shapes
+	// Initialise shapes
 	gameServer.paddleLeft = NewPaddle(turdgl.Vec{X: 50, Y: 200})
 	gameServer.paddleRight = NewPaddle(turdgl.Vec{X: float64(win.GetConfig().Width) - 50, Y: 200})
 	gameServer.ball = NewBall(turdgl.Vec{
 		X: float64(win.GetConfig().Width / 2),
 		Y: float64(win.GetConfig().Height / 2),
 	})
+
+	win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyPress, func() { win.Quit() })
 
 	prevTime := time.Now()
 	for win.IsRunning() {
@@ -82,15 +80,6 @@ func pongServer() {
 		win.Draw(gameServer.ball)
 
 		win.Update()
-
-		// Count FPS
-		frames++
-		select {
-		case <-second:
-			win.SetTitle(fmt.Sprintf("%s | FPS: %d", win.GetConfig().Title, frames))
-			frames = 0
-		default:
-		}
 	}
 }
 
@@ -141,12 +130,11 @@ func (client *Client) handleRequest() {
 
 		// Remove delimiter from message
 		message = message[:len(message)-1]
-		log.Info("Received from client: " + message)
 
 		var clientUpdate ClientUpdate
 		err = json.Unmarshal([]byte(message), &clientUpdate)
 		if err != nil {
-			log.Error("Failed to unmarshal client update: " + err.Error())
+			log.Println("Failed to unmarshal client update:", err)
 		}
 
 		// Update game state from client data
@@ -159,12 +147,12 @@ func (client *Client) handleRequest() {
 			BallPos:        gameServer.ball.body.GetPos(),
 		})
 		if err != nil {
-			log.Error("Failed to marshal new game state: " + err.Error())
+			log.Println("Failed to marshal new game state:", err)
 		}
 
 		_, err = client.conn.Write(append(b, ';')) // add delimiter for easier client parsing
 		if err != nil {
-			log.Error("Failed to reply to client:", err)
+			log.Println("Failed to reply to client:", err)
 		}
 	}
 }

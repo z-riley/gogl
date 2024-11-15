@@ -1,9 +1,17 @@
 package turdgl
 
-import "math"
+import (
+	"fmt"
+	"math"
+)
 
 // Vec is a Cartesian vector.
 type Vec struct{ X, Y float64 }
+
+// String returns a human-readable version of the vector.
+func (v Vec) String() string {
+	return fmt.Sprintf("{%.2f, %.2f}", v.X, v.Y)
+}
 
 // Mag calculates the magnitude of a vector.
 func (v Vec) Mag() float64 {
