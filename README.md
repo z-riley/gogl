@@ -14,7 +14,7 @@ This library does:
 
 This library does not:
 - Support animations*
-- Provide "game engine" utilities
+- Provide "game engine" like functionality
 
 *Animations and other complex graphics can be built on top of Turdgl. See [go-2048-battle](http://github.com/z-riley/go-2048-battle) as an example.
 

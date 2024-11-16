@@ -17,7 +17,7 @@ type WindowCfg struct {
 	Title string
 	// Width, Height specifies the dimensions of the window, in pixels.
 	Width, Height int
-	// Icon is the image used for the window. Default if nil.
+	// Icon is the image used for the window icon. Default if nil.
 	Icon *os.File
 	// Resizable can be set to true to allow the window to be resizable.
 	Resizable bool
