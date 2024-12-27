@@ -31,3 +31,5 @@ Homebrew (MacOS):
 ```sh
 brew install sdl2_image
 ```
+
+For other platforms, see [wiki.libsdl.org/SDL2/Installation](https://wiki.libsdl.org/SDL2/Installation/)
