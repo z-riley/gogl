@@ -1,4 +1,4 @@
-package turdgl
+package gogl
 
 import (
 	"fmt"
@@ -257,7 +257,7 @@ type engine struct {
 	textMutator        *textMutator
 }
 
-// newEngine constructs a new turdgl engine.
+// newEngine constructs a new gogl engine.
 func newEngine() *engine {
 	return &engine{
 		drawQueue:          []Drawable{},

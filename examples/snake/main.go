@@ -4,11 +4,11 @@ import (
 	"image/color"
 	"time"
 
-	"github.com/z-riley/turdgl"
+	"github.com/z-riley/gogl"
 )
 
 func main() {
-	win, err := turdgl.NewWindow(turdgl.WindowCfg{
+	win, err := gogl.NewWindow(gogl.WindowCfg{
 		Title:  "Moving Snake Example",
 		Width:  1024,
 		Height: 768,
@@ -18,10 +18,10 @@ func main() {
 	}
 	defer win.Destroy()
 
-	snake := NewSnake(turdgl.Vec{X: 400, Y: 100})
-	instruction := turdgl.NewText("Use WASD to move", turdgl.Vec{X: 10}, "../../fonts/arial.ttf")
+	snake := NewSnake(gogl.Vec{X: 400, Y: 100})
+	instruction := gogl.NewText("Use WASD to move", gogl.Vec{X: 10}, "../../fonts/arial.ttf")
 
-	win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyPress, func() { win.Quit() })
+	win.RegisterKeybind(gogl.KeyEscape, gogl.KeyPress, func() { win.Quit() })
 
 	prevTime := time.Now()
 
@@ -31,20 +31,20 @@ func main() {
 
 		// React to pressed keys
 		const speed = 1000
-		if win.KeyIsPressed(turdgl.KeyW) {
-			snake.velocity = &turdgl.Vec{Y: -speed}
+		if win.KeyIsPressed(gogl.KeyW) {
+			snake.velocity = &gogl.Vec{Y: -speed}
 			snake.Update(dt, win.Framebuffer)
 		}
-		if win.KeyIsPressed(turdgl.KeyA) {
-			snake.velocity = &turdgl.Vec{X: -speed}
+		if win.KeyIsPressed(gogl.KeyA) {
+			snake.velocity = &gogl.Vec{X: -speed}
 			snake.Update(dt, win.Framebuffer)
 		}
-		if win.KeyIsPressed(turdgl.KeyS) {
-			snake.velocity = &turdgl.Vec{Y: speed}
+		if win.KeyIsPressed(gogl.KeyS) {
+			snake.velocity = &gogl.Vec{Y: speed}
 			snake.Update(dt, win.Framebuffer)
 		}
-		if win.KeyIsPressed(turdgl.KeyD) {
-			snake.velocity = &turdgl.Vec{X: speed}
+		if win.KeyIsPressed(gogl.KeyD) {
+			snake.velocity = &gogl.Vec{X: speed}
 			snake.Update(dt, win.Framebuffer)
 		}
 

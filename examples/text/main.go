@@ -5,11 +5,11 @@ import (
 	"image/color"
 	"time"
 
-	"github.com/z-riley/turdgl"
+	"github.com/z-riley/gogl"
 )
 
 func main() {
-	win, err := turdgl.NewWindow(turdgl.WindowCfg{
+	win, err := gogl.NewWindow(gogl.WindowCfg{
 		Title:     "Basic Shapes Example",
 		Width:     1200,
 		Height:    768,
@@ -23,11 +23,11 @@ func main() {
 	// For measuring FPS
 	frames := 0
 	second := time.Tick(time.Second)
-	fpsCounter := turdgl.NewText("Measuring FPS...", turdgl.Vec{X: 1000, Y: 50}, "../../fonts/arial.ttf").
+	fpsCounter := gogl.NewText("Measuring FPS...", gogl.Vec{X: 1000, Y: 50}, "../../fonts/arial.ttf").
 		SetColour(color.RGBA{255, 255, 255, 255}).
 		SetSize(20)
 
-	dynamicText := turdgl.NewText("Testing", turdgl.Vec{X: 300, Y: 100}, "../../fonts/arial.ttf")
+	dynamicText := gogl.NewText("Testing", gogl.Vec{X: 300, Y: 100}, "../../fonts/arial.ttf")
 	go func() {
 		for {
 			for i := range 5 {
@@ -39,31 +39,31 @@ func main() {
 		}
 	}()
 
-	bottomRight := turdgl.NewText("Bottom right alignment", turdgl.Vec{X: 300, Y: 200}, "../../fonts/arial.ttf").
-		SetAlignment(turdgl.AlignBottomRight)
+	bottomRight := gogl.NewText("Bottom right alignment", gogl.Vec{X: 300, Y: 200}, "../../fonts/arial.ttf").
+		SetAlignment(gogl.AlignBottomRight)
 
-	dynamicAlignment := turdgl.NewText("Scroll to change\nalignment", turdgl.Vec{X: 1000, Y: 400}, "../../fonts/arial.ttf").
-		SetAlignment(turdgl.AlignCentre).
+	dynamicAlignment := gogl.NewText("Scroll to change\nalignment", gogl.Vec{X: 1000, Y: 400}, "../../fonts/arial.ttf").
+		SetAlignment(gogl.AlignCentre).
 		SetSize(40)
-	marker := turdgl.NewRect(5, 5, dynamicAlignment.Pos())
+	marker := gogl.NewRect(5, 5, dynamicAlignment.Pos())
 	type alignPair struct {
-		alignment turdgl.Alignment
+		alignment gogl.Alignment
 		label     string
 	}
 	// Change alignment using mouse scroll wheel
 	alignments := []alignPair{
-		{turdgl.AlignTopLeft, "Top left alignment"},
-		{turdgl.AlignTopCentre, "Top centre alignment"},
-		{turdgl.AlignTopRight, "Top right alignment"},
-		{turdgl.AlignCentreLeft, "Centre left alignment"},
-		{turdgl.AlignCentre, "Centre alignment"},
-		{turdgl.AlignCentreRight, "Centre right alignment"},
-		{turdgl.AlignBottomLeft, "Bottom left alignment"},
-		{turdgl.AlignBottomCentre, "Bottom centre alignment"},
-		{turdgl.AlignBottomRight, "Bottom right alignment"},
+		{gogl.AlignTopLeft, "Top left alignment"},
+		{gogl.AlignTopCentre, "Top centre alignment"},
+		{gogl.AlignTopRight, "Top right alignment"},
+		{gogl.AlignCentreLeft, "Centre left alignment"},
+		{gogl.AlignCentre, "Centre alignment"},
+		{gogl.AlignCentreRight, "Centre right alignment"},
+		{gogl.AlignBottomLeft, "Bottom left alignment"},
+		{gogl.AlignBottomCentre, "Bottom centre alignment"},
+		{gogl.AlignBottomRight, "Bottom right alignment"},
 	}
 	i := 0
-	win.SetMouseScrollCallback(func(movement turdgl.Vec) {
+	win.SetMouseScrollCallback(func(movement gogl.Vec) {
 		if movement.IsScrollUp() {
 			i++
 			if i > len(alignments)-1 {
@@ -81,14 +81,14 @@ func main() {
 	})
 
 	// Register window-level keybinds
-	win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyPress, func() { win.Quit() })
-	win.RegisterKeybind(turdgl.KeyLCtrl, turdgl.KeyPress, func() { win.Quit() })
+	win.RegisterKeybind(gogl.KeyEscape, gogl.KeyPress, func() { win.Quit() })
+	win.RegisterKeybind(gogl.KeyLCtrl, gogl.KeyPress, func() { win.Quit() })
 
 	for win.IsRunning() {
 		win.SetBackground(color.RGBA{35, 39, 46, 255})
 
 		// Draw shapes
-		for _, shape := range []turdgl.Drawable{
+		for _, shape := range []gogl.Drawable{
 			fpsCounter,
 			dynamicText,
 			bottomRight,

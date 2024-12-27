@@ -3,12 +3,12 @@ package main
 import (
 	"image/color"
 
-	"github.com/z-riley/turdgl"
+	"github.com/z-riley/gogl"
 )
 
 func main() {
-	win, err := turdgl.NewWindow(turdgl.WindowCfg{
-		Title:  "Turdgl Polygon Example",
+	win, err := gogl.NewWindow(gogl.WindowCfg{
+		Title:  "gogl Polygon Example",
 		Width:  1024,
 		Height: 768,
 	})
@@ -17,7 +17,7 @@ func main() {
 	}
 	defer win.Destroy()
 
-	polygon := turdgl.NewPolygon([]turdgl.Vec{
+	polygon := gogl.NewPolygon([]gogl.Vec{
 		{X: 560, Y: 120},
 		{X: 450, Y: 340},
 		{X: 250, Y: 220},
@@ -27,9 +27,9 @@ func main() {
 		{X: 800, Y: 600},
 		{X: 830, Y: 240},
 		{X: 680, Y: 250},
-	}).SetStyle(turdgl.Style{Colour: color.RGBA{20, 70, 20, 255}})
+	}).SetStyle(gogl.Style{Colour: color.RGBA{20, 70, 20, 255}})
 
-	win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyPress, func() { win.Quit() })
+	win.RegisterKeybind(gogl.KeyEscape, gogl.KeyPress, func() { win.Quit() })
 
 	for win.IsRunning() {
 		win.SetBackground(color.Black)

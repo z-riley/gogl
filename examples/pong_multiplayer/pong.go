@@ -3,7 +3,7 @@ package main
 import (
 	"time"
 
-	"github.com/z-riley/turdgl"
+	"github.com/z-riley/gogl"
 	"golang.org/x/exp/constraints"
 )
 
@@ -21,31 +21,31 @@ const (
 )
 
 type paddle struct {
-	body     *turdgl.Rect
-	velocity *turdgl.Vec // velocity in px/s
+	body     *gogl.Rect
+	velocity *gogl.Vec // velocity in px/s
 }
 
 // NewPaddle constructs a new paddle.
-func NewPaddle(pos turdgl.Vec) *paddle {
+func NewPaddle(pos gogl.Vec) *paddle {
 	return &paddle{
-		body:     turdgl.NewRect(paddleWidth, paddleHeight, pos),
-		velocity: &turdgl.Vec{},
+		body:     gogl.NewRect(paddleWidth, paddleHeight, pos),
+		velocity: &gogl.Vec{},
 	}
 }
 
 // Draw draws the paddle on the provided frame buffer.
-func (p *paddle) Draw(buf *turdgl.FrameBuffer) {
+func (p *paddle) Draw(buf *gogl.FrameBuffer) {
 	p.body.Draw(buf)
 }
 
 // MovePos recalculates the paddles's position based on the current velocity and time interval.
 // A reference to the frame buffer must be provided to check the paddle isn't out of bounds.
-func (p *paddle) MovePos(dir direction, dt time.Duration, buf *turdgl.FrameBuffer) {
+func (p *paddle) MovePos(dir direction, dt time.Duration, buf *gogl.FrameBuffer) {
 	switch dir {
 	case dirUp:
-		p.velocity = &turdgl.Vec{Y: -paddleSpeed}
+		p.velocity = &gogl.Vec{Y: -paddleSpeed}
 	case dirDown:
-		p.velocity = &turdgl.Vec{Y: paddleSpeed}
+		p.velocity = &gogl.Vec{Y: paddleSpeed}
 	}
 
 	// Update the position
@@ -54,7 +54,7 @@ func (p *paddle) MovePos(dir direction, dt time.Duration, buf *turdgl.FrameBuffe
 	// Make sure the paddle on the screen
 	newY = Constrain(newY, 0, float64(buf.Height())-(paddleHeight)-1)
 
-	p.body.SetPos(turdgl.Vec{X: newX, Y: newY})
+	p.body.SetPos(gogl.Vec{X: newX, Y: newY})
 }
 
 const (
@@ -63,26 +63,26 @@ const (
 )
 
 type ball struct {
-	body     *turdgl.Circle
-	velocity turdgl.Vec // velocity in px/s
+	body     *gogl.Circle
+	velocity gogl.Vec // velocity in px/s
 }
 
 // NewBall constructs a new ball.
-func NewBall(pos turdgl.Vec) *ball {
+func NewBall(pos gogl.Vec) *ball {
 	return &ball{
-		body:     turdgl.NewCircle(10, pos),
-		velocity: turdgl.Normalise(turdgl.Vec{X: 1, Y: 1}).SetMag(ballSpeed),
+		body:     gogl.NewCircle(10, pos),
+		velocity: gogl.Normalise(gogl.Vec{X: 1, Y: 1}).SetMag(ballSpeed),
 	}
 }
 
 // Draw draws the ball on the provided frame buffer.
-func (b *ball) Draw(buf *turdgl.FrameBuffer) {
+func (b *ball) Draw(buf *gogl.FrameBuffer) {
 	b.body.Draw(buf)
 }
 
 // Update recalculates the balls's position based on the current velocity and time interval.
 // A reference to the frame buffer must be provided to check the ball isn't out of bounds.
-func (b *ball) Update(dt time.Duration, buf *turdgl.FrameBuffer) {
+func (b *ball) Update(dt time.Duration, buf *gogl.FrameBuffer) {
 	// Update the position
 	pos := b.body.GetPos()
 	newX := b.body.GetPos().X + b.velocity.X*dt.Seconds()
@@ -98,7 +98,7 @@ func (b *ball) Update(dt time.Duration, buf *turdgl.FrameBuffer) {
 		b.velocity.Y *= -1
 	}
 
-	b.body.SetPos(turdgl.Vec{X: newX, Y: newY})
+	b.body.SetPos(gogl.Vec{X: newX, Y: newY})
 }
 
 // Constrain keeps a number between lower and upper bounds.

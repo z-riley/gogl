@@ -1,4 +1,4 @@
-module github.com/z-riley/turdgl
+module github.com/z-riley/gogl
 
 go 1.22
 

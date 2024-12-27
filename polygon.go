@@ -1,4 +1,4 @@
-package turdgl
+package gogl
 
 import (
 	"container/ring"
@@ -160,7 +160,7 @@ func triangulatePoly2Tri(vecs []Vec) []*Triangle {
 	swctx.Triangulate()
 	trianglesRaw := swctx.GetTriangles()
 
-	// Convert library format to turdgl triangles
+	// Convert library format to gogl triangles
 	var triangles []*Triangle
 	for _, t := range trianglesRaw {
 		a := Vec{t.Points[0].X, t.Points[0].Y}

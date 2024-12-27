@@ -1,4 +1,4 @@
-package turdgl
+package gogl
 
 import (
 	"testing"

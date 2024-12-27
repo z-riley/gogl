@@ -5,13 +5,13 @@ import (
 	"image/color"
 	"time"
 
-	"github.com/z-riley/turdgl"
+	"github.com/z-riley/gogl"
 	"golang.org/x/exp/constraints"
 )
 
 func main() {
-	win, err := turdgl.NewWindow(turdgl.WindowCfg{
-		Title:  "Turdgl Pong Example",
+	win, err := gogl.NewWindow(gogl.WindowCfg{
+		Title:  "gogl Pong Example",
 		Width:  1024,
 		Height: 768,
 	})
@@ -21,19 +21,19 @@ func main() {
 	defer win.Destroy()
 
 	// Initialise shapes
-	paddleLeft := NewPaddle(turdgl.Vec{X: 50, Y: 200})
-	paddleRight := NewPaddle(turdgl.Vec{X: float64(win.GetConfig().Width) - 50, Y: 200})
-	ball := NewBall(turdgl.Vec{
+	paddleLeft := NewPaddle(gogl.Vec{X: 50, Y: 200})
+	paddleRight := NewPaddle(gogl.Vec{X: float64(win.GetConfig().Width) - 50, Y: 200})
+	ball := NewBall(gogl.Vec{
 		X: float64(win.GetConfig().Width / 2),
 		Y: float64(win.GetConfig().Height / 2),
 	})
-	scores := turdgl.NewText("0 | 0", turdgl.Vec{X: 470, Y: 20}, "../../fonts/arial.ttf").
+	scores := gogl.NewText("0 | 0", gogl.Vec{X: 470, Y: 20}, "../../fonts/arial.ttf").
 		SetSize(34).SetColour(color.White)
 	setScore := func(left, right int) {
 		scores.SetText(fmt.Sprintf("%d | %d", left, right))
 	}
 
-	win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyPress, func() { win.Quit() })
+	win.RegisterKeybind(gogl.KeyEscape, gogl.KeyPress, func() { win.Quit() })
 
 	// Game state
 	var (
@@ -47,16 +47,16 @@ func main() {
 		prevTime = time.Now()
 
 		// React to pressed keys
-		if win.KeyIsPressed(turdgl.KeyW) {
+		if win.KeyIsPressed(gogl.KeyW) {
 			paddleLeft.MovePos(dirUp, dt, win.Framebuffer)
 		}
-		if win.KeyIsPressed(turdgl.KeyS) {
+		if win.KeyIsPressed(gogl.KeyS) {
 			paddleLeft.MovePos(dirDown, dt, win.Framebuffer)
 		}
-		if win.KeyIsPressed(turdgl.KeyUp) {
+		if win.KeyIsPressed(gogl.KeyUp) {
 			paddleRight.MovePos(dirUp, dt, win.Framebuffer)
 		}
-		if win.KeyIsPressed(turdgl.KeyDown) {
+		if win.KeyIsPressed(gogl.KeyDown) {
 			paddleRight.MovePos(dirDown, dt, win.Framebuffer)
 		}
 
@@ -71,8 +71,8 @@ func main() {
 			rightScore++
 			setScore(leftScore, rightScore)
 		}
-		if turdgl.IsColliding(ball.body, paddleLeft.body) ||
-			turdgl.IsColliding(ball.body, paddleRight.body) {
+		if gogl.IsColliding(ball.body, paddleLeft.body) ||
+			gogl.IsColliding(ball.body, paddleRight.body) {
 			ball.velocity.X *= -1
 		}
 

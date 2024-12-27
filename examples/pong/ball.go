@@ -3,7 +3,7 @@ package main
 import (
 	"time"
 
-	"github.com/z-riley/turdgl"
+	"github.com/z-riley/gogl"
 )
 
 const (
@@ -12,20 +12,20 @@ const (
 )
 
 type ball struct {
-	body     *turdgl.Circle
-	velocity turdgl.Vec // velocity in px/s
+	body     *gogl.Circle
+	velocity gogl.Vec // velocity in px/s
 }
 
 // NewBall constructs a new ball.
-func NewBall(pos turdgl.Vec) *ball {
+func NewBall(pos gogl.Vec) *ball {
 	return &ball{
-		body:     turdgl.NewCircle(10, pos),
-		velocity: turdgl.Normalise(turdgl.Vec{X: 1, Y: 1}).SetMag(ballSpeed),
+		body:     gogl.NewCircle(10, pos),
+		velocity: gogl.Normalise(gogl.Vec{X: 1, Y: 1}).SetMag(ballSpeed),
 	}
 }
 
 // Draw draws the ball on the provided frame buffer.
-func (b *ball) Draw(buf *turdgl.FrameBuffer) {
+func (b *ball) Draw(buf *gogl.FrameBuffer) {
 	b.body.Draw(buf)
 }
 
@@ -39,7 +39,7 @@ const (
 
 // Update recalculates the balls's position based on the current velocity and time interval.
 // A reference to the frame buffer must be provided to check the ball isn't out of bounds.
-func (b *ball) Update(dt time.Duration, buf *turdgl.FrameBuffer) pongEvent {
+func (b *ball) Update(dt time.Duration, buf *gogl.FrameBuffer) pongEvent {
 	var event pongEvent
 
 	// Update the position
@@ -64,7 +64,7 @@ func (b *ball) Update(dt time.Duration, buf *turdgl.FrameBuffer) pongEvent {
 		b.velocity.Y *= -1
 	}
 
-	b.body.SetPos(turdgl.Vec{X: newX, Y: newY})
+	b.body.SetPos(gogl.Vec{X: newX, Y: newY})
 
 	return event
 }

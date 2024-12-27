@@ -9,7 +9,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/z-riley/turdgl"
+	"github.com/z-riley/gogl"
 )
 
 var gameClient Game
@@ -34,7 +34,7 @@ func pongClient() {
 
 // gameLoop is the main loop for the client.
 func gameLoop(conn *net.TCPConn) {
-	win, err := turdgl.NewWindow(turdgl.WindowCfg{
+	win, err := gogl.NewWindow(gogl.WindowCfg{
 		Title:  "Pong Client",
 		Width:  1024,
 		Height: 768,
@@ -45,14 +45,14 @@ func gameLoop(conn *net.TCPConn) {
 	defer win.Destroy()
 
 	// Initialise shapes
-	gameClient.paddleLeft = NewPaddle(turdgl.Vec{X: 50, Y: 200})
-	gameClient.paddleRight = NewPaddle(turdgl.Vec{X: float64(win.GetConfig().Width) - 50, Y: 200})
-	gameClient.ball = NewBall(turdgl.Vec{
+	gameClient.paddleLeft = NewPaddle(gogl.Vec{X: 50, Y: 200})
+	gameClient.paddleRight = NewPaddle(gogl.Vec{X: float64(win.GetConfig().Width) - 50, Y: 200})
+	gameClient.ball = NewBall(gogl.Vec{
 		X: float64(win.GetConfig().Width / 2),
 		Y: float64(win.GetConfig().Height / 2),
 	})
 
-	win.RegisterKeybind(turdgl.KeyEscape, turdgl.KeyPress, func() { win.Quit() })
+	win.RegisterKeybind(gogl.KeyEscape, gogl.KeyPress, func() { win.Quit() })
 
 	prevTime := time.Now()
 	for win.IsRunning() {
@@ -60,17 +60,17 @@ func gameLoop(conn *net.TCPConn) {
 		prevTime = time.Now()
 
 		// React to pressed keys
-		if win.KeyIsPressed(turdgl.KeyUp) {
+		if win.KeyIsPressed(gogl.KeyUp) {
 			gameClient.paddleRight.MovePos(dirUp, dt, win.Framebuffer)
 		}
-		if win.KeyIsPressed(turdgl.KeyDown) {
+		if win.KeyIsPressed(gogl.KeyDown) {
 			gameClient.paddleRight.MovePos(dirDown, dt, win.Framebuffer)
 		}
 
 		// Ball movement
 		gameClient.ball.Update(dt, win.Framebuffer)
-		if turdgl.IsColliding(gameClient.ball.body, gameClient.paddleLeft.body) ||
-			turdgl.IsColliding(gameClient.ball.body, gameClient.paddleRight.body) {
+		if gogl.IsColliding(gameClient.ball.body, gameClient.paddleLeft.body) ||
+			gogl.IsColliding(gameClient.ball.body, gameClient.paddleRight.body) {
 			gameClient.ball.velocity.X *= -1
 		}
 
@@ -93,11 +93,11 @@ func gameLoop(conn *net.TCPConn) {
 
 // clientUpdate contains data to send to the server to update the game state.
 type ClientUpdate struct {
-	RightPaddlePos turdgl.Vec `json:"rightPaddlePos"`
+	RightPaddlePos gogl.Vec `json:"rightPaddlePos"`
 }
 
 // movePaddle sends a request to move the paddle to the game server.
-func movePaddle(conn *net.TCPConn, newPos turdgl.Vec) error {
+func movePaddle(conn *net.TCPConn, newPos gogl.Vec) error {
 	b, err := json.Marshal(ClientUpdate{RightPaddlePos: newPos})
 	if err != nil {
 		return fmt.Errorf("failed to marshal client update %w", err)

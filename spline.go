@@ -1,4 +1,4 @@
-package turdgl
+package gogl
 
 // GenerateCatmullRomSpline generates a series of points on a Catmull-Rom spline that passes
 // through the given points.
