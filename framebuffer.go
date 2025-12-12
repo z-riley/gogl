@@ -3,6 +3,7 @@ package gogl
 import (
 	"image/color"
 	"math"
+	"unsafe"
 )
 
 // Drawable is an interface for things that can be drawn onto a frame buffer.
@@ -13,40 +14,39 @@ type Drawable interface {
 
 const pxLen = 4
 
-// Pixel represents a pixel, with bytes [alpha, blue, green, red].
-type Pixel [pxLen]uint8
+// Pixel packs a pixel into a 32-bit word with bytes [alpha, blue, green, red].
+// Matches SDL's RGBA8888 layout on little-endian systems when viewed as raw memory.
+type Pixel uint32
 
-// NewPixel constructs a new coloured pixel.
 func NewPixel(c color.Color) Pixel {
 	r, g, b, a := RGBA8(c)
-	return [pxLen]uint8{a, b, g, r}
+	return pack(a, b, g, r)
 }
 
-// R returns the value of the red channel.
-func (p Pixel) R() uint8 { return p[3] }
+func (p Pixel) A() uint8 { return uint8(p) }
+func (p Pixel) B() uint8 { return uint8(p >> 8) }
+func (p Pixel) G() uint8 { return uint8(p >> 16) }
+func (p Pixel) R() uint8 { return uint8(p >> 24) }
 
-// G returns the value of the green channel.
-func (p Pixel) G() uint8 { return p[2] }
-
-// B returns the value of the blue channel.
-func (p Pixel) B() uint8 { return p[1] }
-
-// A returns the value of the alpha channel.
-func (p Pixel) A() uint8 { return p[0] }
-
-// FrameBuffer is a 2D slice of pixels which represents a screen.
-type FrameBufferSlices [][]Pixel
+// pack packs individual channel bytes into Pixel.
+func pack(a, b, g, r uint8) Pixel {
+	return Pixel(uint32(a) | uint32(b)<<8 | uint32(g)<<16 | uint32(r)<<24)
+}
 
 type FrameBuffer struct {
-	fb     []byte
+	fb     []Pixel
 	width  int
 	height int
 }
 
 // NewFrameBuffer constructs a new frame buffer with a particular width and height.
 func NewFrameBuffer(width, height int) *FrameBuffer {
+	if width < 1 || height < 1 {
+		panic("invalid frame buffer size")
+	}
+
 	return &FrameBuffer{
-		fb:     make([]byte, width*height*pxLen),
+		fb:     make([]Pixel, width*height),
 		width:  width,
 		height: height,
 	}
@@ -63,14 +63,7 @@ func (f *FrameBuffer) GetPixel(x, y int) Pixel {
 
 func (f *FrameBuffer) getPixel(x, y int) Pixel {
 	targetPix := x + f.width*y
-	targetByte := targetPix * pxLen
-
-	return Pixel{
-		f.fb[targetByte],
-		f.fb[targetByte+1],
-		f.fb[targetByte+2],
-		f.fb[targetByte+3],
-	}
+	return f.fb[targetPix]
 }
 
 // BlendFunc is a function that blends a source pixel with a destination pixel.
@@ -89,11 +82,7 @@ func (f *FrameBuffer) SetPixelFunc(x, y int, p Pixel, blend BlendFunc) {
 
 func (f *FrameBuffer) setPixel(x, y int, p Pixel) {
 	targetPix := x + f.width*y
-	targetByte := targetPix * pxLen
-
-	for i := 0; i < pxLen; i++ {
-		f.fb[(targetByte)+i] = p[i]
-	}
+	f.fb[targetPix] = p
 }
 
 // SetPixel sets a pixel in the frame buffer. If the requested pixel is out of
@@ -111,13 +100,9 @@ func (f *FrameBuffer) Clear() {
 // Fill sets every pixel in the frame buffer to the provided colour.
 func (f *FrameBuffer) Fill(c color.Color) {
 	p := NewPixel(c)
-	a, b, g, r := p.A(), p.B(), p.G(), p.R()
 
-	for i := 0; i < len(f.fb); i += pxLen {
-		f.fb[i] = a
-		f.fb[i+1] = b
-		f.fb[i+2] = g
-		f.fb[i+3] = r
+	for i := range f.fb {
+		f.fb[i] = p
 	}
 }
 
@@ -133,7 +118,7 @@ func (f *FrameBuffer) Height() int {
 
 // Bytes returns the frame buffer as a one-dimensional slice of bytes.
 func (f *FrameBuffer) Bytes() []byte {
-	return f.fb
+	return unsafe.Slice((*byte)(unsafe.Pointer(&f.fb[0])), len(f.fb)*pxLen)
 }
 
 // WithinFrame returns true if the given point lies within the boundary of the frame
@@ -198,7 +183,7 @@ func AlphaBlend(src, dst Pixel) Pixel {
 
 	// Handle fully transparent case
 	if a == 0 {
-		return Pixel{0, 0, 0, 0}
+		return 0
 	}
 
 	// Resulting color channels calculation
@@ -211,7 +196,7 @@ func AlphaBlend(src, dst Pixel) Pixel {
 	g = Clamp(g, 0, math.MaxUint8)
 	b = Clamp(b, 0, math.MaxUint8)
 
-	return Pixel{uint8(a), uint8(b), uint8(g), uint8(r)}
+	return pack(uint8(a), uint8(b), uint8(g), uint8(r))
 }
 
 // AdditiveBlend blends a source pixel with a destination pixel by adding the values
@@ -222,10 +207,5 @@ func AdditiveBlend(src, dst Pixel) Pixel {
 	g := Clamp(uint16(dst.G())+uint16(src.G()), 0, math.MaxUint8)
 	r := Clamp(uint16(dst.R())+uint16(src.R()), 0, math.MaxUint8)
 
-	return Pixel{
-		src.A(),
-		uint8(b),
-		uint8(g),
-		uint8(r),
-	}
+	return pack(src.A(), uint8(b), uint8(g), uint8(r))
 }
