@@ -13,37 +13,43 @@ type Drawable interface {
 
 const pxLen = 4
 
-// Pixel represents a pixel, with bytes [red, green, blue, alpha].
+// Pixel represents a pixel, with bytes [alpha, blue, green, red].
 type Pixel [pxLen]uint8
 
 // NewPixel constructs a new coloured pixel.
 func NewPixel(c color.Color) Pixel {
 	r, g, b, a := RGBA8(c)
-	return [pxLen]uint8{r, g, b, a}
+	return [pxLen]uint8{a, b, g, r}
 }
 
 // R returns the value of the red channel.
-func (p Pixel) R() uint8 { return p[0] }
+func (p Pixel) R() uint8 { return p[3] }
 
 // G returns the value of the green channel.
-func (p Pixel) G() uint8 { return p[1] }
+func (p Pixel) G() uint8 { return p[2] }
 
 // B returns the value of the blue channel.
-func (p Pixel) B() uint8 { return p[2] }
+func (p Pixel) B() uint8 { return p[1] }
 
 // A returns the value of the alpha channel.
-func (p Pixel) A() uint8 { return p[3] }
+func (p Pixel) A() uint8 { return p[0] }
 
 // FrameBuffer is a 2D slice of pixels which represents a screen.
-type FrameBuffer [][]Pixel
+type FrameBufferSlices [][]Pixel
+
+type FrameBuffer struct {
+	fb     []byte
+	width  int
+	height int
+}
 
 // NewFrameBuffer constructs a new frame buffer with a particular width and height.
 func NewFrameBuffer(width, height int) *FrameBuffer {
-	f := FrameBuffer(make([][]Pixel, height))
-	for i := 0; i < len(f); i++ {
-		f[i] = make([]Pixel, width)
+	return &FrameBuffer{
+		fb:     make([]byte, width*height*pxLen),
+		width:  width,
+		height: height,
 	}
-	return &f
 }
 
 // GetPixel returns a copy of the pixel at the specified coordinates.
@@ -51,18 +57,43 @@ func (f *FrameBuffer) GetPixel(x, y int) Pixel {
 	if y > f.Height()-1 || y < 0 || x > f.Width()-1 || x < 0 {
 		panic("GetPixel out of bounds")
 	}
-	return (*f)[y][x]
+
+	return f.getPixel(x, y)
+}
+
+func (f *FrameBuffer) getPixel(x, y int) Pixel {
+	targetPix := x + f.width*y
+	targetByte := targetPix * pxLen
+
+	return Pixel{
+		f.fb[targetByte],
+		f.fb[targetByte+1],
+		f.fb[targetByte+2],
+		f.fb[targetByte+3],
+	}
 }
 
 // BlendFunc is a function that blends a source pixel with a destination pixel.
 type BlendFunc func(src, dst Pixel) Pixel
 
-// SetPixelFunc sets a pixe in the frame buffer using the specified blend function.
-func (f *FrameBuffer) SetPixelFunc(x, y int, p Pixel, fn BlendFunc) {
+// SetPixelFunc sets a pixel in the frame buffer using the specified blend function.
+func (f *FrameBuffer) SetPixelFunc(x, y int, p Pixel, blend BlendFunc) {
 	if y > f.Height()-1 || y < 0 || x > f.Width()-1 || x < 0 {
 		return
 	}
-	(*f)[y][x] = fn(p, (*f)[y][x])
+
+	px := blend(p, f.getPixel(x, y))
+
+	f.setPixel(x, y, px)
+}
+
+func (f *FrameBuffer) setPixel(x, y int, p Pixel) {
+	targetPix := x + f.width*y
+	targetByte := targetPix * pxLen
+
+	for i := 0; i < pxLen; i++ {
+		f.fb[(targetByte)+i] = p[i]
+	}
 }
 
 // SetPixel sets a pixel in the frame buffer. If the requested pixel is out of
@@ -79,42 +110,30 @@ func (f *FrameBuffer) Clear() {
 
 // Fill sets every pixel in the frame buffer to the provided colour.
 func (f *FrameBuffer) Fill(c color.Color) {
-	pixel := NewPixel(c)
-	for i := range len(*f) {
-		for j := range len((*f)[0]) {
-			(*f)[i][j] = pixel
-		}
+	p := NewPixel(c)
+	a, b, g, r := p.A(), p.B(), p.G(), p.R()
+
+	for i := 0; i < len(f.fb); i += pxLen {
+		f.fb[i] = a
+		f.fb[i+1] = b
+		f.fb[i+2] = g
+		f.fb[i+3] = r
 	}
 }
 
 // Width returns the width of the frame buffer.
 func (f *FrameBuffer) Width() int {
-	return len((*f)[0])
+	return f.width
 }
 
 // Height returns the height of the frame buffer.
 func (f *FrameBuffer) Height() int {
-	return len(*f)
+	return f.height
 }
 
 // Bytes returns the frame buffer as a one-dimensional slice of bytes.
 func (f *FrameBuffer) Bytes() []byte {
-	buf := *f
-	out := make([]byte, len(buf)*len(buf[0])*pxLen)
-	offset := 0
-
-	for i := range buf {
-		slice := buf[i]
-		for _, pixel := range slice {
-			// Copy the bytes of each pixel in reverse order
-			for k := pxLen - 1; k >= 0; k-- {
-				out[offset] = pixel[k]
-				offset++
-			}
-		}
-	}
-
-	return out
+	return f.fb
 }
 
 // WithinFrame returns true if the given point lies within the boundary of the frame
@@ -192,21 +211,21 @@ func AlphaBlend(src, dst Pixel) Pixel {
 	g = Clamp(g, 0, math.MaxUint8)
 	b = Clamp(b, 0, math.MaxUint8)
 
-	return Pixel{uint8(r), uint8(g), uint8(b), uint8(a)}
+	return Pixel{uint8(a), uint8(b), uint8(g), uint8(r)}
 }
 
 // AdditiveBlend blends a source pixel with a destination pixel by adding the values
 // of each channel.
 func AdditiveBlend(src, dst Pixel) Pixel {
 	// Clamp to stop overflow
-	r := Clamp(uint16(dst[0])+uint16(src[0]), 0, math.MaxUint8)
-	g := Clamp(uint16(dst[1])+uint16(src[1]), 0, math.MaxUint8)
-	b := Clamp(uint16(dst[2])+uint16(src[2]), 0, math.MaxUint8)
+	b := Clamp(uint16(dst.B())+uint16(src.B()), 0, math.MaxUint8)
+	g := Clamp(uint16(dst.G())+uint16(src.G()), 0, math.MaxUint8)
+	r := Clamp(uint16(dst.R())+uint16(src.R()), 0, math.MaxUint8)
 
 	return Pixel{
-		uint8(r),
-		uint8(g),
+		src.A(),
 		uint8(b),
-		src[3],
+		uint8(g),
+		uint8(r),
 	}
 }
