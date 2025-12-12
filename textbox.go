@@ -3,7 +3,7 @@ package gogl
 import (
 	"image/color"
 
-	"github.com/veandco/go-sdl2/sdl"
+	"github.com/jupiterrider/purego-sdl3/sdl"
 )
 
 // TextBox is a shape that can be typed in.
@@ -201,8 +201,8 @@ func (t *textMutator) String() string {
 }
 
 // handleEvent processes key press events.
-func (t *textMutator) handleEvent(event *sdl.KeyboardEvent) {
-	if event.Keysym.Sym == KeyBackspace && event.State == sdl.PRESSED {
+func (t *textMutator) handleEvent(event sdl.KeyboardEvent) {
+	if event.Key == KeyBackspace && event.Down {
 		t.backspace()
 	}
 }

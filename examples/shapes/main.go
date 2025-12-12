@@ -150,7 +150,7 @@ func main() {
 		win.Update()
 
 		loc := win.MouseLocation()
-		win.SetTitle(fmt.Sprint(loc, win.Framebuffer.GetPixel(int(loc.X), int(loc.Y))))
+		win.SetTitle(fmt.Sprintf("%s Colour: %x", loc, win.Framebuffer.GetPixel(int(loc.X), int(loc.Y))))
 
 		// Count FPS
 		frames++

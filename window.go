@@ -3,12 +3,11 @@ package gogl
 import (
 	"fmt"
 	"image/color"
-	"log"
 	"os"
 	"unsafe"
 
-	"github.com/veandco/go-sdl2/img"
-	"github.com/veandco/go-sdl2/sdl"
+	"github.com/jupiterrider/purego-sdl3/img"
+	"github.com/jupiterrider/purego-sdl3/sdl"
 )
 
 // WindowCfg contains adjustable configuration for a window.
@@ -26,81 +25,81 @@ type WindowCfg struct {
 // Window represents an OS Window.
 type Window struct {
 	Framebuffer *FrameBuffer
-	win         *sdl.Window
-	renderer    *sdl.Renderer
-	texture     *sdl.Texture
-	engine      *engine
-	config      WindowCfg
+
+	win      *sdl.Window
+	renderer *sdl.Renderer
+	texture  *sdl.Texture
+
+	engine *engine
+	config WindowCfg
 }
 
 // NewWindow constructs a new window according to the provided configuration.
 //
 // Call Destroy to deallocate the window.
 func NewWindow(cfg WindowCfg) (*Window, error) {
-	if err := sdl.Init(sdl.INIT_VIDEO); err != nil {
-		return nil, err
+	if ok := sdl.Init(sdl.InitVideo); !ok {
+		return nil, fmt.Errorf("failed to init sdl3: %s", sdl.GetError())
 	}
 
-	var resizableFlag uint32 = sdl.WINDOW_RESIZABLE
+	var resizableFlag3 sdl.WindowFlags
 	if cfg.Resizable {
-		resizableFlag = 0
+		resizableFlag3 = sdl.WindowResizable
 	}
 
-	w, err := sdl.CreateWindow(
+	w := sdl.CreateWindow(
 		cfg.Title,
-		sdl.WINDOWPOS_UNDEFINED,
-		sdl.WINDOWPOS_UNDEFINED,
 		int32(cfg.Width),
 		int32(cfg.Height),
-		sdl.WINDOW_SHOWN|resizableFlag,
+		resizableFlag3,
 	)
-	if err != nil {
-		return nil, err
+	if w == nil {
+		return nil, fmt.Errorf("failed to create sdl3 window: %s", sdl.GetError())
+	}
+	if !sdl.StartTextInput(w) {
+		return nil, fmt.Errorf("failed to start text input: %s", sdl.GetError())
 	}
 
-	r, err := sdl.CreateRenderer(w, -1,
-		sdl.RENDERER_ACCELERATED|sdl.RENDERER_PRESENTVSYNC,
-	)
-	if err != nil {
-		log.Fatalf("failed to create renderer: %s", err)
+	r := sdl.CreateRenderer(w, "")
+	if r == nil {
+		return nil, fmt.Errorf("failed to create sdl3 renderer: %s", sdl.GetError())
 	}
 
-	t, err := r.CreateTexture(
-		sdl.PIXELFORMAT_RGBA8888,
-		sdl.TEXTUREACCESS_STREAMING,
+	t := sdl.CreateTexture(
+		r,
+		sdl.PixelFormatRGBA8888,
+		sdl.TextureAccessStreaming,
 		int32(cfg.Width),
 		int32(cfg.Height),
 	)
-	if err != nil {
-		log.Fatalf("failed to create texture: %s", err)
+	if t == nil {
+		return nil, fmt.Errorf("failed to create sdl3 texture: %s", sdl.GetError())
 	}
 
 	// (Optional) set window icon
 	if cfg.Icon != nil {
-		iconSurface, err := img.Load(cfg.Icon.Name())
-		if err != nil {
-			return nil, fmt.Errorf("could not load icon: %w", err)
-		}
-		defer iconSurface.Free()
-		w.SetIcon(iconSurface)
+		iconSurface := img.Load(cfg.Icon.Name())
+		sdl.SetWindowIcon(w, iconSurface)
 	}
 
 	return &Window{
 		Framebuffer: NewFrameBuffer(cfg.Width, cfg.Height),
-		win:         w,
-		renderer:    r,
-		texture:     t,
-		engine:      newEngine(),
-		config:      cfg,
+
+		win:      w,
+		renderer: r,
+		texture:  t,
+
+		engine: newEngine(),
+		config: cfg,
 	}, nil
 }
 
 // Destroy deallocates the window's resources. Call it at the end of your application.
 func (w *Window) Destroy() {
+	sdl.DestroyTexture(w.texture)
+	sdl.DestroyRenderer(w.renderer)
+	sdl.DestroyWindow(w.win)
 	sdl.Quit()
-	_ = w.win.Destroy()
-	_ = w.renderer.Destroy()
-	_ = w.texture.Destroy()
 }
 
 // Draw draws a shape to the window.
@@ -143,16 +142,20 @@ func (w *Window) SetBackground(c color.Color) {
 
 func (w *Window) Update() {
 	// Handle internal events
-	for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
-		switch e := event.(type) {
-		case *sdl.QuitEvent:
+	var event sdl.Event
+	for sdl.PollEvent(&event) {
+		switch event.Type() {
+		case sdl.EventQuit:
 			w.engine.running = false
-		case *sdl.KeyboardEvent:
+		case sdl.EventKeyDown, sdl.EventKeyUp:
+			e := event.Key()
 			w.engine.keyTracker.handleEvent(e)
 			w.engine.textMutator.handleEvent(e)
-		case *sdl.TextInputEvent:
-			w.engine.textMutator.Append(e.GetText())
-		case *sdl.MouseWheelEvent:
+		case sdl.EventTextInput:
+			e := event.Text()
+			w.engine.textMutator.Append(e.Text())
+		case sdl.EventMouseWheel:
+			e := event.Wheel()
 			w.engine.mouseScrollTracker.handleEvent(e)
 		}
 	}
@@ -166,15 +169,18 @@ func (w *Window) Update() {
 	}
 	w.engine.drawQueue = nil
 
-	// Render latest frame buffer to window
+	// Render to SDL window
 	pixels := w.Framebuffer.Bytes()
-	if err := w.texture.Update(nil, unsafe.Pointer(&pixels[0]), w.config.Width*pxLen); err != nil {
-		fmt.Println("SDL texture failed to update from frame buffer")
+	// Pitch is bytes per row: width * 4 bytes per pixel (RGBA8888)
+	if !sdl.UpdateTexture(w.texture, nil, unsafe.Pointer(&pixels[0]), int32(w.config.Width*pxLen)) {
+		fmt.Println("failed to update texture:", sdl.GetError())
 	}
-	if err := w.renderer.Copy(w.texture, nil, nil); err != nil {
-		fmt.Println("SDL renderer failed to copy texture")
+	if !sdl.RenderTexture(w.renderer, w.texture, nil, nil) {
+		fmt.Println("failed to render texture:", sdl.GetError())
 	}
-	w.renderer.Present()
+	if !sdl.RenderPresent(w.renderer) {
+		fmt.Println("failed to present render:", sdl.GetError())
+	}
 }
 
 // IsRunning returns true while the window is running.
@@ -195,7 +201,8 @@ func (w *Window) GetConfig() WindowCfg {
 // MouseLocation returns the location of the mouse cursor, relative to
 // the origin of the window.
 func (w *Window) MouseLocation() Vec {
-	x, y, _ := sdl.GetMouseState()
+	var x, y float32
+	_ = sdl.GetMouseState(&x, &y)
 	return Vec{X: float64(x), Y: float64(y)}
 }
 
@@ -227,25 +234,32 @@ func (m MouseState) String() string {
 
 // MouseButtonState returns the current state of the mouse buttons.
 func (w *Window) MouseButtonState() MouseState {
-	_, _, s := sdl.GetMouseState()
-	return MouseState(s)
+	return MouseState(sdl.GetMouseState(nil, nil))
 }
 
 // Width returns the width of the window in pixels.
 func (w *Window) Width() int {
-	width, _ := w.win.GetSize()
+	var width int32
+	if !sdl.GetWindowSize(w.win, &width, nil) {
+		fmt.Println("failed to get window size: " + sdl.GetError())
+	}
 	return int(width)
 }
 
 // Height returns the height of the window in pixels.
 func (w *Window) Height() int {
-	_, height := w.win.GetSize()
+	var height int32
+	if !sdl.GetWindowSize(w.win, nil, &height) {
+		fmt.Println("failed to get window size: " + sdl.GetError())
+	}
 	return int(height)
 }
 
 // SetTitle sets the title of the window to the provided string.
 func (w *Window) SetTitle(title string) {
-	w.win.SetTitle(title)
+	if !sdl.SetWindowTitle(w.win, title) {
+		fmt.Println("failed to set window title: " + sdl.GetError())
+	}
 }
 
 // engine contains constructs used to execute background logic.

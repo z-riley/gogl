@@ -20,16 +20,6 @@ This library does not:
 
 ## Dependencies
 
-### SDL2 - DirectMedia Layer
+### SDL3 - DirectMedia Layer
 
-#### apt (Ubuntu):
-```sh
-sudo apt-get update && sudo apt-get install -y libsdl2-dev libsdl2-image-dev
-```
-
-#### brew (MacOS):
-```sh
-brew install sdl2_image
-```
-
-For other platforms, see [wiki.libsdl.org/SDL2/Installation](https://wiki.libsdl.org/SDL2/Installation/)
+See [SDL3 installation guide](https://gist.github.com/NoxFly/1067c9fc24024d26b51a6825de5cff74)

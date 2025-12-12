@@ -28,6 +28,19 @@ func (p Pixel) B() uint8 { return uint8(p >> 8) }
 func (p Pixel) G() uint8 { return uint8(p >> 16) }
 func (p Pixel) R() uint8 { return uint8(p >> 24) }
 
+// RGBA implements color.Colour
+func (p Pixel) RGBA() (r, g, b, a uint32) {
+	r = uint32(p.R())
+	r |= r << 8
+	g = uint32(p.G())
+	g |= g << 8
+	b = uint32(p.B())
+	b |= b << 8
+	a = uint32(p.A())
+	a |= a << 8
+	return
+}
+
 // pack packs individual channel bytes into Pixel.
 func pack(a, b, g, r uint8) Pixel {
 	return Pixel(uint32(a) | uint32(b)<<8 | uint32(g)<<16 | uint32(r)<<24)

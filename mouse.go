@@ -1,8 +1,6 @@
 package gogl
 
-import (
-	"github.com/veandco/go-sdl2/sdl"
-)
+import "github.com/jupiterrider/purego-sdl3/sdl"
 
 // MouseScrollCallback is executed when the user scrolls the mouse wheel in any direction.
 //
@@ -42,6 +40,6 @@ func newMouseScrollHandler() *mouseScrollHandler {
 }
 
 // handleEvent handles a mouse scroll event.
-func (m *mouseScrollHandler) handleEvent(event *sdl.MouseWheelEvent) {
-	m.Callback(Vec{float64(event.PreciseX), float64(event.PreciseY)})
+func (m *mouseScrollHandler) handleEvent(event sdl.MouseWheelEvent) {
+	m.Callback(Vec{float64(event.MouseX), float64(event.MouseY)})
 }
