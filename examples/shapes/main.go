@@ -3,12 +3,19 @@ package main
 import (
 	"fmt"
 	"image/color"
+	"log"
+	"net/http"
+	_ "net/http/pprof"
 	"time"
 
 	"github.com/z-riley/gogl"
 )
 
 func main() {
+	go func() { // for pprof
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
+
 	win, err := gogl.NewWindow(gogl.WindowCfg{
 		Title:  "Basic Shapes Example",
 		Width:  1200,
