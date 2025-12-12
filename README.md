@@ -22,12 +22,12 @@ This library does not:
 
 ### SDL2 - DirectMedia Layer
 
-Advanced Packaging Tool (Ubuntu):
+#### apt (Ubuntu):
 ```sh
 sudo apt-get update && sudo apt-get install -y libsdl2-dev libsdl2-image-dev
 ```
 
-Homebrew (MacOS):
+#### brew (MacOS):
 ```sh
 brew install sdl2_image
 ```
