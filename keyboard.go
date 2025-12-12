@@ -74,9 +74,10 @@ func (k *keyTracker) isPressed(key sdl.Keycode) bool {
 
 // handleEvent processes key press events and keeps track of pressed keys.
 func (k *keyTracker) handleEvent(event sdl.KeyboardEvent) {
+
 	if event.Down {
 		// Execute on-press callback
-		if event.Repeat {
+		if !event.Repeat {
 			if fn, ok := k.keyBindingsPress[event.Key]; ok {
 				fn()
 			}
@@ -86,7 +87,7 @@ func (k *keyTracker) handleEvent(event sdl.KeyboardEvent) {
 		k.pressedKeys[event.Key] = struct{}{}
 	} else {
 		// Execute on-release callback
-		if event.Repeat {
+		if !event.Repeat {
 			if fn, ok := k.keyBindingsRelease[event.Key]; ok {
 				fn()
 			}
