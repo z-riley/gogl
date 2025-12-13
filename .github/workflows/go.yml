@@ -1,0 +1,50 @@
+name: Go
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install SDL3 from source
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git cmake ninja-build build-essential \
+            libasound2-dev libpulse-dev libaudio-dev \
+            libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxfixes-dev \
+            libxi-dev libxinerama-dev libxss-dev libxtst-dev \
+            libwayland-dev wayland-protocols libdrm-dev libgbm-dev \
+            libpng-dev libjpeg-dev libtiff-dev libwebp-dev
+
+          git clone https://github.com/libsdl-org/SDL.git
+          cd SDL
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DSDL_STATIC=OFF
+          cmake --build build
+          sudo cmake --install build
+          cd ..
+
+          git clone https://github.com/libsdl-org/SDL_image.git
+          cd SDL_image
+          cmake -S . -B build -GNinja -DCMAKE_BUILD_TYPE=Release -DSDLIMAGE_SAMPLES=OFF
+          cmake --build build
+          sudo cmake --install build
+          cd ..
+
+          sudo ldconfig
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.25"
+
+      - name: Build
+        run: go build -v ./...
+
+      - name: Test
+        run: go test -v ./...
