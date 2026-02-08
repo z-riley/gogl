@@ -103,8 +103,8 @@ func (w *Window) Destroy() {
 }
 
 // Draw draws a shape to the window.
-func (w *Window) Draw(s Drawable) {
-	w.engine.drawQueue = append(w.engine.drawQueue, s)
+func (w *Window) Draw(s ...Drawable) {
+	w.engine.drawQueue = append(w.engine.drawQueue, s...)
 }
 
 // RegisterKeybind sets a callback function which is executed when a key is pressed.

@@ -130,7 +130,7 @@ func main() {
 		txtBox.Update(win)
 
 		// Draw shapes
-		for _, shape := range []gogl.Drawable{
+		win.Draw(
 			bgRect,
 			rectSolid,
 			rectOutline,
@@ -142,9 +142,7 @@ func main() {
 			circleRed,
 			circleBlue,
 			circleGreen,
-		} {
-			win.Draw(shape)
-		}
+		)
 
 		// Lastly, the window must be updated
 		win.Update()
