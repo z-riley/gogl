@@ -1,6 +1,6 @@
 module github.com/z-riley/gogl
 
-go 1.22
+go 1.26
 
 require (
 	github.com/jupiterrider/purego-sdl3 v0.0.0-20251207102000-8bd199c0f033
