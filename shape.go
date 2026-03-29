@@ -85,7 +85,7 @@ func IsColliding(s1, s2 Shape) bool {
 				return false
 			}
 		default:
-			panic(fmt.Sprintf("collision detection is unsupported for type: %s" + s2.String()))
+			panic(fmt.Sprintf("collision detection is unsupported for type: %s", s2.String()))
 		}
 	case *Circle:
 		switch s2.(type) {
@@ -109,11 +109,11 @@ func IsColliding(s1, s2 Shape) bool {
 				return false
 			}
 		default:
-			panic(fmt.Sprintf("collision detection is unsupported for type: %s" + s2.String()))
+			panic(fmt.Sprintf("collision detection is unsupported for type: %s", s2.String()))
 		}
 	case *CurvedRect:
 		panic("todo")
 	default:
-		panic(fmt.Sprintf("collision detection is unsupported for type: %s" + s1.String()))
+		panic(fmt.Sprintf("collision detection is unsupported for type: %s", s1.String()))
 	}
 }
