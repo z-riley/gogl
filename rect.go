@@ -28,110 +28,110 @@ func NewRect(width, height float64, pos Vec) *Rect {
 }
 
 // Draw draws the rectangle onto the provided frame buffer.
-func (r *Rect) Draw(buf *FrameBuffer) {
-	if r.style.Thickness == 0 {
-		for x := 0; x <= int(math.Round(r.w)); x++ {
-			for y := 0; y <= int(math.Round(r.h)); y++ {
-				xInt, yInt := int(math.Round(r.Pos.X)), int(math.Round(r.Pos.Y))
-				buf.SetPixel(xInt+x, yInt+y, NewPixel(r.style.Colour))
+func (e *Rect) Draw(buf *FrameBuffer) {
+	if e.style.Thickness == 0 {
+		for x := 0; x <= int(math.Round(e.w)); x++ {
+			for y := 0; y <= int(math.Round(e.h)); y++ {
+				xInt, yInt := int(math.Round(e.Pos.X)), int(math.Round(e.Pos.Y))
+				buf.SetPixel(xInt+x, yInt+y, NewPixel(e.style.Colour))
 			}
 		}
-		if r.style.Bloom > 0 {
-			r.drawBloom(buf)
+		if e.style.Bloom > 0 {
+			e.drawBloom(buf)
 		}
 	} else {
 		// Draw each edge as its own rectangle
-		NewRect(r.w, r.style.Thickness, r.Pos).
-			SetStyle(Style{r.style.Colour, 0, 0}).
+		NewRect(e.w, e.style.Thickness, e.Pos).
+			SetStyle(Style{e.style.Colour, 0, 0}).
 			Draw(buf)
-		NewRect(r.w, r.style.Thickness, Vec{r.Pos.X, r.Pos.Y + float64(r.h) - float64(r.style.Thickness)}).
-			SetStyle(Style{r.style.Colour, 0, 0}).
+		NewRect(e.w, e.style.Thickness, Vec{e.Pos.X, e.Pos.Y + float64(e.h) - float64(e.style.Thickness)}).
+			SetStyle(Style{e.style.Colour, 0, 0}).
 			Draw(buf)
-		NewRect(r.style.Thickness, r.h, r.Pos).
-			SetStyle(Style{r.style.Colour, 0, 0}).
+		NewRect(e.style.Thickness, e.h, e.Pos).
+			SetStyle(Style{e.style.Colour, 0, 0}).
 			Draw(buf)
-		NewRect(r.style.Thickness, r.h, Vec{r.Pos.X + float64(r.w) - float64(r.style.Thickness), r.Pos.Y}).
-			SetStyle(Style{r.style.Colour, 0, 0}).
+		NewRect(e.style.Thickness, e.h, Vec{e.Pos.X + float64(e.w) - float64(e.style.Thickness), e.Pos.Y}).
+			SetStyle(Style{e.style.Colour, 0, 0}).
 			Draw(buf)
 
-		if r.style.Bloom > 0 {
-			r.drawBloom(buf)
+		if e.style.Bloom > 0 {
+			e.drawBloom(buf)
 		}
 	}
 }
 
 // Width returns the pixel width of the rectangle.
-func (r *Rect) Width() float64 {
-	return r.w
+func (e *Rect) Width() float64 {
+	return e.w
 }
 
 // SetWidth sets the width of the rectangle.
 func (r *Rect) SetWidth(px float64) *Rect {
-	r.w = px
+	r.w = max(px, 0)
 	return r
 }
 
 // Height returns the pixel height of the rectangle.
-func (r *Rect) Height() float64 {
-	return r.h
+func (e *Rect) Height() float64 {
+	return e.h
 }
 
 // SetHeight sets the height of the rectangle.
 func (r *Rect) SetHeight(px float64) *Rect {
-	r.h = px
+	r.h = max(px, 0)
 	return r
 }
 
 // GetPos returns the position of the rectangle.
-func (r *Rect) GetPos() Vec {
-	return r.Pos
+func (e *Rect) GetPos() Vec {
+	return e.Pos
 }
 
 // SetPos sets the position of the rectangle.
-func (r *Rect) SetPos(pos Vec) {
-	r.Pos = pos
+func (e *Rect) SetPos(pos Vec) {
+	e.Pos = pos
 }
 
 // GetStyle returns's the rectangle's style.
-func (r *Rect) GetStyle() Style {
-	return r.style
+func (e *Rect) GetStyle() Style {
+	return e.style
 }
 
 // SetStyle sets the style of the rectangle.
-func (r *Rect) SetStyle(style Style) *Rect {
-	r.style = style
-	return r
+func (e *Rect) SetStyle(style Style) *Rect {
+	e.style = style
+	return e
 }
 
 // Move moves the rectangle by the given vector.
-func (r *Rect) Move(px Vec) {
-	r.Pos = Add(r.Pos, px)
+func (e *Rect) Move(px Vec) {
+	e.Pos = Add(e.Pos, px)
 }
 
 // String returns the type of shape as a string.
-func (r *Rect) String() string {
+func (e *Rect) String() string {
 	return "rectangle"
 }
 
 // IsWithin returns whether a position lies within the rectangle's perimeter.
-func (r *Rect) IsWithin(pos Vec) bool {
-	return (pos.X >= r.Pos.X) && (pos.X <= r.Pos.X+r.Width()) &&
-		(pos.Y >= r.Pos.Y) && (pos.Y <= r.Pos.Y+r.Height())
+func (e *Rect) IsWithin(pos Vec) bool {
+	return (pos.X >= e.Pos.X) && (pos.X <= e.Pos.X+e.Width()) &&
+		(pos.Y >= e.Pos.Y) && (pos.Y <= e.Pos.Y+e.Height())
 }
 
 // drawBloom draws a bloom effect around the shape.
-func (r *Rect) drawBloom(buf *FrameBuffer) {
+func (e *Rect) drawBloom(buf *FrameBuffer) {
 	// Draw borders around the rectangle of increasing size and decreasing intensity.
-	for dist := 1; dist <= r.style.Bloom; dist++ {
-		x, y := int(math.Round(r.Pos.X)), int(math.Round(r.Pos.Y))
+	for dist := 1; dist <= e.style.Bloom; dist++ {
+		x, y := int(math.Round(e.Pos.X)), int(math.Round(e.Pos.Y))
 		topLeftX := x - dist
 		topLeftY := y - dist
-		topRightX := x + int(math.Round(r.w)) + dist
-		bottomLeftY := y + int(math.Round(r.h)) + dist
+		topRightX := x + int(math.Round(e.w)) + dist
+		bottomLeftY := y + int(math.Round(e.h)) + dist
 
 		// Calculate colour from distance away from shape body
-		brightness := 1 - (float64(dist) / float64(r.style.Bloom))
-		r, g, b, a := RGBA8(r.style.Colour)
+		brightness := 1 - (float64(dist) / float64(e.style.Bloom))
+		r, g, b, a := RGBA8(e.style.Colour)
 		bloomColour := color.RGBA{r, g, b, uint8(brightness * float64(a))}
 
 		// Draw top and bottom bloom
@@ -252,7 +252,7 @@ func (r *CurvedRect) Width() float64 {
 
 // SetWidth sets the width of the curved rectangle.
 func (r *CurvedRect) SetWidth(px float64) *CurvedRect {
-	r.w = px
+	r.w = max(px, 0)
 	return r
 }
 
@@ -263,7 +263,7 @@ func (r *CurvedRect) Height() float64 {
 
 // SetHeight sets the height of the curved rectangle.
 func (r *CurvedRect) SetHeight(px float64) *CurvedRect {
-	r.h = px
+	r.h = max(px, 0)
 	return r
 }
 

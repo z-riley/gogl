@@ -43,6 +43,9 @@ func (c *Circle) Draw(buf *FrameBuffer) {
 	bbBoxPos := Vec{c.Pos.X - radius, c.Pos.Y - radius}
 	bbox := NewRect(c.d, c.d, bbBoxPos)
 
+	// TODO: this could be faster by calculating a quarter of the circle and mirroring it
+	// onto the other quadrants
+
 	// Iterate over every pixel in the bounding box
 	for x := bbox.Pos.X; x <= bbox.Pos.X+bbox.w; x++ {
 		for y := bbox.Pos.Y; y <= bbox.Pos.Y+bbox.h; y++ {

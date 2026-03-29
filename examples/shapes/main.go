@@ -35,6 +35,7 @@ func main() {
 		120, 90,
 		gogl.Vec{X: 50, Y: 50},
 	).SetStyle(gogl.Style{Colour: color.RGBA{0, 0, 255, 255}, Thickness: 0, Bloom: 30})
+	win.RegisterKeybind(gogl.KeyE, gogl.Instantaneous, func() { rectSolid.Move(gogl.Vec{X: 2, Y: 2}) })
 
 	rectOutline := gogl.NewRect(
 		120, 90,
@@ -117,10 +118,15 @@ func main() {
 		gogl.Vec{X: 520, Y: 260},
 	).SetStyle(gogl.Style{Colour: color.RGBA{0, 0, 255, 100}})
 
+	ellipse := gogl.NewEllipse(100, 50, gogl.Vec{X: 100, Y: 350})
+	win.RegisterKeybind(gogl.KeyUp, gogl.Instantaneous, func() { ellipse.SetHeight(ellipse.Height() + 1) })
+	win.RegisterKeybind(gogl.KeyDown, gogl.Instantaneous, func() { ellipse.SetHeight(ellipse.Height() - 1) })
+	win.RegisterKeybind(gogl.KeyLeft, gogl.Instantaneous, func() { ellipse.SetWidth(ellipse.Width() + 1) })
+	win.RegisterKeybind(gogl.KeyRight, gogl.Instantaneous, func() { ellipse.SetWidth(ellipse.Width() - 1) })
+
 	// Register window-level keybinds
 	win.RegisterKeybind(gogl.KeyEscape, gogl.KeyPress, func() { win.Quit() })
 	win.RegisterKeybind(gogl.KeyLCtrl, gogl.KeyPress, func() { win.Quit() })
-	win.RegisterKeybind(gogl.KeyE, gogl.Instantaneous, func() { rectSolid.Move(gogl.Vec{X: 2, Y: 2}) })
 
 	for win.IsRunning() {
 		win.SetBackground(color.RGBA{35, 39, 46, 255})
@@ -142,6 +148,7 @@ func main() {
 			circleRed,
 			circleBlue,
 			circleGreen,
+			ellipse,
 		)
 
 		// Lastly, the window must be updated
