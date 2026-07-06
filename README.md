@@ -1,8 +1,8 @@
 # GoGL
 
-GoGL is a 2D graphics library built on top of [Simple Directmedia Layer](https://www.libsdl.org/). It is CPU-based, meaning it does not perform well with intensive graphics.
+GoGL is a 2D graphics library built on top of [Simple DirectMedia Layer](https://www.libsdl.org/). It is CPU-based, meaning it does not perform well with intensive graphics.
 
-This project was built as a learning experience. Therefore, it is not recommended for any serious applications.
+This project was built as a learning experience. It is not recommended for any serious applications.
 
 ## Capabilities
 
